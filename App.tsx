@@ -1,12 +1,13 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import NavBar from "./app/components/NavBar";
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Hello world!</Text>
-      <Text>asdfasd</Text>
-    </View>
+    <NavigationContainer>
+      <NavBar />
+    </NavigationContainer>
   );
 }
 
