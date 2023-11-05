@@ -4,8 +4,6 @@ import SignIn from "./app/screens/SignIn";
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Hello world!</Text>
-      <Text>hello</Text>
       <SignIn></SignIn>
     </View>
 
