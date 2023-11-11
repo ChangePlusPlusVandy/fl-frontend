@@ -1,8 +1,22 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, {useState} from 'react';
+import {Button, View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { NavigationProp } from '@react-navigation/native';
 
 import FLlogo from "../../assets/friends-life-logo.png";
-const SignIn = () => {
+import OpenEye from "../../assets/OpenEye.png"
+import ClosedEye from "../../assets/Eye-slash.png"
+
+interface RouterProps {
+  navigation: NavigationProp<any, any>;
+}
+
+const SignIn = ({navigation}: RouterProps) => {
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const onLogin = () =>{
+        alert("email: "+ email + "\npassword: "+ password)
+    }
     return (
       <View style={styles.root}>
         <Text style={styles.login}>Login</Text>
@@ -10,21 +24,27 @@ const SignIn = () => {
         <TouchableOpacity style={styles.donTHaveAnAccountSignUp}>
           <Text style={styles.labelWrapper}>
             <Text style={styles.label}>Don't have an account ?</Text>
-            <Text style={styles.label2}> Sign up</Text>
+            <Text style={styles.label2} onPress={() => navigation.navigate('SignUp')}> Sign up</Text>
           </Text>
         </TouchableOpacity>
         <Text style={styles.email}>Email</Text>
-        <TextInput style={styles.usernameBox}></TextInput>
-        <View style={styles.passwordBox}></View>
+        <TextInput style={styles.usernameBox} onChangeText={(username)=>setEmail(username)}></TextInput>
+        <TextInput style={styles.passwordBox} secureTextEntry={!showPassword} onChangeText={(newPass)=>setPassword(password)}></TextInput>
         {/* Add your vector and logo components */}
         <Text style={styles.password}>Password</Text>
         <Text style={styles.forgotPassword}>Forgot Password?</Text>
-        <View style={styles.loginBox}></View>
-        <Text style={styles.logIn}>Log in</Text>
+        <TouchableOpacity style={styles.loginBox} onPress={onLogin}>
+
+      </TouchableOpacity>
+      <Text style={styles.logIn}>Log in</Text>
         <Text style={styles.rememberMe}>Remember Me</Text>
-        {/* Add your vector329 component */}
-        {/* Add your logo component */}
+        <Image source={showPassword ? ClosedEye: OpenEye} style={styles.vector}/>
+
+        <TouchableOpacity style={styles.vector} onPress={()=>setShowPassword(!showPassword)}></TouchableOpacity>
+        
+
         <Image source={FLlogo} style={styles.screenshot2023114At1171}/>
+
       </View>
     );
   };
@@ -45,7 +65,6 @@ const styles = StyleSheet.create({
       color: '#000',
       fontSize: 29,
       fontWeight: '600',
-      fontFamily: 'Poppins',
       position: 'absolute',
       left: 26,
       top: 269,
@@ -53,7 +72,6 @@ const styles = StyleSheet.create({
     pleaseSignInToContinue: {
       color: '#818181',
       fontSize: 16,
-      fontFamily: 'Poppins',
       position: 'absolute',
       left: 25,
       top: 313,
@@ -65,23 +83,19 @@ const styles = StyleSheet.create({
     },
     labelWrapper: {
       fontSize: 16,
-      fontFamily: 'Poppins',
     },
     label: {
       color: '#818181',
       fontSize: 16,
-      fontFamily: 'Poppins',
     },
     label2: {
       color: '#f89b40',
       fontSize: 16,
       fontWeight: '500',
-      fontFamily: 'Poppins',
     },
     email: {
       color: '#818181',
       fontSize: 17,
-      fontFamily: 'Poppins',
       position: 'absolute',
       left: 25,
       top: 364,
@@ -93,6 +107,7 @@ const styles = StyleSheet.create({
       width: 340,
       height: 58,
       borderRadius: 9,
+      fontSize: 25,
       backgroundColor: '#f4f4f4',
     },
     passwordBox: {
@@ -102,12 +117,12 @@ const styles = StyleSheet.create({
       width: 340,
       height: 58,
       borderRadius: 9,
+      fontSize: 25,
       backgroundColor: '#f4f4f4',
     },
     password: {
       color: '#818181',
       fontSize: 17,
-      fontFamily: 'Poppins',
       position: 'absolute',
       left: 25,
       top: 470,
@@ -115,7 +130,6 @@ const styles = StyleSheet.create({
     forgotPassword: {
       color: '#000',
       fontSize: 15,
-      fontFamily: 'Poppins',
       position: 'absolute',
       left: 233,
       top: 566,
@@ -133,7 +147,6 @@ const styles = StyleSheet.create({
       color: '#313b54',
       fontSize: 17,
       fontWeight: 'bold',
-      fontFamily: 'Poppins',
       position: 'absolute',
       left: 170,
       top: 660,
@@ -141,19 +154,9 @@ const styles = StyleSheet.create({
     rememberMe: {
       color: '#000',
       fontSize: 15,
-      fontFamily: 'Poppins',
       position: 'absolute',
       left: 54,
       top: 566,
-    },
-    // Add styles for vector and logo components
-    vector329: {
-      position: 'absolute',
-      left: 1600.5,
-      top: 150,
-      width: 31,
-      height: 15.5,
-      overflow: 'visible',
     },
     // Add styles for your logo component
     logo: {
@@ -171,5 +174,15 @@ const styles = StyleSheet.create({
       width: 239,
       height: 232,
       // Add background image styling here
+    },
+    vector: {
+      position: 'absolute',
+      left: '83.3333%',
+      right: '11.4716%',
+      top: '61.3%',
+      overflow: 'visible',
+      width: 13,
+      height: 13,
+      tintColor: 'grey',
     },
   });
