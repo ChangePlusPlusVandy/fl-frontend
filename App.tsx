@@ -4,18 +4,19 @@ import SignIn from "./app/screens/SignIn";
 import SignUp from "./app/screens/SignUp"
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
+import Conversations from "./app/screens/Conversations";
+import Message from "./app/screens/Message";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
+    /*<NavigationContainer>
       <Stack.Navigator initialRouteName="SignIn">
         <Stack.Screen name="SignIn" component={SignIn} options={{headerShown: false}} />
         <Stack.Screen name="SignUp" component={SignUp} options={{headerShown: false}} />
       </Stack.Navigator>
-    </NavigationContainer>
-
+    </NavigationContainer>*/
+    <Message></Message>
   );
 }
 
