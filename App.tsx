@@ -1,7 +1,8 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import SignIn from "./app/screens/SignIn";
-import SignUp from "./app/screens/SignUp"
+import SignUp from "./app/screens/SignUp";
+import Friends from "./app/screens/Friends";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
@@ -10,12 +11,29 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="SignIn">
-        <Stack.Screen name="SignIn" component={SignIn} options={{headerShown: false}} />
-        <Stack.Screen name="SignUp" component={SignUp} options={{headerShown: false}} />
+      <Stack.Navigator initialRouteName="Friends">
+        <Stack.Screen
+          name="SignIn"
+          component={SignIn}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SignUp"
+          component={SignUp}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Friends"
+          component={Friends}
+          options={{
+            headerTitleStyle: {
+              fontWeight: "bold",
+              fontSize: 25,
+            },
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
-
   );
 }
 
