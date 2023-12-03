@@ -13,19 +13,28 @@ import ChangePasswordIcon from "../../assets/passwordicon.png";
 import DeleteAccountIcon from "../../assets/deleteicon.png";
 import AboutIcon from "../../assets/infoicon.png";
 import LogoutIcon from "../../assets/logouticon.png";
-import BackButton from "../../assets/back.png";
 import Arrow from "../../assets/arrow.png";
 
-const Profile = () => {
+import { NavigationProp } from "@react-navigation/native";
+import BackButton from "../components/BackButton";
+
+interface RouterProps {
+  navigation: NavigationProp<any, any>;
+}
+
+const Profile = ({ navigation }: RouterProps) => {
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity>
-        <Image source={BackButton} style={styles.backButton}></Image>
-      </TouchableOpacity>
+      <View style={styles.header}>
+        <BackButton />
+      </View>
       <Image source={ProfilePicture} style={styles.image}></Image>
       <Text style={styles.name}>Joseph Quatela</Text>
       <Text style={styles.email}>joseph.c.quatela@vanderbilt.edu</Text>
-      <TouchableOpacity style={styles.edit}>
+      <TouchableOpacity
+        style={styles.edit}
+        onPress={() => navigation.navigate("EditProfile")}
+      >
         <Text style={styles.editText}>Edit Profile</Text>
         <Image source={Arrow} style={styles.editArrow}></Image>
       </TouchableOpacity>
@@ -57,6 +66,9 @@ const Profile = () => {
 };
 
 const styles = StyleSheet.create({
+  header: {
+    paddingLeft: 20,
+  },
   container: {
     flex: 1,
     backgroundColor: "white",
@@ -132,14 +144,6 @@ const styles = StyleSheet.create({
     color: "black",
     fontWeight: "500",
     alignSelf: "center",
-  },
-  backButton: {
-    width: undefined,
-    height: 30,
-    aspectRatio: 1,
-    resizeMode: "contain",
-    marginLeft: 20,
-    marginTop: 20,
   },
 });
 
