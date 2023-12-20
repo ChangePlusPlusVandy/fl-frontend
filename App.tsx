@@ -6,13 +6,20 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Profile from "./app/screens/Profile";
 import EditProfile from "./app/screens/EditProfile";
+import NewPost from "./app/screens/NewPost";
+import Launch from "./app/screens/Launch";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Profile">
+      <Stack.Navigator initialRouteName="Launch">
+        <Stack.Screen
+          name="Launch"
+          component={Launch}
+          options={{ headerShown: false}}
+        />
         <Stack.Screen
           name="SignIn"
           component={SignIn}
@@ -31,6 +38,11 @@ export default function App() {
         <Stack.Screen
           name="EditProfile"
           component={EditProfile}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="NewPost"
+          component={NewPost}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
