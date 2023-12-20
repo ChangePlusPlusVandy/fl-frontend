@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import NavBar from "./app/components/NavBar";
+import NavBarFamily from "./app/components/NavBarFamily";
+import NavBarStaff from "./app/components/NavBarStaff";
 
 export default function App() {
+  const [user, setUser] = useState("family");
   return (
     <NavigationContainer>
-      <NavBar />
+      {user === "family" ? <NavBarFamily /> : <NavBarStaff />}
     </NavigationContainer>
   );
 }

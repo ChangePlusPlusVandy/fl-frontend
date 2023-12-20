@@ -4,13 +4,15 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/Home";
 import Messages from "../screens/Messages";
 import Friends from "../screens/Friends";
+import Attendance from "../screens/Attendance";
 import HomeIcon from "../../assets/tabhome.png";
 import MessagesIcon from "../../assets/tabmessages.png";
 import FriendsIcon from "../../assets/tabfriends.png";
+import AttendanceIcon from "../../assets/tabattendance.png";
 
 const Tab = createBottomTabNavigator();
 
-const NavBar = () => {
+const NavBarStaff = () => {
   return (
     <Tab.Navigator screenOptions={{ tabBarStyle: { height: 90 } }}>
       <Tab.Screen
@@ -21,7 +23,7 @@ const NavBar = () => {
             return (
               <Text
                 style={{
-                  fontSize: 17,
+                  fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
                 }}
@@ -47,6 +49,39 @@ const NavBar = () => {
         }}
       />
       <Tab.Screen
+        name="Attendance"
+        component={Attendance}
+        options={{
+          tabBarLabel: ({ focused, color }) => {
+            return (
+              <Text
+                style={{
+                  fontSize: 15,
+                  marginTop: -10,
+                  color: focused ? "black" : "#D9D9D9",
+                }}
+              >
+                Attendance
+              </Text>
+            );
+          },
+          tabBarIcon: ({ focused, color, size }) => {
+            return (
+              <Image
+                source={AttendanceIcon}
+                style={{
+                  width: 35,
+                  height: 35,
+                  tintColor: color,
+                }}
+              ></Image>
+            );
+          },
+          tabBarActiveTintColor: "#F89B40",
+          tabBarInactiveTintColor: "#D9D9D9",
+        }}
+      />
+      <Tab.Screen
         name="Messages"
         component={Messages}
         options={{
@@ -54,7 +89,7 @@ const NavBar = () => {
             return (
               <Text
                 style={{
-                  fontSize: 17,
+                  fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
                 }}
@@ -87,7 +122,7 @@ const NavBar = () => {
             return (
               <Text
                 style={{
-                  fontSize: 17,
+                  fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
                 }}
@@ -116,4 +151,4 @@ const NavBar = () => {
   );
 };
 
-export default NavBar;
+export default NavBarStaff;
