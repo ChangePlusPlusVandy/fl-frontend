@@ -5,6 +5,8 @@ import SignUp from "./app/screens/SignUp";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Profile from "./app/screens/Profile";
 import EditProfile from "./app/screens/EditProfile";
+import NewPost from "./app/screens/NewPost";
+import Launch from "./app/screens/Launch";
 
 const Stack = createNativeStackNavigator();
 import { NavigationContainer } from "@react-navigation/native";
