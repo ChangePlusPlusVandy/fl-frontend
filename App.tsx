@@ -1,5 +1,13 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import SignIn from "./app/screens/SignIn";
+import SignUp from "./app/screens/SignUp";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Profile from "./app/screens/Profile";
+import EditProfile from "./app/screens/EditProfile";
+
+const Stack = createNativeStackNavigator();
 import { NavigationContainer } from "@react-navigation/native";
 import NavBarFamily from "./app/components/NavBarFamily";
 import NavBarStaff from "./app/components/NavBarStaff";
