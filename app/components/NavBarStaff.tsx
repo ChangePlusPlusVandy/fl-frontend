@@ -10,6 +10,11 @@ import MessagesIcon from "../../assets/tabmessages.png";
 import FriendsIcon from "../../assets/tabfriends.png";
 import AttendanceIcon from "../../assets/tabattendance.png";
 
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import AttendanceHistory from "../screens/AttendanceHistory";
+const Stack = createNativeStackNavigator();
+
 const Tab = createBottomTabNavigator();
 
 const NavBarStaff = () => {
@@ -50,7 +55,7 @@ const NavBarStaff = () => {
       />
       <Tab.Screen
         name="Today's Attendance"
-        component={Attendance}
+        component={AttendanceNavigator}
         options={{
           tabBarLabel: ({ focused, color }) => {
             return (
@@ -148,6 +153,25 @@ const NavBarStaff = () => {
         }}
       />
     </Tab.Navigator>
+  );
+};
+
+const AttendanceNavigator = () => {
+  return (
+    <NavigationContainer independent={true}>
+      <Stack.Navigator initialRouteName="Attendance">
+        <Stack.Screen
+          name="Attendance"
+          component={Attendance}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AttendanceHistory"
+          component={AttendanceHistory}
+          options={{ headerShown: false }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 
