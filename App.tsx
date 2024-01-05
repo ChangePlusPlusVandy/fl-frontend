@@ -5,7 +5,7 @@ import NavBarFamily from "./app/components/NavBarFamily";
 import NavBarStaff from "./app/components/NavBarStaff";
 
 export default function App() {
-  const [user, setUser] = useState("family");
+  const [user, setUser] = useState("staff");
   return (
     <NavigationContainer>
       {user === "family" ? <NavBarFamily /> : <NavBarStaff />}

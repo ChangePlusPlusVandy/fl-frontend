@@ -49,7 +49,7 @@ const NavBarStaff = () => {
         }}
       />
       <Tab.Screen
-        name="Attendance"
+        name="Today's Attendance"
         component={Attendance}
         options={{
           tabBarLabel: ({ focused, color }) => {
