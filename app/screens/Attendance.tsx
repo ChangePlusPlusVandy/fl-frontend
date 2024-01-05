@@ -17,7 +17,7 @@ interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
-const Attendance = () => {
+const Attendance = ({ navigation }: RouterProps) => {
   const [searchValue, setSearchValue] = useState("");
   return (
     <SafeAreaView style={styles.container}>
@@ -31,7 +31,10 @@ const Attendance = () => {
             style={styles.searchInput}
           ></TextInput>
         </View>
-        <TouchableOpacity style={styles.history}>
+        <TouchableOpacity
+          style={styles.history}
+          onPress={() => navigation.navigate("AttendanceHistory")}
+        >
           <Text style={styles.historyText}>History</Text>
         </TouchableOpacity>
       </View>
