@@ -11,6 +11,11 @@ import {
 } from "react-native";
 import searchIcon from "../../assets/search.png";
 import AttendanceSingle from "../components/AttendanceSingle";
+import { NavigationProp } from "@react-navigation/native";
+
+interface RouterProps {
+  navigation: NavigationProp<any, any>;
+}
 
 const Attendance = () => {
   const [searchValue, setSearchValue] = useState("");
