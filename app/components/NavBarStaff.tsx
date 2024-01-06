@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/Home";
 import Messages from "../screens/Messages";
@@ -10,9 +10,12 @@ import MessagesIcon from "../../assets/tabmessages.png";
 import FriendsIcon from "../../assets/tabfriends.png";
 import AttendanceIcon from "../../assets/tabattendance.png";
 
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, NavigationProp } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AttendanceHistory from "../screens/AttendanceHistory";
+import BackButton from "./BackButton";
+import { Header } from "react-native/Libraries/NewAppScreen";
+import DayAttendance from "../screens/DayAttendance";
 const Stack = createNativeStackNavigator();
 
 const Tab = createBottomTabNavigator();
@@ -54,7 +57,7 @@ const NavBarStaff = () => {
         }}
       />
       <Tab.Screen
-        name="Today's Attendance"
+        name="Attendance"
         component={AttendanceNavigator}
         options={{
           tabBarLabel: ({ focused, color }) => {
@@ -82,6 +85,7 @@ const NavBarStaff = () => {
               ></Image>
             );
           },
+          headerShown: false,
           tabBarActiveTintColor: "#F89B40",
           tabBarInactiveTintColor: "#D9D9D9",
         }}
@@ -156,19 +160,34 @@ const NavBarStaff = () => {
   );
 };
 
-const AttendanceNavigator = () => {
+interface RouterProps {
+  navigation: NavigationProp<any, any>;
+}
+
+const AttendanceNavigator = ({ navigation }: RouterProps) => {
   return (
     <NavigationContainer independent={true}>
-      <Stack.Navigator initialRouteName="Attendance">
+      <Stack.Navigator initialRouteName="AttendanceToday">
         <Stack.Screen
-          name="Attendance"
+          name="Today's Attendance"
           component={Attendance}
-          options={{ headerShown: false }}
+          options={{}}
         />
         <Stack.Screen
           name="AttendanceHistory"
           component={AttendanceHistory}
-          options={{ headerShown: false }}
+          options={{
+            headerTitle: "Attendence Record",
+            headerBackTitle: "Back",
+          }}
+        />
+        <Stack.Screen
+          name="DayAttendance"
+          component={DayAttendance}
+          options={{
+            headerTitle: "Attendence - Date",
+            headerBackTitle: "Back",
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>
