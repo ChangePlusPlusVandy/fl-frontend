@@ -21,7 +21,7 @@ interface RouterProps {
   }
 
 const UserHome = ({ navigation }: RouterProps) => {
-    const [name, setName] = useState('name');
+    const [name, setName] = useState('User');
 
     return (
       
