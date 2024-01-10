@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import SignIn from "./app/screens/SignIn";
 import SignUp from "./app/screens/SignUp";
@@ -18,49 +19,49 @@ export default function App() {
   const [user, setUser] = useState("family");
   return (
     <NavigationContainer>
-    <Stack.Navigator initialRouteName="UserTabs">
-      <Stack.Screen
-        name="Launch"
-        component={Launch}
-        options={{ headerShown: false}}
-      />
-      <Stack.Screen
-        name="SignIn"
-        component={SignIn}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="SignUp"
-        component={SignUp}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Profile"
-        component={Profile}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="EditProfile"
-        component={EditProfile}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="NewPost"
-        component={NewPost}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="UserTabs"
-        component={NavBarFamily}
-        options={{ headerShown: false}}
-      />
-      <Stack.Screen
-        name="StaffTabs"
-        component={NavBarStaff}
-        options={{ headerShown: false}}
-      />
-    </Stack.Navigator>
-  </NavigationContainer>
+      <Stack.Navigator initialRouteName="UserTabs">
+        <Stack.Screen
+          name="Launch"
+          component={Launch}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SignIn"
+          component={SignIn}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SignUp"
+          component={SignUp}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Profile"
+          component={Profile}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="EditProfile"
+          component={EditProfile}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="NewPost"
+          component={NewPost}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="UserTabs"
+          component={NavBarFamily}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="StaffTabs"
+          component={NavBarStaff}
+          options={{ headerShown: false }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 

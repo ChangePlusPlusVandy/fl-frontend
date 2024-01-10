@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Home from "../screens/UserHome";
+import Home from "../screens/Home";
 import Messages from "../screens/Messages";
 import Friends from "../screens/Friends";
 import HomeIcon from "../../assets/tabhome.png";
@@ -12,7 +12,7 @@ const Tab = createBottomTabNavigator();
 
 const NavBarFamily = () => {
   return (
-    <Tab.Navigator screenOptions={{ tabBarStyle: { height: 90 }, headerShown: false }}>
+    <Tab.Navigator screenOptions={{ tabBarStyle: { height: 90 } }}>
       <Tab.Screen
         name="Home"
         component={Home}
@@ -24,8 +24,7 @@ const NavBarFamily = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Home
               </Text>
             );
@@ -38,8 +37,7 @@ const NavBarFamily = () => {
                   width: 28,
                   height: 30,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
@@ -57,8 +55,7 @@ const NavBarFamily = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Messages
               </Text>
             );
@@ -71,8 +68,7 @@ const NavBarFamily = () => {
                   width: 40,
                   height: 40,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
@@ -90,8 +86,7 @@ const NavBarFamily = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Friends
               </Text>
             );
@@ -104,8 +99,7 @@ const NavBarFamily = () => {
                   width: 45,
                   height: 45,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",

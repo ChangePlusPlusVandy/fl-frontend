@@ -12,12 +12,13 @@ import {
 import searchIcon from "../../assets/search.png";
 import AttendanceSingle from "../components/AttendanceSingle";
 import { NavigationProp } from "@react-navigation/native";
+import DayAttendanceSingle from "../components/DayAttendanceSingle";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
-const Attendance = ({ navigation }: RouterProps) => {
+const DayAttendance = ({ navigation }: RouterProps) => {
   const [searchValue, setSearchValue] = useState("");
   return (
     <SafeAreaView style={styles.container}>
@@ -39,9 +40,9 @@ const Attendance = ({ navigation }: RouterProps) => {
         </TouchableOpacity>
       </View>
       <ScrollView style={styles.attendanceContainer}>
-        <AttendanceSingle />
-        <AttendanceSingle />
-        <AttendanceSingle />
+        <DayAttendanceSingle />
+        <DayAttendanceSingle />
+        <DayAttendanceSingle />
       </ScrollView>
     </SafeAreaView>
   );
@@ -89,4 +90,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Attendance;
+export default DayAttendance;

@@ -1,7 +1,7 @@
 import React from "react";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Home from "../screens/StaffHome";
+import Home from "../screens/Home";
 import Messages from "../screens/Messages";
 import Friends from "../screens/Friends";
 import Attendance from "../screens/Attendance";
@@ -10,11 +10,19 @@ import MessagesIcon from "../../assets/tabmessages.png";
 import FriendsIcon from "../../assets/tabfriends.png";
 import AttendanceIcon from "../../assets/tabattendance.png";
 
+import { NavigationContainer, NavigationProp } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import AttendanceHistory from "../screens/AttendanceHistory";
+import BackButton from "./BackButton";
+import { Header } from "react-native/Libraries/NewAppScreen";
+import DayAttendance from "../screens/DayAttendance";
+const Stack = createNativeStackNavigator();
+
 const Tab = createBottomTabNavigator();
 
 const NavBarStaff = () => {
   return (
-    <Tab.Navigator screenOptions={{ tabBarStyle: { height: 90 }, headerShown: false}}>
+    <Tab.Navigator screenOptions={{ tabBarStyle: { height: 90 } }}>
       <Tab.Screen
         name="Home"
         component={Home}
@@ -26,8 +34,7 @@ const NavBarStaff = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Home
               </Text>
             );
@@ -40,8 +47,7 @@ const NavBarStaff = () => {
                   width: 28,
                   height: 30,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
@@ -50,7 +56,7 @@ const NavBarStaff = () => {
       />
       <Tab.Screen
         name="Attendance"
-        component={Attendance}
+        component={AttendanceNavigator}
         options={{
           tabBarLabel: ({ focused, color }) => {
             return (
@@ -59,8 +65,7 @@ const NavBarStaff = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Attendance
               </Text>
             );
@@ -73,10 +78,10 @@ const NavBarStaff = () => {
                   width: 35,
                   height: 35,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
+          headerShown: false,
           tabBarActiveTintColor: "#F89B40",
           tabBarInactiveTintColor: "#D9D9D9",
         }}
@@ -92,8 +97,7 @@ const NavBarStaff = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Messages
               </Text>
             );
@@ -106,8 +110,7 @@ const NavBarStaff = () => {
                   width: 40,
                   height: 40,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
@@ -125,8 +128,7 @@ const NavBarStaff = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Friends
               </Text>
             );
@@ -139,8 +141,7 @@ const NavBarStaff = () => {
                   width: 45,
                   height: 45,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
@@ -148,6 +149,40 @@ const NavBarStaff = () => {
         }}
       />
     </Tab.Navigator>
+  );
+};
+
+interface RouterProps {
+  navigation: NavigationProp<any, any>;
+}
+
+const AttendanceNavigator = ({ navigation }: RouterProps) => {
+  return (
+    <NavigationContainer independent={true}>
+      <Stack.Navigator initialRouteName="AttendanceToday">
+        <Stack.Screen
+          name="Today's Attendance"
+          component={Attendance}
+          options={{}}
+        />
+        <Stack.Screen
+          name="AttendanceHistory"
+          component={AttendanceHistory}
+          options={{
+            headerTitle: "Attendence Record",
+            headerBackTitle: "Back",
+          }}
+        />
+        <Stack.Screen
+          name="DayAttendance"
+          component={DayAttendance}
+          options={{
+            headerTitle: "Attendence - Date",
+            headerBackTitle: "Back",
+          }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 
