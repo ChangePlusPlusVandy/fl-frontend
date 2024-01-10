@@ -34,8 +34,7 @@ const NavBarStaff = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Home
               </Text>
             );
@@ -48,8 +47,7 @@ const NavBarStaff = () => {
                   width: 28,
                   height: 30,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
@@ -67,8 +65,7 @@ const NavBarStaff = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Attendance
               </Text>
             );
@@ -81,8 +78,7 @@ const NavBarStaff = () => {
                   width: 35,
                   height: 35,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           headerShown: false,
@@ -101,8 +97,7 @@ const NavBarStaff = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Messages
               </Text>
             );
@@ -115,8 +110,7 @@ const NavBarStaff = () => {
                   width: 40,
                   height: 40,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
@@ -134,8 +128,7 @@ const NavBarStaff = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Friends
               </Text>
             );
@@ -148,8 +141,7 @@ const NavBarStaff = () => {
                   width: 45,
                   height: 45,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
