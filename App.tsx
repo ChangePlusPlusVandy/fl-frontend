@@ -7,6 +7,7 @@ import Profile from "./app/screens/Profile";
 import EditProfile from "./app/screens/EditProfile";
 import NewPost from "./app/screens/NewPost";
 import Launch from "./app/screens/Launch";
+import UserHome from "./app/screens/UserHome";
 
 const Stack = createNativeStackNavigator();
 import { NavigationContainer } from "@react-navigation/native";
@@ -17,8 +18,49 @@ export default function App() {
   const [user, setUser] = useState("family");
   return (
     <NavigationContainer>
-      {user === "family" ? <NavBarFamily /> : <NavBarStaff />}
-    </NavigationContainer>
+    <Stack.Navigator initialRouteName="UserTabs">
+      <Stack.Screen
+        name="Launch"
+        component={Launch}
+        options={{ headerShown: false}}
+      />
+      <Stack.Screen
+        name="SignIn"
+        component={SignIn}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="SignUp"
+        component={SignUp}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={Profile}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfile}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="NewPost"
+        component={NewPost}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="UserTabs"
+        component={NavBarFamily}
+        options={{ headerShown: false}}
+      />
+      <Stack.Screen
+        name="StaffTabs"
+        component={NavBarStaff}
+        options={{ headerShown: false}}
+      />
+    </Stack.Navigator>
+  </NavigationContainer>
   );
 }
 
