@@ -1,22 +1,43 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
+import useAuthStore, { CreateUserProps } from '../stores/auth';
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
 const SignUp = ({navigation}: RouterProps) => {
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [accountType, setAccountType] = useState('Staff'); // Default to Staff
+  const [form, setForm] = useState<CreateUserProps>({
+    emailAddress: "",
+    password: "",
+    confirmPassword: "",
+    username: "",
+    type: "Staff",
+  });
+  const { user, createAccount } = useAuthStore();
   const [secure, setSecure] = useState(true);
-  const handleSignUp = () => {
-      if(password!=confirmPassword){
-        alert()
+
+  if (user !== null) {
+    navigation.navigate('Home');
+  }
+
+  const handleAccountCreation = async () => {
+    try {
+      if (form.password !== form.confirmPassword) {
+        throw new Error("Passwords do not match");
       }
+      
+      await createAccount(form);
+
+      navigation.navigate('SignIn');
+    } catch (e) {
+      alert(`An error has occurred: ${e}`)
+    }
+  };
+
+  const updateForm = (updates: any) => {
+    setForm({ ...form, ...updates });
   };
 
   return (
@@ -28,18 +49,18 @@ const SignUp = ({navigation}: RouterProps) => {
         <TouchableOpacity
           style={[
             styles.accountTypeButton,
-            accountType === 'Staff' && styles.selectedAccountType,
+            form.type === 'Staff' && styles.selectedAccountType,
           ]}
-          onPress={() => setAccountType('Staff')}
+          onPress={() => updateForm({ type: 'Staff' })}
         >
           <Text>Staff</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
             styles.accountTypeButton,
-            accountType === 'Family' && styles.selectedAccountType,
+            form.type === 'Family' && styles.selectedAccountType,
           ]}
-          onPress={() => setAccountType('Family')}
+          onPress={() => updateForm({ type: 'Family' })}
         >
           <Text>Family</Text>
         </TouchableOpacity>
@@ -49,31 +70,31 @@ const SignUp = ({navigation}: RouterProps) => {
 
       <TextInput
         style={styles.input}
-        value={email}
-        onChangeText={text => setEmail(text)}
+        value={form.emailAddress}
+        onChangeText={text => updateForm({ emailAddress: text })}
       />
       
       <Text style ={styles.boxLabel}>Username</Text>
       <TextInput
         style={styles.input}
-        value={username}
-        onChangeText={text => setUsername(text)}
+        value={form.username}
+        onChangeText={text => updateForm({ username: text })}
       />
       <Text style = {styles.boxLabel}>Password</Text>
       <TextInput
         style={styles.input}
         secureTextEntry={secure}
-        value={password}
-        onChangeText={text => setPassword(text)}
+        value={form.password}
+        onChangeText={text => updateForm({ password: text })}
       />
       <Text style ={styles.boxLabel}>Confirm Password</Text>
       <TextInput
         style={styles.input}
         secureTextEntry={secure}
-        value={confirmPassword}
-        onChangeText={text => setConfirmPassword(text)}
+        value={form.confirmPassword}
+        onChangeText={text => updateForm({ confirmPassword: text })}
       />
-      <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+      <TouchableOpacity style={styles.signUpButton} onPress={handleAccountCreation}>
         <Text style = {styles.createAccount}>Create Account</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.signInLink}>
