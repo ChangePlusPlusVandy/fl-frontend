@@ -1,22 +1,42 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button, View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 
 import FLlogo from "../../assets/friends-life-logo.png";
 import OpenEye from "../../assets/OpenEye.png"
 import ClosedEye from "../../assets/Eye-slash.png"
+import useAuthStore from '../stores/auth';
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
-const SignIn = ({navigation}: RouterProps) => {
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("");
+interface Form {
+  emailAddress: string
+  password: string
+}
+
+const SignIn = ({ navigation }: RouterProps) => {
+    const { user, signIn } = useAuthStore();
+    const [form, setForm] = useState<Form>({ emailAddress: "", password: "" });
     const [showPassword, setShowPassword] = useState(false);
-    const onLogin = () =>{
-        alert("email: "+ email + "\npassword: "+ password)
+
+    useEffect(() => {
+      if (user !== null) {
+        navigation.navigate('Home');
+      }
+    }, [user]);
+
+    const onLogin = async () =>{
+        const { emailAddress, password } = form;
+
+        try {
+          await signIn({ emailAddress, password });
+        } catch (error) {
+          alert('Invalid credentials. Please try again.')
+        }
     }
+
     return (
       <View style={styles.root}>
         <Text style={styles.login}>Login</Text>
@@ -28,8 +48,8 @@ const SignIn = ({navigation}: RouterProps) => {
           </Text>
         </TouchableOpacity>
         <Text style={styles.email}>Email</Text>
-        <TextInput style={styles.usernameBox} onChangeText={(username)=>setEmail(username)}></TextInput>
-        <TextInput style={styles.passwordBox} secureTextEntry={!showPassword} onChangeText={(newPass)=>setPassword(password)}></TextInput>
+        <TextInput style={styles.usernameBox} onChangeText={(emailAddress: any) => setForm({ ...form, emailAddress })}></TextInput>
+        <TextInput style={styles.passwordBox} secureTextEntry={!showPassword} onChangeText={(password: any) => setForm({ ...form, password })}></TextInput>
         {/* Add your vector and logo components */}
         <Text style={styles.password}>Password</Text>
         <Text style={styles.forgotPassword}>Forgot Password?</Text>
