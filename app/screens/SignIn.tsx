@@ -5,20 +5,15 @@ import { NavigationProp } from '@react-navigation/native';
 import FLlogo from "../../assets/friends-life-logo.png";
 import OpenEye from "../../assets/OpenEye.png"
 import ClosedEye from "../../assets/Eye-slash.png"
-import useAuthStore from '../stores/auth';
+import useAuthStore, { SignInProps } from '../stores/auth';
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
-interface Form {
-  emailAddress: string
-  password: string
-}
-
 const SignIn = ({ navigation }: RouterProps) => {
     const { user, signIn } = useAuthStore();
-    const [form, setForm] = useState<Form>({ emailAddress: "", password: "" });
+    const [form, setForm] = useState<SignInProps>({ emailAddress: "", password: "" });
     const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {

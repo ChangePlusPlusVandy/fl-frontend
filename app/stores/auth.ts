@@ -9,10 +9,15 @@ export interface CreateUserProps {
     type: 'Default' | 'Staff' | 'Family'
 }
 
+export interface SignInProps {
+    emailAddress: string
+    password: string
+}
+
 interface AuthStore {
     user: FirebaseAuthTypes.User | null;
     createAccount: ({ username, emailAddress, password, type }: CreateUserProps) => Promise<void>;
-    signIn: ({ emailAddress, password }: { emailAddress: string, password: string }) => Promise<void>;
+    signIn: ({ emailAddress, password }: SignInProps) => Promise<void>;
     logout: () => Promise<void>;
 }
 
@@ -34,7 +39,7 @@ const useAuthStore = create<AuthStore>((set) => ({
             console.log(e);
         }
     },
-    signIn: async ({ emailAddress, password }) => {
+    signIn: async ({ emailAddress, password }: SignInProps) => {
         try {
             const { user } = await firebase.auth().signInWithEmailAndPassword(emailAddress, password);
             set({ user });
