@@ -18,7 +18,7 @@ export default function App() {
   const [user, setUser] = useState("family");
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="UserTabs">
+      <Stack.Navigator initialRouteName="SignIn">
         <Stack.Screen
           name="Launch"
           component={Launch}
