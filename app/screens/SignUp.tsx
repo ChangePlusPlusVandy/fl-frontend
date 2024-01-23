@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { NavigationProp } from '@react-navigation/native';
 import useAuthStore, { CreateUserProps } from '../stores/auth';
+import { useFirebase } from '../firebase';
+import { getAuth } from 'firebase/auth';
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -17,6 +19,8 @@ const SignUp = ({navigation}: RouterProps) => {
   });
   const { user, createAccount } = useAuthStore();
   const [secure, setSecure] = useState(true);
+  const firebase = useFirebase();
+  const auth = getAuth(firebase);
 
   if (user !== null) {
     navigation.navigate('Home');

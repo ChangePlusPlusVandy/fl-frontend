@@ -1,5 +1,6 @@
-import { firebase, FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { User, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { create } from "zustand";
+import { useFirebase } from "../firebase";
 
 export interface CreateUserProps {
     username: string
@@ -15,17 +16,20 @@ export interface SignInProps {
 }
 
 interface AuthStore {
-    user: FirebaseAuthTypes.User | null;
+    user: User | null;
     createAccount: ({ username, emailAddress, password, type }: CreateUserProps) => Promise<void>;
     signIn: ({ emailAddress, password }: SignInProps) => Promise<void>;
     logout: () => Promise<void>;
 }
 
+const firebase = useFirebase();
+const auth = getAuth(firebase);
+
 const useAuthStore = create<AuthStore>((set) => ({
     user: null,
     createAccount: async ({ username, emailAddress, password, type }: CreateUserProps) => {
         try {
-            const { user } = await firebase.auth().createUserWithEmailAndPassword(emailAddress, password);
+            const { user } = await createUserWithEmailAndPassword(auth, emailAddress, password);
             await fetch('api_url', {
                 method: 'POST',
                 body: JSON.stringify({
@@ -41,7 +45,7 @@ const useAuthStore = create<AuthStore>((set) => ({
     },
     signIn: async ({ emailAddress, password }: SignInProps) => {
         try {
-            const { user } = await firebase.auth().signInWithEmailAndPassword(emailAddress, password);
+            const { user } = await signInWithEmailAndPassword(auth, emailAddress, password);
             set({ user });
         } catch (error) {
             console.log(error);
@@ -49,7 +53,7 @@ const useAuthStore = create<AuthStore>((set) => ({
     },
     logout: async () => {
         try {
-            await firebase.auth().signOut();
+            await signOut(auth);
             set({ user: null });
         } catch (error) {
             console.log(error);
