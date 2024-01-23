@@ -18,7 +18,7 @@ const SignIn = ({ navigation }: RouterProps) => {
 
     useEffect(() => {
       if (user !== null) {
-        navigation.navigate('Home');
+        navigation.navigate('UserTabs');
       }
     }, [user]);
 

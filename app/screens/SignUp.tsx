@@ -23,7 +23,7 @@ const SignUp = ({navigation}: RouterProps) => {
   const auth = getAuth(firebase);
 
   if (user !== null) {
-    navigation.navigate('Home');
+    navigation.navigate('UserTabs');
   }
 
   const handleAccountCreation = async () => {
