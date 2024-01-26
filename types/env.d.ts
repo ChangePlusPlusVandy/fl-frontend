@@ -5,4 +5,5 @@ declare module "@env" {
   export const FIREBASE_STORAGE_BUCKET: string;
   export const FIREBASE_MESSAGE_SENDER_ID: string;
   export const FIREBASE_APP_ID: string;
+  export const API_SECRET: string;
 }
