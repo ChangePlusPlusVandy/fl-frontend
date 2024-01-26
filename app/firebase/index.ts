@@ -1,13 +1,20 @@
-import Config from "react-native-config";
 import { initializeApp } from "firebase/app";
+import {
+  FIREBASE_API_KEY,
+  FIREBASE_AUTH_DOMAIN,
+  FIREBASE_MESSAGE_SENDER_ID,
+  FIREBASE_PROJECT_ID,
+  FIREBASE_STORAGE_BUCKET,
+  FIREBASE_APP_ID,
+} from "@env";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBxOCPWJVuUEq-phN_mf54Zph7JZJLM-8E",
-    authDomain: "friends-life-1cd60.firebaseapp.com",
-    projectId: "friends-life-1cd60",
-    storageBucket: "friends-life-1cd60.appspot.com",
-    messagingSenderId: "842743778727",
-    appId: "1:842743778727:web:a4360e42602a535f093a82"
+  apiKey: FIREBASE_API_KEY,
+  authDomain: FIREBASE_AUTH_DOMAIN,
+  projectId: FIREBASE_PROJECT_ID,
+  storageBucket: FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: FIREBASE_MESSAGE_SENDER_ID,
+  appId: FIREBASE_APP_ID,
 };
 
 export const firebase = initializeApp(firebaseConfig);
