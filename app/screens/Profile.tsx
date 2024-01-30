@@ -1,3 +1,5 @@
+import useAuthStore, { SignInProps } from "../stores/auth";
+
 import {
   View,
   Text,
@@ -23,6 +25,18 @@ interface RouterProps {
 }
 
 const Profile = ({ navigation }: RouterProps) => {
+  const { logout } = useAuthStore();
+
+  const onLogout = async () => {
+    try {
+      await logout();
+      navigation.navigate('SignIn')
+
+    } catch (error) {
+      alert("Error logging out");
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -56,7 +70,7 @@ const Profile = ({ navigation }: RouterProps) => {
           <Image source={AboutIcon} style={styles.icon}></Image>
           <Text style={styles.optionText}>About Us</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.stupidOption}>
+        <TouchableOpacity style={styles.stupidOption} onPress={onLogout}>
           <Image source={LogoutIcon} style={styles.stupidIcon}></Image>
           <Text style={styles.optionText}>Logout</Text>
         </TouchableOpacity>

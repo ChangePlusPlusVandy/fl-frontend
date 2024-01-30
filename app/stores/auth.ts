@@ -54,6 +54,13 @@ const useAuthStore = create<AuthStore>((set) => ({
     logout: async () => {
         try {
             await signOut(auth);
+
+            if (auth.currentUser === null) {
+                console.log('Logged out');
+            } else {
+                console.log('Logout failed');
+            }
+
             set({ user: null });
         } catch (error) {
             console.log(error);
