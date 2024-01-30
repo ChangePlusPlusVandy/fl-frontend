@@ -26,7 +26,9 @@ const Profile = ({ navigation }: RouterProps) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <BackButton />
+        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+          <BackButton />
+        </TouchableOpacity>
       </View>
       <Image source={ProfilePicture} style={styles.image}></Image>
       <Text style={styles.name}>Joseph Quatela</Text>
