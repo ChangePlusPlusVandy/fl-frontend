@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,11 +7,11 @@ import {
   StyleSheet,
   Image,
   ScrollView,
-} from 'react-native';
-import { NavigationProp } from '@react-navigation/native';
-import ProfilePic from '../../assets/User_circle.png';
-import AddPic from '../../assets/Add.png';
-import Post from '../components/Post';
+} from "react-native";
+import { NavigationProp } from "@react-navigation/native";
+import ProfilePic from "../../assets/User_circle.png";
+import AddPic from "../../assets/Add.png";
+import Post from "../components/Post";
 import joeyProfile from "../../assets/profilepicture.jpg";
 import AllanTennis from "../../assets/allantennis.png";
 import Allan from "../../assets/mrzhang.png";
@@ -33,7 +33,7 @@ interface PostItem {
 }
 
 const StaffHome = ({ navigation }: RouterProps) => {
-  const [name, setName] = useState('Staff');
+  const [name, setName] = useState("Staff");
   const [posts, setPosts] = useState<PostItem[]>([
     {
       id: 1,
@@ -77,7 +77,12 @@ const StaffHome = ({ navigation }: RouterProps) => {
         <View style={styles.headerContainer}>
           <Text style={styles.headerText}>Welcome </Text>
           <Text style={styles.nameText}>{name}!</Text>
-          <Image source={ProfilePic} style={styles.profilePic} />
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Profile")}
+            style={styles.profilePic}
+          >
+            <Image source={ProfilePic} />
+          </TouchableOpacity>
         </View>
 
         {posts.map((post) => (
@@ -93,7 +98,10 @@ const StaffHome = ({ navigation }: RouterProps) => {
         ))}
       </ScrollView>
 
-      <TouchableOpacity style={styles.addPic}>
+      <TouchableOpacity
+        style={styles.addPic}
+        onPress={() => navigation.navigate("NewPost")}
+      >
         <Image source={AddPic} />
       </TouchableOpacity>
     </SafeAreaView>
@@ -102,32 +110,32 @@ const StaffHome = ({ navigation }: RouterProps) => {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 20,
     marginBottom: 20,
     paddingBottom: 20,
     borderBottomWidth: 2,
-    borderBottomColor: 'grey',
+    borderBottomColor: "grey",
   },
   headerText: {
     fontSize: 25,
-    fontWeight: '600',
-    color: 'grey',
+    fontWeight: "600",
+    color: "grey",
   },
   nameText: {
     fontSize: 25,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   profilePic: {
-    marginLeft: 'auto',
+    marginLeft: "auto",
   },
   addPic: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     right: 0,
   },
