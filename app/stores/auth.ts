@@ -1,6 +1,8 @@
 import { User, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { create } from "zustand";
 import { useFirebase } from "../firebase";
+import { generateHmacSignature } from "../utils/signature";
+import { API_SECRET, API_URL } from "@env";
 
 export interface CreateUserProps {
     username: string
@@ -30,13 +32,18 @@ const useAuthStore = create<AuthStore>((set) => ({
     createAccount: async ({ username, emailAddress, password, type }: CreateUserProps) => {
         try {
             const { user } = await createUserWithEmailAndPassword(auth, emailAddress, password);
-            await fetch('api_url', {
+            const body = JSON.stringify({
+                firebaseUserId: user.uid,
+                emailAddress: emailAddress,
+                name: username,
+                type: type,
+            })
+            await fetch(API_URL+'/user/', {
                 method: 'POST',
-                body: JSON.stringify({
-                    firbaseUserId: user.uid,
-                    name: username,
-                    type: type,
-                }),
+                headers: {
+                    'Friends-Life-Signature': generateHmacSignature(body, API_SECRET)
+                },
+                body: body,
             });
             set({ user });
         } catch (e) {
