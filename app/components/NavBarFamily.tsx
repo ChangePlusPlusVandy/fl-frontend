@@ -7,6 +7,7 @@ import Friends from "../screens/Friends";
 import HomeIcon from "../../assets/tabhome.png";
 import MessagesIcon from "../../assets/tabmessages.png";
 import FriendsIcon from "../../assets/tabfriends.png";
+import Conversations from "../screens/Conversations";
 
 const Tab = createBottomTabNavigator();
 
@@ -46,7 +47,7 @@ const NavBarFamily = () => {
       />
       <Tab.Screen
         name="Messages"
-        component={Messages}
+        component={Conversations}
         options={{
           tabBarLabel: ({ focused, color }) => {
             return (
