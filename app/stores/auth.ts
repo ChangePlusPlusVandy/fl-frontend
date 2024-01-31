@@ -58,7 +58,7 @@ const useAuthStore = create<AuthStore>((set) => ({
         name: username,
         type: type,
       });
-      const data = await fetch(`${API_URL}/user/`, {
+      const data = await fetch(`${API_URL}user/`, {
         method: "POST",
         headers: {
           "Friends-Life-Signature": generateHmacSignature(body, API_SECRET),
