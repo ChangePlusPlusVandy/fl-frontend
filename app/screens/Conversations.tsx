@@ -12,12 +12,13 @@ import { FontAwesome } from "@expo/vector-icons"; // Import the FontAwesome icon
 import { MaterialCommunityIcons } from "@expo/vector-icons"; // Import MaterialCommunityIcons for the search bar icon
 import moment from "moment";
 import { NavigationProp } from "@react-navigation/native";
-
+import NewMessagePopup from "../components/NewMessagePopup";
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 const Conversations = ({ navigation }: RouterProps) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isPopupVisible, setPopupVisible] = React.useState(false);
 
   const [chats, setChats] = useState([
     {
@@ -42,11 +43,12 @@ const Conversations = ({ navigation }: RouterProps) => {
 
   return (
     <View style={styles.root}>
+
       <View style={styles.header}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Messages</Text>
         </View>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={()=>setPopupVisible(true)}>
           <View style={styles.plusButton}>
             <FontAwesome name="plus" size={20} color="#fff" />
           </View>
@@ -64,6 +66,7 @@ const Conversations = ({ navigation }: RouterProps) => {
           />
         </View>
       </View>
+
       <FlatList
         data={filteredChats}
         keyExtractor={(item) => item.id}
@@ -79,6 +82,11 @@ const Conversations = ({ navigation }: RouterProps) => {
           </TouchableOpacity>
         )}
       />
+      {isPopupVisible&&<NewMessagePopup
+        onClose={() => setPopupVisible(false)}
+        navigation={navigation}
+      />}
+
     </View>
   );
 };

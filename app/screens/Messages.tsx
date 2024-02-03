@@ -16,6 +16,7 @@ interface RouterProps {
 const Messages = ({navigation}: RouterProps) => {
   const route = useRoute();
   const personName = route.params?.reciever;
+  console.log(route);
   //const navigation = useNavigation();
 
   //note that these are listed from newest to oldest.
@@ -78,7 +79,7 @@ const Messages = ({navigation}: RouterProps) => {
   return (
     <View style={styles.root}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => setMessages(messages)}>
+        <TouchableOpacity onPress={() => navigation.navigate("Conversations")}>
           <FontAwesome name="arrow-left" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{personName}</Text>

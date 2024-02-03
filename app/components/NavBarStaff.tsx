@@ -171,6 +171,7 @@ const AttendanceNavigator = ({ navigation }: RouterProps) => {
           options={{
             headerTitle: "Attendence Record",
             headerBackTitle: "Back",
+            headerShown: false
           }}
         />
         <Stack.Screen
@@ -179,6 +180,7 @@ const AttendanceNavigator = ({ navigation }: RouterProps) => {
           options={{
             headerTitle: "Attendence - Date",
             headerBackTitle: "Back",
+            headerShown: false
           }}
         />
       </Stack.Navigator>

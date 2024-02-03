@@ -64,6 +64,7 @@ export default function App() {
         <Stack.Screen
           name="Messages"
           component={Messages}
+          options={{ headerShown: false }}
           />
       </Stack.Navigator>
     </NavigationContainer>

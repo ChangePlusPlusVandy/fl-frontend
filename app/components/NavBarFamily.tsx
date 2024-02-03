@@ -74,6 +74,7 @@ const NavBarFamily = () => {
           },
           tabBarActiveTintColor: "#F89B40",
           tabBarInactiveTintColor: "#D9D9D9",
+          headerShown: false,
         }}
       />
       <Tab.Screen
