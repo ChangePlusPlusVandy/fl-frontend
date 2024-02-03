@@ -9,11 +9,13 @@ import NewPost from "./app/screens/NewPost";
 import Launch from "./app/screens/Launch";
 import UserHome from "./app/screens/UserHome";
 
-const Stack = createNativeStackNavigator();
+
 import { NavigationContainer } from "@react-navigation/native";
 import NavBarFamily from "./app/components/NavBarFamily";
 import NavBarStaff from "./app/components/NavBarStaff";
+import Messages from "./app/screens/Messages";
 
+const Stack = createNativeStackNavigator();
 export default function App() {
   const [user, setUser] = useState("family");
   return (
@@ -59,6 +61,10 @@ export default function App() {
           component={NavBarStaff}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="Messages"
+          component={Messages}
+          />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -8,12 +8,17 @@ import {
   FlatList,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome icons
-import { useNavigation } from "@react-navigation/native";
-
-const Messages = () => {
-  const personName = "Leo Zhang";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { NavigationProp, RouteProp } from "@react-navigation/native";
+interface RouterProps {
+  navigation: NavigationProp<any, any>;
+}
+const Messages = ({navigation}: RouterProps) => {
+  const route = useRoute();
+  const personName = route.params?.reciever;
   //const navigation = useNavigation();
 
+  //note that these are listed from newest to oldest.
   const [messages, setMessages] = useState([
     { id: "1", text: "Hello!", sender: "user" },
     { id: "2", text: "Hi there!", sender: "other" },
@@ -64,7 +69,8 @@ const Messages = () => {
         text: newMessage,
         sender: "user",
       };
-      setMessages([...messages, newMessageObj]);
+      setMessages([newMessageObj, ...messages]);
+      console.log(messages);
       setNewMessage("");
     }
   };
@@ -90,6 +96,7 @@ const Messages = () => {
           </View>
         )}
         inverted={true}
+        
         showsVerticalScrollIndicator={false}
       />
       <View style={styles.messageInputContainer}>

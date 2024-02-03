@@ -46,7 +46,7 @@ const NavBarFamily = () => {
         }}
       />
       <Tab.Screen
-        name="Messages"
+        name="Conversations"
         component={Conversations}
         options={{
           tabBarLabel: ({ focused, color }) => {

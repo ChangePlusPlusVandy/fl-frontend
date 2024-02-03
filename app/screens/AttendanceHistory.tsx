@@ -6,6 +6,7 @@ import { NavigationProp } from "@react-navigation/native";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
+  recipient: String;
 }
 
 const AttendanceHistory = ({ navigation }: RouterProps) => {
