@@ -17,6 +17,9 @@ import BackButton from "../components/BackButton";
 import fileUploadIcon from "../../assets/file_upload.png";
 import linkUploadIcon from "../../assets/link_upload.png";
 import imgUploadIcon from "../../assets/img_upload.png";
+import { generateHmacSignature } from "../utils/signature";
+import { API_URL, API_SECRET } from "@env";
+import useAuthStore from "../stores/auth";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -25,10 +28,48 @@ interface RouterProps {
 const NewPost = ({ navigation }: RouterProps) => {
   const [subject, setSubject] = useState("");
   const [textBox, setTextBox] = useState("");
+  const { user } = useAuthStore();
 
-  const handlePost = () => {
-    console.log("Subject:", subject);
-    console.log("Text:", textBox);
+  const handlePost = async () => {
+    try {
+      const userData = await fetch(`${API_URL}user/firebase/${user?.uid}`, {
+        method: "GET",
+        headers: {
+          "Friends-Life-Signature": generateHmacSignature(
+            JSON.stringify({ firebaseId: user?.uid }),
+            API_SECRET
+          ),
+        },
+      });
+
+      const userInfo = await userData.json();
+
+      const body = {
+        userId: userInfo._id,
+        user: userInfo.name,
+        title: subject,
+        postBody: textBox,
+        image: "test",
+      };
+      const signature = generateHmacSignature(JSON.stringify(body), API_SECRET);
+      const response = await fetch("https://fl-backend.vercel.app/post", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Friends-Life-Signature": signature,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        console.log("Post created successfully");
+        navigation.navigate("StaffTabs");
+      } else {
+        console.error("Failed to create post");
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+    }
   };
 
   return (
@@ -69,7 +110,10 @@ const NewPost = ({ navigation }: RouterProps) => {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.postButton} onPress={handlePost}>
+          <TouchableOpacity
+            style={styles.postButton}
+            onPress={() => handlePost()}
+          >
             <Text style={styles.postButtonText}>Post</Text>
           </TouchableOpacity>
         </ScrollView>
