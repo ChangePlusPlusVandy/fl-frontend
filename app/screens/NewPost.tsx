@@ -17,6 +17,9 @@ import BackButton from "../components/BackButton";
 import fileUploadIcon from "../../assets/file_upload.png";
 import linkUploadIcon from "../../assets/link_upload.png";
 import imgUploadIcon from "../../assets/img_upload.png";
+import { AdvancedImage } from "cloudinary-react-native";
+import cld from "../utils/cloudinary";
+import { launchImageLibrary } from "react-native-image-picker";
 import { generateHmacSignature } from "../utils/signature";
 import { API_URL, API_SECRET } from "@env";
 import useAuthStore from "../stores/auth";
@@ -28,6 +31,7 @@ interface RouterProps {
 const NewPost = ({ navigation }: RouterProps) => {
   const [subject, setSubject] = useState("");
   const [textBox, setTextBox] = useState("");
+  const [imageUri, setImageUri] = useState("");
   const { user } = useAuthStore();
 
   const handlePost = async () => {
@@ -72,6 +76,23 @@ const NewPost = ({ navigation }: RouterProps) => {
     }
   };
 
+  const handleUploadImage = () => {
+    launchImageLibrary({ mediaType: "photo" }, (response) => {
+      if (response.didCancel) {
+        console.log("User cancelled image picker");
+      } else if (response.errorCode) {
+        console.log("ImagePicker Error: ", response.errorCode);
+      } else if (response.assets && response.assets.length > 0) {
+        const source = response.assets[0].uri;
+        console.log(source);
+      } else {
+        console.log("No assets found or assets is undefined.");
+      }
+    });
+  };
+
+  const myImage = cld.image("i3zlgkinsrfesn8ck9ds");
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -95,6 +116,7 @@ const NewPost = ({ navigation }: RouterProps) => {
             />
 
             <View style={styles.line}></View>
+
             <TextInput
               style={styles.textBox}
               placeholder="What's on your mind?"
@@ -104,9 +126,12 @@ const NewPost = ({ navigation }: RouterProps) => {
             />
 
             <View style={styles.uploadContainer}>
-              <Image source={imgUploadIcon} style={styles.uploadIcon} />
-              <Image source={fileUploadIcon} style={styles.uploadIcon} />
-              <Image source={linkUploadIcon} style={styles.uploadIcon} />
+              <TouchableOpacity
+                style={styles.uploadIcon}
+                onPress={handleUploadImage}
+              >
+                <Image source={imgUploadIcon} />
+              </TouchableOpacity>
             </View>
           </View>
 
