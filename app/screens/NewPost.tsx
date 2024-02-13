@@ -17,9 +17,9 @@ import BackButton from "../components/BackButton";
 import fileUploadIcon from "../../assets/file_upload.png";
 import linkUploadIcon from "../../assets/link_upload.png";
 import imgUploadIcon from "../../assets/img_upload.png";
-import { AdvancedImage } from "cloudinary-react-native";
+import { AdvancedImage, upload } from "cloudinary-react-native";
 import cld from "../utils/cloudinary";
-import { launchImageLibrary } from "react-native-image-picker";
+import * as ImagePicker from "expo-image-picker";
 import { generateHmacSignature } from "../utils/signature";
 import { API_URL, API_SECRET } from "@env";
 import useAuthStore from "../stores/auth";
@@ -31,11 +31,36 @@ interface RouterProps {
 const NewPost = ({ navigation }: RouterProps) => {
   const [subject, setSubject] = useState("");
   const [textBox, setTextBox] = useState("");
-  const [imageUri, setImageUri] = useState("");
+  const [imageUri, setImageUri] = useState(null);
   const { user } = useAuthStore();
+
+  const cloudinaryUpoad = async () => {
+    let cloudinaryId = "";
+    console.log(imageUri);
+    if (imageUri) {
+      const options = {
+        upload_preset: "ojyuicnt",
+        unsigned: true,
+      };
+
+      await upload(cld, {
+        file: imageUri,
+        options: options,
+        callback: (error: any, response: any) => {
+          if (error) {
+            console.error("Upload error:", error);
+            return;
+          }
+          console.log("Upload successful:", response);
+          cloudinaryId = response.public_id;
+        },
+      });
+    }
+  };
 
   const handlePost = async () => {
     try {
+      cloudinaryUpoad();
       const userData = await fetch(`${API_URL}user/firebase/${user?.uid}`, {
         method: "GET",
         headers: {
@@ -76,22 +101,18 @@ const NewPost = ({ navigation }: RouterProps) => {
     }
   };
 
-  const handleUploadImage = () => {
-    launchImageLibrary({ mediaType: "photo" }, (response) => {
-      if (response.didCancel) {
-        console.log("User cancelled image picker");
-      } else if (response.errorCode) {
-        console.log("ImagePicker Error: ", response.errorCode);
-      } else if (response.assets && response.assets.length > 0) {
-        const source = response.assets[0].uri;
-        console.log(source);
-      } else {
-        console.log("No assets found or assets is undefined.");
-      }
+  const handleUploadImageFromPhone = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
-  };
 
-  const myImage = cld.image("i3zlgkinsrfesn8ck9ds");
+    if (!result.canceled) {
+      setImageUri(result.uri);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -124,11 +145,16 @@ const NewPost = ({ navigation }: RouterProps) => {
               value={textBox}
               onChangeText={(text) => setTextBox(text)}
             />
-
+            {imageUri && (
+              <Image
+                source={{ uri: imageUri }}
+                style={{ width: 200, height: 200 }}
+              />
+            )}
             <View style={styles.uploadContainer}>
               <TouchableOpacity
                 style={styles.uploadIcon}
-                onPress={handleUploadImage}
+                onPress={handleUploadImageFromPhone}
               >
                 <Image source={imgUploadIcon} />
               </TouchableOpacity>
