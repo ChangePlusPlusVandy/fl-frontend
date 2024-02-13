@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,13 +12,48 @@ import {
 import searchIcon from "../../assets/search.png";
 import AttendanceSingle from "../components/AttendanceSingle";
 import { NavigationProp } from "@react-navigation/native";
+import { generateHmacSignature } from "../utils/signature";
+import { API_URL, API_SECRET } from "@env";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
 const Attendance = ({ navigation }: RouterProps) => {
+  const getAttendance = async () => {
+    try {
+      const today = new Date();
+
+      const formattedDate = today.toISOString().split("T")[0];
+
+      const queryString: string = `date=${formattedDate}`;
+      console.log(queryString);
+
+      const signature = generateHmacSignature("GET", API_SECRET);
+      const response = await fetch(
+        `https://fl-backend.vercel.app/attendance?${queryString}`,
+        {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": signature,
+          },
+          // date: { $gte: new Date("2024-01-01"), $lte: new Date("2024-12-31") },
+          // status: "present",
+        }
+      );
+      const res = await response.json();
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const [searchValue, setSearchValue] = useState("");
+
+  useEffect(() => {
+    getAttendance();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.topBar}>
