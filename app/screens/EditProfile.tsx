@@ -27,7 +27,6 @@ const EditProfile = ({ navigation }: RouterProps) => {
   const { user } = useAuthStore();
   const [form, setForm] = useState({
     fullName: "",
-    emailAddress: "",
     phoneNumber: "",
   });
 
@@ -47,7 +46,6 @@ const EditProfile = ({ navigation }: RouterProps) => {
         const userData = await response.json();
         setForm({
           fullName: userData.name,
-          emailAddress: userData.emailAddress,
           phoneNumber: userData.phoneNumber,
         });
       }
@@ -72,15 +70,8 @@ const EditProfile = ({ navigation }: RouterProps) => {
         const userData = await response.json();
         const id = userData._id;
 
-        // console.log(id);
-        // console.log("a");
-        // console.log(form.fullName);
-        // console.log(form.emailAddress);
-        // console.log(form.phoneNumber);
-        // console.log("a");
         const userBody = {
           name: form.fullName,
-          emailAddress: form.emailAddress,
           phoneNumber: form.phoneNumber,
         };
 
@@ -90,7 +81,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
         );
         // console.log(signature);
         console.log("start of patch");
-        const updateResponse = await fetch(`${API_URL}/user/${id}`, {
+        const updateResponse = await fetch(`${API_URL}user/${id}`, {
           method: "PATCH",
           headers: {
             "Friends-Life-Signature": signature,
@@ -98,8 +89,6 @@ const EditProfile = ({ navigation }: RouterProps) => {
           },
           body: JSON.stringify(userBody),
         });
-        const updatedUser = await updateResponse.json();
-        // console.log( updatedUser);
         console.log("end of patch");
       }
     } catch (error) {
@@ -137,12 +126,6 @@ const EditProfile = ({ navigation }: RouterProps) => {
               style={styles.input}
               value={form.fullName}
               onChangeText={(text) => setForm({ ...form, fullName: text })}
-            />
-            <Text style={styles.label}>Email Address</Text>
-            <TextInput
-              style={styles.input}
-              value={form.emailAddress}
-              onChangeText={(text) => setForm({ ...form, emailAddress: text })}
             />
             <Text style={styles.label}>Phone Number</Text>
             <TextInput
