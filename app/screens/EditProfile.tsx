@@ -72,12 +72,12 @@ const EditProfile = ({ navigation }: RouterProps) => {
         const userData = await response.json();
         const id = userData._id;
 
-        console.log(id);
-        console.log("a");
-        console.log(form.fullName);
-        console.log(form.emailAddress);
-        console.log(form.phoneNumber);
-        console.log("a");
+        // console.log(id);
+        // console.log("a");
+        // console.log(form.fullName);
+        // console.log(form.emailAddress);
+        // console.log(form.phoneNumber);
+        // console.log("a");
         const userBody = {
           name: form.fullName,
           emailAddress: form.emailAddress,
@@ -88,7 +88,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
           JSON.stringify(userBody),
           API_SECRET
         );
-        console.log(signature);
+        // console.log(signature);
         console.log("start of patch");
         const updateResponse = await fetch(`${API_URL}/user/${id}`, {
           method: "PATCH",
@@ -99,7 +99,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
           body: JSON.stringify(userBody),
         });
         const updatedUser = await updateResponse.json();
-        console.log( updatedUser);
+        // console.log( updatedUser);
         console.log("end of patch");
       }
     } catch (error) {
