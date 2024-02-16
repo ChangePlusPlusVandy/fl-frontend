@@ -41,17 +41,6 @@ const Report = ({ navigation }: RouterProps) => {
     },
   ]);
 
-  //   useEffect(() => {
-  //     const data = await fetch(`${API_URL}user/`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Friends-Life-Signature": generateHmacSignature(body, API_SECRET),
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: body,
-  //     });
-  //   }, []);
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
