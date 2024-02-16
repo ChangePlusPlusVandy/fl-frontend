@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../screens/StaffHome";
-import Messages from "../screens/Messages";
+import Conversations from "../screens/Conversations";
 import Friends from "../screens/Friends";
 import Attendance from "../screens/Attendance";
 import HomeIcon from "../../assets/tabhome.png";
@@ -22,7 +22,8 @@ const Tab = createBottomTabNavigator();
 
 const NavBarStaff = () => {
   return (
-    <Tab.Navigator screenOptions={{ tabBarStyle: { height: 90 }, headerShown: false  }}>
+    <Tab.Navigator
+      screenOptions={{ tabBarStyle: { height: 90 }, headerShown: false }}>
       <Tab.Screen
         name="Home"
         component={Home}
@@ -87,8 +88,8 @@ const NavBarStaff = () => {
         }}
       />
       <Tab.Screen
-        name="Messages"
-        component={Messages}
+        name="Conversations"
+        component={Conversations}
         options={{
           tabBarLabel: ({ focused, color }) => {
             return (

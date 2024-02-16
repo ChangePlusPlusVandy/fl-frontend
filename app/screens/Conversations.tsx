@@ -10,9 +10,14 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons"; // Import the FontAwesome icons
 import { MaterialCommunityIcons } from "@expo/vector-icons"; // Import MaterialCommunityIcons for the search bar icon
+import { NavigationProp } from "@react-navigation/native";
 import moment from "moment";
 
-const Conversations = () => {
+interface RouterProps {
+  navigation: NavigationProp<any, any>;
+}
+
+const Conversations = ({ navigation }: RouterProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [chats, setChats] = useState([
@@ -64,7 +69,11 @@ const Conversations = () => {
         data={filteredChats}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.chatItem}>
+          <TouchableOpacity
+            style={styles.chatItem}
+            onPress={() => {
+              navigation.navigate("Messages");
+            }}>
             <Image source={item.profileImage} style={styles.profileImage} />
             <View style={styles.chatInfo}>
               <Text style={styles.chatName}>{item.name}</Text>
