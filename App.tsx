@@ -8,6 +8,7 @@ import EditProfile from "./app/screens/EditProfile";
 import NewPost from "./app/screens/NewPost";
 import Launch from "./app/screens/Launch";
 import UserHome from "./app/screens/UserHome";
+import NewFriendReport from "./app/screens/NewFriendReport";
 import Report from "./app/screens/Report";
 import Messages from "./app/screens/Messages";
 
@@ -65,6 +66,11 @@ export default function App() {
         <Stack.Screen
           name="Report"
           component={Report}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="NewFriendReport"
+          component={NewFriendReport}
           options={{ headerShown: false }}
         />
         <Stack.Screen

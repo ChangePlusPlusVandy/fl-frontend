@@ -58,7 +58,7 @@ const Report = ({ navigation }: RouterProps) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.edit}
-            onPress={() => navigation.navigate("NewPost")}>
+            onPress={() => navigation.navigate("NewFriendReport")}>
             <Text style={styles.editText}>Write New Report</Text>
           </TouchableOpacity>
         </View>
