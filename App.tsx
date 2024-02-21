@@ -15,10 +15,12 @@ const Stack = createNativeStackNavigator();
 import { NavigationContainer } from "@react-navigation/native";
 import NavBarFamily from "./app/components/NavBarFamily";
 import NavBarStaff from "./app/components/NavBarStaff";
+import { API_SECRET } from "@env";
 import AttendanceHistory from "./app/screens/AttendanceHistory";
 
 export default function App() {
   const [user, setUser] = useState("family");
+  console.log(API_SECRET);
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="SignIn">
