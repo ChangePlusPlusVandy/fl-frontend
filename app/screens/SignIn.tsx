@@ -7,6 +7,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  TouchableWithoutFeedback,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { NavigationProp } from "@react-navigation/native";
 
@@ -28,16 +32,8 @@ const SignIn = ({ navigation }: RouterProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      setForm({ emailAddress: "", password: "" });
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  useEffect(() => {
     if (user !== null) {
-      navigation.navigate("UserTabs");
+      navigation.navigate("StaffTabs");
     }
   }, [user]);
 
@@ -52,54 +48,60 @@ const SignIn = ({ navigation }: RouterProps) => {
   };
 
   return (
-    <View style={styles.root}>
-      <Text style={styles.login}>Login</Text>
-      <Text style={styles.pleaseSignInToContinue}>
-        Please sign in to continue
-      </Text>
-      <TouchableOpacity style={styles.donTHaveAnAccountSignUp}>
-        <Text style={styles.labelWrapper}>
-          <Text style={styles.label}>Don't have an account ?</Text>
-          <Text
-            style={styles.label2}
-            onPress={() => navigation.navigate("SignUp")}
-          >
-            {" "}
-            Sign up
-          </Text>
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+      }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.root}>
+        <Text style={styles.login}>Login</Text>
+        <Text style={styles.pleaseSignInToContinue}>
+          Please sign in to continue
         </Text>
-      </TouchableOpacity>
-      <Text style={styles.email}>Email</Text>
-      <TextInput
-        style={styles.usernameBox}
-        onChangeText={(emailAddress: any) => setForm({ ...form, emailAddress })}
-      ></TextInput>
-      <TextInput
-        style={styles.passwordBox}
-        secureTextEntry={!showPassword}
-        onChangeText={(password: any) => setForm({ ...form, password })}
-      ></TextInput>
-      {/* Add your vector and logo components */}
-      <Text style={styles.password}>Password</Text>
-      <Text style={styles.forgotPassword}>Forgot Password?</Text>
-      <TouchableOpacity
-        style={styles.loginBox}
-        onPress={onLogin}
-      ></TouchableOpacity>
-      <Text style={styles.logIn}>Log in</Text>
-      <Text style={styles.rememberMe}>Remember Me</Text>
-      <Image
-        source={showPassword ? ClosedEye : OpenEye}
-        style={styles.vector}
-      />
+        <TouchableOpacity style={styles.donTHaveAnAccountSignUp}>
+          <Text style={styles.labelWrapper}>
+            <Text style={styles.label}>Don't have an account ?</Text>
+            <Text
+              style={styles.label2}
+              onPress={() => navigation.navigate("SignUp")}>
+              {" "}
+              Sign up
+            </Text>
+          </Text>
+        </TouchableOpacity>
+        <Text style={styles.email}>Email</Text>
+        <TextInput
+          style={styles.usernameBox}
+          onChangeText={(emailAddress: any) =>
+            setForm({ ...form, emailAddress })
+          }></TextInput>
+        <TextInput
+          style={styles.passwordBox}
+          secureTextEntry={!showPassword}
+          onChangeText={(password: any) =>
+            setForm({ ...form, password })
+          }></TextInput>
+        {/* Add your vector and logo components */}
+        <Text style={styles.password}>Password</Text>
+        <Text style={styles.forgotPassword}>Forgot Password?</Text>
+        <TouchableOpacity
+          style={styles.loginBox}
+          onPress={onLogin}></TouchableOpacity>
+        <Text style={styles.logIn}>Log in</Text>
+        <Text style={styles.rememberMe}>Remember Me</Text>
+        <Image
+          source={showPassword ? ClosedEye : OpenEye}
+          style={styles.vector}
+        />
 
-      <TouchableOpacity
-        style={styles.vector}
-        onPress={() => setShowPassword(!showPassword)}
-      ></TouchableOpacity>
+        <TouchableOpacity
+          style={styles.vector}
+          onPress={() => setShowPassword(!showPassword)}></TouchableOpacity>
 
-      <Image source={FLlogo} style={styles.screenshot2023114At1171} />
-    </View>
+        <Image source={FLlogo} style={styles.screenshot2023114At1171} />
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
