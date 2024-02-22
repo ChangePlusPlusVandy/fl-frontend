@@ -25,6 +25,7 @@ export interface SignInProps {
 
 interface AuthStore {
   user: User | null;
+  userId: string | null;
   createAccount: ({
     username,
     emailAddress,
@@ -40,6 +41,7 @@ const auth = getAuth(firebase);
 
 const useAuthStore = create<AuthStore>((set) => ({
   user: null,
+  userId: null,
   createAccount: async ({
     username,
     emailAddress,
@@ -67,7 +69,6 @@ const useAuthStore = create<AuthStore>((set) => ({
         body: body,
       });
       console.log(await data.json());
-      set({ user });
     } catch (e) {
       console.log(e);
     }
@@ -79,7 +80,20 @@ const useAuthStore = create<AuthStore>((set) => ({
         emailAddress,
         password
       );
+
+      const userData = await fetch(`${API_URL}user/firebase/${user.uid}`, {
+        method: "GET",
+        headers: {
+          "Friends-Life-Signature": generateHmacSignature(
+            JSON.stringify({ firebaseId: user.uid }),
+            API_SECRET
+          ),
+        },
+      });
+      const userId = (await userData.json())._id;
+
       set({ user });
+      set({ userId });
     } catch (error) {
       console.log(error);
     }
@@ -95,6 +109,7 @@ const useAuthStore = create<AuthStore>((set) => ({
       }
 
       set({ user: null });
+      set({ userId: null });
     } catch (error) {
       console.log(error);
     }
