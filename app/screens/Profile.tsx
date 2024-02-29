@@ -10,10 +10,8 @@ import {
   Linking,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import ProfilePicture from "../../assets/profilepicture.jpg";
 import HelpIcon from "../../assets/helpicon.png";
 import ChangePasswordIcon from "../../assets/passwordicon.png";
-import DeleteAccountIcon from "../../assets/deleteicon.png";
 import AboutIcon from "../../assets/infoicon.png";
 import LogoutIcon from "../../assets/logouticon.png";
 import Arrow from "../../assets/arrow.png";
@@ -32,6 +30,7 @@ const Profile = ({ navigation }: RouterProps) => {
   const [userDetails, setUserDetails] = useState({
     name: "",
     emailAddress: "",
+    profilePicture: "",
   });
 
   useEffect(() => {
@@ -43,8 +42,10 @@ const Profile = ({ navigation }: RouterProps) => {
           setUserDetails({
             name: fetchedDetails.name,
             emailAddress: fetchedDetails.emailAddress,
+            profilePicture: fetchedDetails.profilePicture,
           });
         }
+        console.log(userDetails.profilePicture);
       } catch (error) {
         console.error("Failed to fetch user details:", error);
       }
@@ -112,7 +113,11 @@ const Profile = ({ navigation }: RouterProps) => {
           },
         });
         const userData = await response.json();
-        return { name: userData.name, emailAddress: userData.emailAddress };
+        return {
+          name: userData.name,
+          emailAddress: userData.emailAddress,
+          profilePicture: userData.profilePicture,
+        };
       }
     } catch (error) {
       console.error("Network error fetching initial data: " + error.message);
@@ -126,7 +131,10 @@ const Profile = ({ navigation }: RouterProps) => {
           <BackButton />
         </TouchableOpacity>
       </View>
-      <Image source={ProfilePicture} style={styles.image}></Image>
+      <Image
+        source={{ uri: userDetails.profilePicture }}
+        style={styles.image}
+      ></Image>
       <Text style={styles.name}>{userDetails.name}</Text>
       <Text style={styles.email}>{userDetails.emailAddress}</Text>
       <TouchableOpacity

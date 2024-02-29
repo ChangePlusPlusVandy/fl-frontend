@@ -13,7 +13,6 @@ import {
 import React, { useState, useEffect } from "react";
 import { NavigationProp } from "@react-navigation/native";
 import BackButton from "../components/BackButton";
-import ProfilePicture from "../../assets/profilepicture.jpg";
 import CameraIcon from "../../assets/camera.png";
 import useAuthStore from "../stores/auth";
 import { API_URL, API_SECRET } from "@env";
@@ -28,6 +27,10 @@ const EditProfile = ({ navigation }: RouterProps) => {
   const [form, setForm] = useState({
     fullName: "",
     phoneNumber: "",
+  });
+
+  const [image, setImage] = useState({
+    profilePicture: "",
   });
 
   const fetchInitialData = async () => {
@@ -48,11 +51,12 @@ const EditProfile = ({ navigation }: RouterProps) => {
           fullName: userData.name,
           phoneNumber: userData.phoneNumber,
         });
+        setImage({
+          profilePicture: userData.profilePicture,
+        });
       }
     } catch (error) {
-      console.error(
-        "Network error fetching initial data: " + (error as Error).message
-      );
+      console.error("Network error fetching initial data: " + error.message);
     }
   };
 
@@ -63,10 +67,19 @@ const EditProfile = ({ navigation }: RouterProps) => {
           JSON.stringify({ firebaseId: user.uid }),
           API_SECRET
         );
+        const response = await fetch(`${API_URL}user/firebase/${user.uid}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": firebaseSignature,
+          },
+        });
+        const userData = await response.json();
+        const id = userData._id;
 
         const userBody = {
           name: form.fullName,
           phoneNumber: form.phoneNumber,
+          // profilePicture:
         };
 
         const signature = generateHmacSignature(
@@ -106,7 +119,10 @@ const EditProfile = ({ navigation }: RouterProps) => {
           </View>
 
           <View style={styles.profileContainer}>
-            <Image source={ProfilePicture} style={styles.image}></Image>
+            <Image
+              source={{ uri: image.profilePicture }}
+              style={styles.image}
+            ></Image>
             <TouchableOpacity>
               <Image source={CameraIcon} style={styles.cameraIcon}></Image>
             </TouchableOpacity>
