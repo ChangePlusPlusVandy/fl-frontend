@@ -8,12 +8,15 @@ import EditProfile from "./app/screens/EditProfile";
 import NewPost from "./app/screens/NewPost";
 import Launch from "./app/screens/Launch";
 import UserHome from "./app/screens/UserHome";
+import Report from "./app/screens/Report";
+import Messages from "./app/screens/Messages";
 
 const Stack = createNativeStackNavigator();
 import { NavigationContainer } from "@react-navigation/native";
 import NavBarFamily from "./app/components/NavBarFamily";
 import NavBarStaff from "./app/components/NavBarStaff";
 import { API_SECRET } from "@env";
+import AttendanceHistory from "./app/screens/AttendanceHistory";
 
 export default function App() {
   const [user, setUser] = useState("family");
@@ -59,6 +62,21 @@ export default function App() {
         <Stack.Screen
           name="StaffTabs"
           component={NavBarStaff}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Report"
+          component={Report}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AttendanceHistory"
+          component={AttendanceHistory}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Messages"
+          component={Messages}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

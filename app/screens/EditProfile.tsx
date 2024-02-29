@@ -24,7 +24,7 @@ interface RouterProps {
 }
 
 const EditProfile = ({ navigation }: RouterProps) => {
-  const { user } = useAuthStore();
+  const { user, userId } = useAuthStore();
   const [form, setForm] = useState({
     fullName: "",
     phoneNumber: "",
@@ -34,10 +34,10 @@ const EditProfile = ({ navigation }: RouterProps) => {
     try {
       if (user) {
         const signature = generateHmacSignature(
-          JSON.stringify({ firebaseId: user.uid }),
+          JSON.stringify({ _id: userId }),
           API_SECRET
         );
-        const response = await fetch(`${API_URL}user/firebase/${user.uid}`, {
+        const response = await fetch(`${API_URL}user/${userId}`, {
           method: "GET",
           headers: {
             "Friends-Life-Signature": signature,
@@ -47,11 +47,12 @@ const EditProfile = ({ navigation }: RouterProps) => {
         setForm({
           fullName: userData.name,
           phoneNumber: userData.phoneNumber,
-          // add image
         });
       }
     } catch (error) {
-      console.error("Network error fetching initial data: " + error.message);
+      console.error(
+        "Network error fetching initial data: " + (error as Error).message
+      );
     }
   };
 
@@ -62,19 +63,10 @@ const EditProfile = ({ navigation }: RouterProps) => {
           JSON.stringify({ firebaseId: user.uid }),
           API_SECRET
         );
-        const response = await fetch(`${API_URL}user/firebase/${user.uid}`, {
-          method: "GET",
-          headers: {
-            "Friends-Life-Signature": firebaseSignature,
-          },
-        });
-        const userData = await response.json();
-        const id = userData._id;
 
         const userBody = {
           name: form.fullName,
           phoneNumber: form.phoneNumber,
-          // add image here
         };
 
         const signature = generateHmacSignature(
@@ -82,7 +74,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
           API_SECRET
         );
 
-        const updateResponse = await fetch(`${API_URL}user/${id}`, {
+        const updateResponse = await fetch(`${API_URL}user/${userId}`, {
           method: "PATCH",
           headers: {
             "Friends-Life-Signature": signature,
@@ -92,7 +84,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
         });
       }
     } catch (error) {
-      console.error("Network error:", error.message);
+      console.error("Network error:", (error as Error).message);
     }
   };
 
@@ -103,8 +95,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
+      style={styles.container}>
       <SafeAreaView>
         <ScrollView>
           <View style={styles.headerContainer}>
@@ -138,8 +129,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
               onPress={async () => {
                 await onSave();
                 navigation.navigate("Profile");
-              }}
-            >
+              }}>
               <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>
           </View>

@@ -17,6 +17,12 @@ import BackButton from "../components/BackButton";
 import fileUploadIcon from "../../assets/file_upload.png";
 import linkUploadIcon from "../../assets/link_upload.png";
 import imgUploadIcon from "../../assets/img_upload.png";
+import { AdvancedImage, upload } from "cloudinary-react-native";
+import cld from "../utils/cloudinary";
+import * as ImagePicker from "expo-image-picker";
+import { generateHmacSignature } from "../utils/signature";
+import { API_URL, API_SECRET } from "@env";
+import useAuthStore from "../stores/auth";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -25,17 +31,93 @@ interface RouterProps {
 const NewPost = ({ navigation }: RouterProps) => {
   const [subject, setSubject] = useState("");
   const [textBox, setTextBox] = useState("");
+  const [imageUri, setImageUri] = useState(null);
+  const { user } = useAuthStore();
 
-  const handlePost = () => {
-    console.log("Subject:", subject);
-    console.log("Text:", textBox);
+  const cloudinaryUpoad = async () => {
+    let cloudinaryId = "";
+    console.log(imageUri);
+    if (imageUri) {
+      const options = {
+        upload_preset: "ojyuicnt",
+        unsigned: true,
+      };
+
+      await upload(cld, {
+        file: imageUri,
+        options: options,
+        callback: (error: any, response: any) => {
+          if (error) {
+            console.error("Upload error:", error);
+            return;
+          }
+          console.log("Upload successful:", response);
+          cloudinaryId = response.public_id;
+        },
+      });
+    }
+  };
+
+  const handlePost = async () => {
+    try {
+      cloudinaryUpoad();
+      const userData = await fetch(`${API_URL}user/firebase/${user?.uid}`, {
+        method: "GET",
+        headers: {
+          "Friends-Life-Signature": generateHmacSignature(
+            JSON.stringify({ _id: userId }),
+            API_SECRET
+          ),
+        },
+      });
+
+      const userInfo = await userData.json();
+
+      const body = {
+        userId: userInfo._id,
+        user: userInfo.name,
+        title: subject,
+        postBody: textBox,
+        image: "test",
+      };
+      const signature = generateHmacSignature(JSON.stringify(body), API_SECRET);
+      const response = await fetch("https://fl-backend.vercel.app/post", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Friends-Life-Signature": signature,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        console.log("Post created successfully");
+        navigation.navigate("StaffTabs");
+      } else {
+        console.error("Failed to create post");
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+    }
+  };
+
+  const handleUploadImageFromPhone = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.uri);
+    }
   };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
+      style={styles.container}>
       <SafeAreaView>
         <ScrollView>
           <View style={styles.headerContainer}>
@@ -54,6 +136,7 @@ const NewPost = ({ navigation }: RouterProps) => {
             />
 
             <View style={styles.line}></View>
+
             <TextInput
               style={styles.textBox}
               placeholder="What's on your mind?"
@@ -61,15 +144,25 @@ const NewPost = ({ navigation }: RouterProps) => {
               value={textBox}
               onChangeText={(text) => setTextBox(text)}
             />
-
+            {imageUri && (
+              <Image
+                source={{ uri: imageUri }}
+                style={{ width: 200, height: 200 }}
+              />
+            )}
             <View style={styles.uploadContainer}>
-              <Image source={imgUploadIcon} style={styles.uploadIcon} />
-              <Image source={fileUploadIcon} style={styles.uploadIcon} />
-              <Image source={linkUploadIcon} style={styles.uploadIcon} />
+              <TouchableOpacity
+                style={styles.uploadIcon}
+                onPress={handleUploadImageFromPhone}
+              >
+                <Image source={imgUploadIcon} />
+              </TouchableOpacity>
             </View>
           </View>
 
-          <TouchableOpacity style={styles.postButton} onPress={handlePost}>
+          <TouchableOpacity
+            style={styles.postButton}
+            onPress={() => handlePost()}>
             <Text style={styles.postButtonText}>Post</Text>
           </TouchableOpacity>
         </ScrollView>
