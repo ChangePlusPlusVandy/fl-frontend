@@ -89,8 +89,6 @@ const EditProfile = ({ navigation }: RouterProps) => {
   };
 
   useEffect(() => {
-    console.log("userid");
-    console.log(userId);
     fetchInitialData();
   }, []);
 
