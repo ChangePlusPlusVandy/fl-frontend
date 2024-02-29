@@ -10,36 +10,81 @@ import {
 } from "react-native";
 import { NavigationProp } from "@react-navigation/native";
 import BackButton from "../components/BackButton";
-import Rohan from "../../assets/mrrashingkar.png";
+import moment from "moment";
 import Post from "../components/Post";
 import { generateHmacSignature } from "../utils/signature";
-import { API_URL } from "@env";
+import { API_SECRET, API_URL } from "@env";
+import { RouteProp } from "@react-navigation/native";
 
 interface RouterProps {
+  route: RouteProp<{ params: { friend: any } }>; // Adjust the string type according to your screen name
   navigation: NavigationProp<any, any>;
 }
 
 interface ReportItem {
-  id: number;
-  profilePic: any;
-  profileName: string;
-  profileLocation: string;
-  profileTimePosted: string;
-  bodyText: string;
+  _id: string;
+  friendId: string;
+  reportBody: string;
+  date: string;
 }
 
-const Report = ({ navigation }: RouterProps) => {
-  const [name, setName] = useState("Rohan Rashingkar");
-  const [reports, setReports] = useState<ReportItem[]>([
-    {
-      id: 1,
-      profilePic: Rohan,
-      profileName: "Rohan Rashingkar",
-      profileLocation: "Org Room",
-      profileTimePosted: "3 day ago",
-      bodyText: "Nice!",
-    },
-  ]);
+const Report = ({ route, navigation }: RouterProps) => {
+  const { friend } = route.params;
+  const [reports, setReports] = useState<ReportItem[]>([]);
+
+  const getReports = async () => {
+    try {
+      const reportIds = friend.reports;
+
+      const fetchedReports: ReportItem[] = await Promise.all(
+        reportIds.map(async (reportId: string) => {
+          const response = await fetch(`${API_URL}report/${reportId}`, {
+            method: "GET",
+            headers: {
+              "Friends-Life-Signature": generateHmacSignature(
+                JSON.stringify({ reportId }),
+                API_SECRET
+              ),
+            },
+          });
+          return await response.json();
+        })
+      );
+
+      fetchedReports.sort((a, b) => {
+        return moment(b.date).valueOf() - moment(a.date).valueOf();
+      });
+
+      setReports(fetchedReports);
+    } catch (error) {
+      console.error("Error fetching friend data: ", error);
+    }
+  };
+
+  useEffect(() => {
+    setReports([]);
+    getReports();
+  }, []);
+
+  const calculateTimeSincePost = (postTime: string) => {
+    const postMoment = moment(postTime);
+    const currentTime = moment();
+    const duration = moment.duration(currentTime.diff(postMoment));
+
+    if (duration.asYears() >= 1) {
+      return `${Math.round(duration.asYears())} years ago`;
+    } else if (duration.asMonths() >= 1) {
+      return `${Math.round(duration.asMonths())} months ago`;
+    } else if (duration.asDays() >= 1) {
+      return `${Math.round(duration.asDays())} days ago`;
+    } else if (duration.asHours() >= 1) {
+      return `${Math.round(duration.asHours())} hours ago`;
+    } else if (duration.asMinutes() >= 1) {
+      return `${Math.round(duration.asMinutes())} minutes ago`;
+    } else {
+      return `${Math.round(duration.asSeconds())} seconds ago`;
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -47,7 +92,7 @@ const Report = ({ navigation }: RouterProps) => {
         <TouchableOpacity onPress={() => navigation.navigate("Friends")}>
           <BackButton />
         </TouchableOpacity>
-        <Text style={styles.nameText}>{name}</Text>
+        <Text style={styles.nameText}>{friend.friendName.split(" ")[0]}</Text>
       </View>
       <ScrollView>
         <View style={styles.buttonContainer}>
@@ -58,18 +103,20 @@ const Report = ({ navigation }: RouterProps) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.edit}
-            onPress={() => navigation.navigate("NewPost")}>
+            onPress={() =>
+              navigation.navigate("NewFriendReport", { friend: friend })
+            }>
             <Text style={styles.editText}>Write New Report</Text>
           </TouchableOpacity>
         </View>
         {reports.map((report) => (
           <Post
-            key={report.id}
-            profilePic={report.profilePic}
-            profileName={report.profileName}
-            profileLocation={report.profileLocation}
-            profileTimePosted={report.profileTimePosted}
-            bodyText={report.bodyText}
+            key={report._id}
+            profilePic={friend.profilePic}
+            profileName={friend.friendName.split(" ")[0]}
+            profileLocation="Report"
+            profileTimePosted={calculateTimeSincePost(report.date)}
+            bodyText={report.reportBody}
           />
         ))}
       </ScrollView>

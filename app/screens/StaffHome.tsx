@@ -104,8 +104,7 @@ const StaffHome = ({ navigation }: RouterProps) => {
           <Text style={styles.nameText}>{name}!</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate("Profile")}
-            style={styles.profilePic}
-          >
+            style={styles.profilePic}>
             <Image source={ProfilePic} />
           </TouchableOpacity>
         </View>
@@ -125,8 +124,7 @@ const StaffHome = ({ navigation }: RouterProps) => {
 
       <TouchableOpacity
         style={styles.addPic}
-        onPress={() => navigation.navigate("NewPost")}
-      >
+        onPress={() => navigation.navigate("NewPost")}>
         <Image source={AddPic} />
       </TouchableOpacity>
     </SafeAreaView>

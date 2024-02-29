@@ -41,7 +41,7 @@ const SignIn = ({ navigation }: RouterProps) => {
 
   useEffect(() => {
     if (user !== null) {
-      navigation.navigate("UserTabs");
+      navigation.navigate("StaffTabs");
     }
   }, [user]);
 
@@ -66,8 +66,7 @@ const SignIn = ({ navigation }: RouterProps) => {
           <Text style={styles.label}>Don't have an account ?</Text>
           <Text
             style={styles.label2}
-            onPress={() => navigation.navigate("SignUp")}
-          >
+            onPress={() => navigation.navigate("SignUp")}>
             {" "}
             Sign up
           </Text>
@@ -92,8 +91,7 @@ const SignIn = ({ navigation }: RouterProps) => {
       <Text style={styles.forgotPassword}>Forgot Password?</Text>
       <TouchableOpacity
         style={styles.loginBox}
-        onPress={onLogin}
-      ></TouchableOpacity>
+        onPress={onLogin}></TouchableOpacity>
       <Text style={styles.logIn}>Log in</Text>
       <Text style={styles.rememberMe}>Remember Me</Text>
       <Image
@@ -103,8 +101,7 @@ const SignIn = ({ navigation }: RouterProps) => {
 
       <TouchableOpacity
         style={styles.vector}
-        onPress={() => setShowPassword(!showPassword)}
-      ></TouchableOpacity>
+        onPress={() => setShowPassword(!showPassword)}></TouchableOpacity>
 
       <Image source={FLlogo} style={styles.screenshot2023114At1171} />
     </View>

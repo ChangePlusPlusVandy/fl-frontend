@@ -30,7 +30,8 @@ const Profile = ({ navigation }: RouterProps) => {
   const [userDetails, setUserDetails] = useState({
     name: "",
     emailAddress: "",
-    profilePicture: "",
+    profilePicture:
+      "https://res.cloudinary.com/dvrcdxqex/image/upload/v1707870630/defaultProfilePic.png",
   });
 
   useEffect(() => {
@@ -120,7 +121,7 @@ const Profile = ({ navigation }: RouterProps) => {
         };
       }
     } catch (error) {
-      console.error("Network error fetching initial data: " + error.message);
+      console.error("Network error fetching initial data: " + error);
     }
   };
 
@@ -133,14 +134,12 @@ const Profile = ({ navigation }: RouterProps) => {
       </View>
       <Image
         source={{ uri: userDetails.profilePicture }}
-        style={styles.image}
-      ></Image>
+        style={styles.image}></Image>
       <Text style={styles.name}>{userDetails.name}</Text>
       <Text style={styles.email}>{userDetails.emailAddress}</Text>
       <TouchableOpacity
         style={styles.edit}
-        onPress={() => navigation.navigate("EditProfile")}
-      >
+        onPress={() => navigation.navigate("EditProfile")}>
         <Text style={styles.editText}>Edit Profile</Text>
         <Image source={Arrow} style={styles.editArrow}></Image>
       </TouchableOpacity>
