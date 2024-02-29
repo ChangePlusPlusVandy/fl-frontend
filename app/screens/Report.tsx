@@ -77,7 +77,6 @@ const Report = ({ route, navigation }: RouterProps) => {
         },
       });
       const data = await response.json();
-      console.log(data);
       setShowNewReport(data.type === "Staff");
     } catch (error) {
       console.error("Error fetching user data: ", error);
