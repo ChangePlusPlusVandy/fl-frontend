@@ -10,6 +10,7 @@ import Launch from "./app/screens/Launch";
 import UserHome from "./app/screens/UserHome";
 import Report from "./app/screens/Report";
 import Messages from "./app/screens/Messages";
+import NewFriendReport from "./app/screens/NewFriendReport";
 
 const Stack = createNativeStackNavigator();
 import { NavigationContainer } from "@react-navigation/native";
@@ -72,11 +73,16 @@ export default function App() {
         <Stack.Screen
           name="AttendanceHistory"
           component={AttendanceHistory}
-          options={{ headerShown: false }}
+          options={{ headerShown: true }}
         />
         <Stack.Screen
           name="Messages"
           component={Messages}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="NewFriendReport"
+          component={NewFriendReport}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
