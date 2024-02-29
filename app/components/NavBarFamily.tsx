@@ -13,7 +13,7 @@ const Tab = createBottomTabNavigator();
 
 const NavBarFamily = () => {
   return (
-    <Tab.Navigator screenOptions={{ tabBarStyle: { height: 90 } }}>
+    <Tab.Navigator screenOptions={{ tabBarStyle: { height: 90 }, headerShown: false }}>
       <Tab.Screen
         name="Home"
         component={Home}

@@ -18,28 +18,67 @@ import FLlogo from "../../assets/friends-life-logo.png";
 import OpenEye from "../../assets/OpenEye.png";
 import ClosedEye from "../../assets/Eye-slash.png";
 import useAuthStore, { SignInProps } from "../stores/auth";
+import { generateHmacSignature } from "../utils/signature";
+import { API_URL, API_SECRET } from "@env";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
 const SignIn = ({ navigation }: RouterProps) => {
-  const { user, signIn } = useAuthStore();
+  const { user, signIn, userId } = useAuthStore();
   const [form, setForm] = useState<SignInProps>({
     emailAddress: "",
     password: "",
   });
+  const [userType, setUserType] = useState(undefined);
   const [showPassword, setShowPassword] = useState(false);
 
+  const getUser = async () => {
+    try {
+      const userData = await fetch(`${API_URL}user/${userId}`, {
+        method: "GET",
+        headers: {
+          "Friends-Life-Signature": generateHmacSignature(
+            JSON.stringify({ userId: userId }),
+            API_SECRET
+          ),
+        },
+      });
+
+      const userInfo = await userData.json();
+      setUserType(userInfo.type);
+    } catch (error) {
+      console.error("Error getting name:", error);
+    }
+  };
+
+  //When user finally gets loaded, can get user information
   useEffect(() => {
-    if (user !== null) {
-      navigation.navigate("StaffTabs");
+    console.log('User: ' + user);
+    if (user != null){
+      getUser();
     }
   }, [user]);
 
+  //When user type is determined, navigate to correct tab
+  useEffect(() => {
+    console.log('User Type: ' + userType);
+    if (userType !== undefined) {
+      if (userType === "Staff") {
+        navigation.navigate("StaffTabs");
+      } else if (userType === "Family") {
+        navigation.navigate("UserTabs");
+      } else {
+        alert("Could not verify account type successfully");
+      }
+    } else {
+      getUser();
+    }
+  }, [userType]);
+
   const onLogin = async () => {
     const { emailAddress, password } = form;
-
     try {
       await signIn({ emailAddress, password });
     } catch (error) {
@@ -51,10 +90,12 @@ const SignIn = ({ navigation }: RouterProps) => {
     <TouchableWithoutFeedback
       onPress={() => {
         Keyboard.dismiss();
-      }}>
+      }}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.root}>
+        style={styles.root}
+      >
         <Text style={styles.login}>Login</Text>
         <Text style={styles.pleaseSignInToContinue}>
           Please sign in to continue
@@ -64,7 +105,8 @@ const SignIn = ({ navigation }: RouterProps) => {
             <Text style={styles.label}>Don't have an account ?</Text>
             <Text
               style={styles.label2}
-              onPress={() => navigation.navigate("SignUp")}>
+              onPress={() => navigation.navigate("SignUp")}
+            >
               {" "}
               Sign up
             </Text>
@@ -75,19 +117,20 @@ const SignIn = ({ navigation }: RouterProps) => {
           style={styles.usernameBox}
           onChangeText={(emailAddress: any) =>
             setForm({ ...form, emailAddress })
-          }></TextInput>
+          }
+        ></TextInput>
         <TextInput
           style={styles.passwordBox}
           secureTextEntry={!showPassword}
-          onChangeText={(password: any) =>
-            setForm({ ...form, password })
-          }></TextInput>
+          onChangeText={(password: any) => setForm({ ...form, password })}
+        ></TextInput>
         {/* Add your vector and logo components */}
         <Text style={styles.password}>Password</Text>
         <Text style={styles.forgotPassword}>Forgot Password?</Text>
         <TouchableOpacity
           style={styles.loginBox}
-          onPress={onLogin}></TouchableOpacity>
+          onPress={onLogin}
+        ></TouchableOpacity>
         <Text style={styles.logIn}>Log in</Text>
         <Text style={styles.rememberMe}>Remember Me</Text>
         <Image
@@ -97,7 +140,8 @@ const SignIn = ({ navigation }: RouterProps) => {
 
         <TouchableOpacity
           style={styles.vector}
-          onPress={() => setShowPassword(!showPassword)}></TouchableOpacity>
+          onPress={() => setShowPassword(!showPassword)}
+        ></TouchableOpacity>
 
         <Image source={FLlogo} style={styles.screenshot2023114At1171} />
       </KeyboardAvoidingView>

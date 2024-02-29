@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,23 +10,20 @@ import {
 } from "react-native";
 import { NavigationProp } from "@react-navigation/native";
 import ProfilePic from "../../assets/User_circle.png";
-import AddPic from "../../assets/Add.png";
 import Post from "../components/Post";
-import joeyProfile from "../../assets/profilepicture.jpg";
-import AllanTennis from "../../assets/allantennis.png";
-import Allan from "../../assets/mrzhang.png";
-import Rohan from "../../assets/mrrashingkar.png";
-import Alex from "../../assets/mrlin.png";
+import { generateHmacSignature } from "../utils/signature";
+import { API_URL, API_SECRET } from "@env";
+import moment from "moment";
+import useAuthStore from "../stores/auth";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
 interface PostItem {
-  id: number;
+  id: string;
   profilePic: any;
   profileName: string;
-  profileLocation: string;
   profileTimePosted: string;
   bodyPic?: any;
   bodyText: string;
@@ -34,42 +31,91 @@ interface PostItem {
 
 const UserHome = ({ navigation }: RouterProps) => {
   const [name, setName] = useState("Name");
-  const [posts, setPosts] = useState<PostItem[]>([
-    {
-      id: 1,
-      profilePic: Allan,
-      profileName: "Allan Zhang",
-      profileLocation: "Rohan's House",
-      profileTimePosted: "1 day ago",
-      bodyPic: AllanTennis,
-      bodyText: "Ez Dubs",
-    },
-    {
-      id: 2,
-      profilePic: joeyProfile,
-      profileName: "Joey Q",
-      profileLocation: "Nashville, TN",
-      profileTimePosted: "3 days ago",
-      bodyText: "Lorem ipsum dolor sit amet, consectet",
-    },
-    {
-      id: 3,
-      profilePic: Rohan,
-      profileName: "Rohan Rashingkar",
-      profileLocation: "Sunnyvale",
-      profileTimePosted: "1 month ago",
-      bodyPic: Alex,
-      bodyText: "Missing this cutie extra today",
-    },
-  ]);
+  const [posts, setPosts] = useState<PostItem[]>([]);
+  const { userId } = useAuthStore();
 
-  // const addPost = () => {
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch(`${API_URL}post`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Friends-Life-Signature": generateHmacSignature("GET", API_SECRET),
+          },
+        });
 
-  // };
+        if (response.ok) {
+          const data = await response.json();
 
-  // const deletePost = (postId: number) => {
+          // Map the fetched data to match the PostItem structure
+          const formattedPosts = data.map((post: any) => ({
+            id: post._id, // Use the actual MongoDB _id as the id
+            profilePic: post.user, // Need to grab based off of user ID and fetch from users in mongo
+            profileName: post.user, // Adjust this based on your model
+            profileTimePosted: calculateTimeSincePost(post.dateCreated), // Calculate time since post
+            bodyPic: post.image, // Adjust this based on your model
+            bodyText: post.postBody, // Adjust this based on your model
+          }));
 
-  // };
+          setPosts(formattedPosts.reverse());
+        } else {
+          console.error("Failed to fetch posts");
+        }
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
+    };
+
+    const updateName = async () => {
+      try {
+        const userData = await fetch(`${API_URL}user/${userId}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature(
+              JSON.stringify({ userId: userId }),
+              API_SECRET
+            ),
+          },
+        });
+
+        const userInfo = await userData.json();
+        setName(userInfo.name.split(" ")[0]);
+      } catch (error) {
+        console.error("Error getting name:", error);
+      }
+    };
+
+    updateName();
+    fetchPosts();
+  }, []); // Run only once on component mount
+
+  // Function to calculate time since post
+  const calculateTimeSincePost = (postTime: string) => {
+    const postMoment = moment(postTime);
+    const currentTime = moment();
+    const duration = moment.duration(currentTime.diff(postMoment));
+    const years = duration.asYears();
+    const months = duration.asMonths();
+    const days = duration.asDays();
+    const hours = duration.asHours();
+    const minutes = duration.asMinutes();
+    const seconds = duration.asSeconds();
+
+    if (years >= 1) {
+      return `${Math.round(years)} years ago`;
+    } else if (months >= 1) {
+      return `${Math.round(months)} months ago`;
+    } else if (days >= 1) {
+      return `${Math.round(days)} days ago`;
+    } else if (hours >= 1) {
+      return `${Math.round(hours)} hours ago`;
+    } else if (minutes >= 1) {
+      return `${Math.round(minutes)} minutes ago`;
+    } else {
+      return `${Math.round(seconds)} seconds ago`;
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -79,7 +125,8 @@ const UserHome = ({ navigation }: RouterProps) => {
           <Text style={styles.nameText}>{name}!</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate("Profile")}
-            style={styles.profilePic}>
+            style={styles.profilePic}
+          >
             <Image source={ProfilePic} />
           </TouchableOpacity>
         </View>
@@ -89,19 +136,13 @@ const UserHome = ({ navigation }: RouterProps) => {
             key={post.id}
             profilePic={post.profilePic}
             profileName={post.profileName}
-            profileLocation={post.profileLocation}
+            profileLocation={"Filler Location"}
             profileTimePosted={post.profileTimePosted}
             bodyPic={post.bodyPic}
             bodyText={post.bodyText}
           />
         ))}
       </ScrollView>
-
-      <TouchableOpacity
-        style={styles.addPic}
-        onPress={() => navigation.navigate("NewPost")}>
-        <Image source={AddPic} />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -131,11 +172,6 @@ const styles = StyleSheet.create({
   },
   profilePic: {
     marginLeft: "auto",
-  },
-  addPic: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
   },
 });
 
