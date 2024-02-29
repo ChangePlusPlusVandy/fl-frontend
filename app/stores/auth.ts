@@ -9,6 +9,7 @@ import { create } from "zustand";
 import { useFirebase } from "../firebase";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
+import { Alert } from "react-native";
 
 export interface CreateUserProps {
   username: string;
@@ -69,6 +70,7 @@ const useAuthStore = create<AuthStore>((set) => ({
         body: body,
       });
     } catch (e) {
+      Alert.alert("Invalid sign up. Please try again.");
       console.log(e);
     }
   },
@@ -94,6 +96,7 @@ const useAuthStore = create<AuthStore>((set) => ({
       set({ user });
       set({ userId });
     } catch (error) {
+      Alert.alert("Invalid credentials. Please try again.");
       console.log(error);
     }
   },

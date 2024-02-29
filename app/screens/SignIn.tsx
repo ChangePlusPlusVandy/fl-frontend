@@ -9,10 +9,12 @@ import {
   Image,
   TouchableWithoutFeedback,
   Keyboard,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { NavigationProp } from "@react-navigation/native";
+import { Dimensions } from "react-native";
 
 import FLlogo from "../../assets/friends-life-logo.png";
 import OpenEye from "../../assets/OpenEye.png";
@@ -30,6 +32,7 @@ const SignIn = ({ navigation }: RouterProps) => {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
@@ -56,191 +59,183 @@ const SignIn = ({ navigation }: RouterProps) => {
   };
 
   return (
-    <View style={styles.root}>
-      <Text style={styles.login}>Login</Text>
-      <Text style={styles.pleaseSignInToContinue}>
-        Please sign in to continue
-      </Text>
-      <TouchableOpacity style={styles.donTHaveAnAccountSignUp}>
-        <Text style={styles.labelWrapper}>
-          <Text style={styles.label}>Don't have an account ?</Text>
-          <Text
-            style={styles.label2}
-            onPress={() => navigation.navigate("SignUp")}>
-            {" "}
-            Sign up
-          </Text>
-        </Text>
-      </TouchableOpacity>
-      <Text style={styles.email}>Email</Text>
-      <TextInput
-        style={styles.usernameBox}
-        value={form.emailAddress}
-        onChangeText={(emailAddress) => setForm({ ...form, emailAddress })}
-      />
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+      }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.root}>
+            <Image source={FLlogo} style={styles.logo} />
+            <View style={styles.container}>
+              <Text style={styles.login}>Login</Text>
+              <Text style={styles.pleaseSignInToContinue}>
+                Please sign in to continue
+              </Text>
 
-      <TextInput
-        style={styles.passwordBox}
-        value={form.password}
-        secureTextEntry={!showPassword}
-        onChangeText={(password) => setForm({ ...form, password })}
-      />
+              <Text style={styles.email}>Email</Text>
+              <TextInput
+                style={styles.usernameBox}
+                value={form.emailAddress}
+                onChangeText={(emailAddress) =>
+                  setForm({ ...form, emailAddress })
+                }
+              />
 
-      {/* Add your vector and logo components */}
-      <Text style={styles.password}>Password</Text>
-      <Text style={styles.forgotPassword}>Forgot Password?</Text>
-      <TouchableOpacity
-        style={styles.loginBox}
-        onPress={onLogin}></TouchableOpacity>
-      <Text style={styles.logIn}>Log in</Text>
-      <Text style={styles.rememberMe}>Remember Me</Text>
-      <Image
-        source={showPassword ? ClosedEye : OpenEye}
-        style={styles.vector}
-      />
+              <Text style={styles.password}>Password</Text>
+              <TextInput
+                style={styles.passwordBox}
+                value={form.password}
+                secureTextEntry={!showPassword}
+                onChangeText={(password) => setForm({ ...form, password })}
+              />
+              {/* <TouchableOpacity
+              style={styles.showPasswordButton}
+              onPress={() => setShowPassword(!showPassword)}>
+              <Image
+                source={showPassword ? ClosedEye : OpenEye}
+                style={styles.eyeIcon}
+              />
+            </TouchableOpacity> */}
 
-      <TouchableOpacity
-        style={styles.vector}
-        onPress={() => setShowPassword(!showPassword)}></TouchableOpacity>
+              <View style={styles.forgotPasswordWrap}>
+                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              </View>
 
-      <Image source={FLlogo} style={styles.screenshot2023114At1171} />
-    </View>
+              <TouchableOpacity style={styles.loginBox} onPress={onLogin}>
+                <Text style={styles.loginLabel}>Log in</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.signUp}>
+                <Text style={styles.labelWrapper}>
+                  <Text style={styles.label}>Don't have an account? </Text>
+                  <Text
+                    style={styles.label2}
+                    onPress={() => navigation.navigate("SignUp")}>
+                    Sign up
+                  </Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
 export default SignIn;
 
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   root: {
-    position: "relative",
-    width: 390,
-    height: 844,
-    alignItems: "flex-start",
+    justifyContent: "center", // Center items vertically
+    alignItems: "center", // Center items horizontally
+    width: width,
+    height: height,
     backgroundColor: "#fff",
     overflow: "hidden",
   },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  logo: {
+    position: "relative",
+    width: 0.6 * width,
+    height: 0.6 * width,
+  },
+  container: {
+    width: 0.8 * width,
+    backgroundColor: "#fff",
+    overflow: "hidden",
+    marginBottom: 0.04 * height,
+  },
   login: {
+    position: "relative",
+    fontSize: 0.08 * width,
+    fontWeight: "bold",
     color: "#000",
-    fontSize: 29,
-    fontWeight: "600",
-    position: "absolute",
-    left: 26,
-    top: 269,
   },
   pleaseSignInToContinue: {
+    position: "relative",
+    fontSize: 0.04 * width,
+    height: 0.05 * height,
+    fontWeight: "normal",
     color: "#818181",
-    fontSize: 16,
-    position: "absolute",
-    left: 25,
-    top: 313,
-  },
-  donTHaveAnAccountSignUp: {
-    position: "absolute",
-    left: 65,
-    top: 799,
-  },
-  labelWrapper: {
-    fontSize: 16,
-  },
-  label: {
-    color: "#818181",
-    fontSize: 16,
-  },
-  label2: {
-    color: "#f89b40",
-    fontSize: 16,
-    fontWeight: "500",
   },
   email: {
+    position: "relative",
+    fontSize: 0.05 * width,
     color: "#818181",
-    fontSize: 17,
-    position: "absolute",
-    left: 25,
-    top: 364,
   },
   usernameBox: {
-    position: "absolute",
-    left: 25,
-    top: 393,
-    width: 340,
-    height: 58,
-    borderRadius: 9,
-    fontSize: 25,
-    backgroundColor: "#f4f4f4",
-  },
-  passwordBox: {
-    position: "absolute",
-    left: 25,
-    top: 499,
-    width: 340,
-    height: 58,
-    borderRadius: 9,
-    fontSize: 25,
-    backgroundColor: "#f4f4f4",
+    position: "relative",
+    height: 0.06 * height,
+    backgroundColor: "#F4F4F4", // Light gray background color
+    borderColor: "#F4F4F4",
+    borderRadius: 10,
+    padding: 10,
+    fontSize: 0.05 * width,
   },
   password: {
+    position: "relative",
+    fontSize: 0.05 * width,
     color: "#818181",
-    fontSize: 17,
-    position: "absolute",
-    left: 25,
-    top: 470,
+    marginTop: 0.01 * height,
+  },
+  passwordBox: {
+    position: "relative",
+    height: 0.06 * height,
+    backgroundColor: "#F4F4F4", // Light gray background color
+    borderColor: "#F4F4F4",
+    borderRadius: 10,
+    padding: 10,
+  },
+
+  forgotPasswordWrap: {
+    position: "relative",
+    justifyContent: "flex-end", // Align to the end of the parent view
+    alignSelf: "flex-end",
+    marginTop: 0.01 * height,
   },
   forgotPassword: {
+    fontSize: 0.03 * width,
     color: "#000",
-    fontSize: 15,
-    position: "absolute",
-    left: 233,
-    top: 566,
   },
   loginBox: {
-    position: "absolute",
-    left: 17,
-    top: 641,
-    width: 357,
-    height: 63,
-    borderRadius: 12,
-    backgroundColor: "#f89b40",
+    position: "relative",
+    backgroundColor: "#F89B40",
+    borderRadius: 10,
+    height: 0.06 * height,
+    marginBottom: 0.02 * height,
+    marginTop: 0.02 * height,
+    justifyContent: "center", // Center items vertically
+    alignItems: "center", // Center items horizontally
   },
-  logIn: {
-    color: "#313b54",
-    fontSize: 17,
-    fontWeight: "bold",
-    position: "absolute",
-    left: 170,
-    top: 660,
-  },
-  rememberMe: {
+  loginLabel: {
+    fontSize: 0.05 * width,
     color: "#000",
-    fontSize: 15,
-    position: "absolute",
-    left: 54,
-    top: 566,
+    fontWeight: "bold",
   },
-  // Add styles for your logo component
-  logo: {
-    position: "absolute",
-    left: 78,
-    top: -9,
-    width: 235,
-    height: 278,
+  signUp: {
+    position: "relative",
+    justifyContent: "center", // Center items vertically
+    alignItems: "center", // Center items horizontally
   },
-  // Add styles for screenshot2023114At1171 component
-  screenshot2023114At1171: {
-    position: "absolute",
-    left: 75,
-    top: 18,
-    width: 239,
-    height: 232,
-    // Add background image styling here
+  labelWrapper: {
+    fontSize: 0.04 * width,
+    color: "#818181",
   },
-  vector: {
-    position: "absolute",
-    left: "83.3333%",
-    right: "11.4716%",
-    top: "61.3%",
-    overflow: "visible",
-    width: 13,
-    height: 13,
-    tintColor: "grey",
+  label: {
+    fontSize: 0.04 * width,
+    color: "#818181",
+  },
+  label2: {
+    fontSize: 0.04 * width,
+    color: "#F89B40",
   },
 });

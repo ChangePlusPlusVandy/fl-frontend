@@ -18,75 +18,78 @@ import NavBarFamily from "./app/components/NavBarFamily";
 import NavBarStaff from "./app/components/NavBarStaff";
 import { API_SECRET } from "@env";
 import AttendanceHistory from "./app/screens/AttendanceHistory";
+import { StatusBar } from "react-native";
 
 export default function App() {
   const [user, setUser] = useState("family");
-  console.log(API_SECRET);
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="SignIn">
-        <Stack.Screen
-          name="Launch"
-          component={Launch}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="SignIn"
-          component={SignIn}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="SignUp"
-          component={SignUp}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Profile"
-          component={Profile}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="EditProfile"
-          component={EditProfile}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="NewPost"
-          component={NewPost}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="UserTabs"
-          component={NavBarFamily}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="StaffTabs"
-          component={NavBarStaff}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Report"
-          component={Report}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="AttendanceHistory"
-          component={AttendanceHistory}
-          options={{ headerShown: true }}
-        />
-        <Stack.Screen
-          name="Messages"
-          component={Messages}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="NewFriendReport"
-          component={NewFriendReport}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <>
+      <StatusBar backgroundColor="#000000" barStyle="dark-content" />
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="SignIn">
+          <Stack.Screen
+            name="Launch"
+            component={Launch}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="SignIn"
+            component={SignIn}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="SignUp"
+            component={SignUp}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={Profile}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="EditProfile"
+            component={EditProfile}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="NewPost"
+            component={NewPost}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="UserTabs"
+            component={NavBarFamily}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="StaffTabs"
+            component={NavBarStaff}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Report"
+            component={Report}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="AttendanceHistory"
+            component={AttendanceHistory}
+            options={{ headerShown: true }}
+          />
+          <Stack.Screen
+            name="Messages"
+            component={Messages}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="NewFriendReport"
+            component={NewFriendReport}
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </>
   );
 }
 

@@ -18,7 +18,7 @@ import { RouteProp } from "@react-navigation/native";
 import useAuthStore from "../stores/auth";
 
 interface RouterProps {
-  route: RouteProp<{ params: { friend: any } }>; // Adjust the string type according to your screen name
+  route: RouteProp<{ params: { friend: any } }>;
   navigation: NavigationProp<any, any>;
 }
 
@@ -121,7 +121,9 @@ const Report = ({ route, navigation }: RouterProps) => {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.edit}
-            onPress={() => navigation.navigate("AttendanceHistory")}>
+            onPress={() =>
+              navigation.navigate("AttendanceHistory", { friend: friend })
+            }>
             <Text style={styles.editText}>View Attendance</Text>
           </TouchableOpacity>
           {showNewReport && (
