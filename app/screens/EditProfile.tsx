@@ -37,7 +37,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
     try {
       if (user) {
         const signature = generateHmacSignature(
-          JSON.stringify({ _id: userId }),
+          JSON.stringify({ userId }),
           API_SECRET
         );
         const response = await fetch(`${API_URL}user/${userId}`, {
@@ -56,7 +56,9 @@ const EditProfile = ({ navigation }: RouterProps) => {
         });
       }
     } catch (error) {
-      console.error("Network error fetching initial data: " + error.message);
+      console.error(
+        "Network error fetching initial data: " + (error as Error).message
+      );
     }
   };
 
@@ -121,8 +123,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
           <View style={styles.profileContainer}>
             <Image
               source={{ uri: image.profilePicture }}
-              style={styles.image}
-            ></Image>
+              style={styles.image}></Image>
             <TouchableOpacity>
               <Image source={CameraIcon} style={styles.cameraIcon}></Image>
             </TouchableOpacity>

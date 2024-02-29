@@ -32,7 +32,7 @@ const NewPost = ({ navigation }: RouterProps) => {
   const [subject, setSubject] = useState("");
   const [textBox, setTextBox] = useState("");
   const [imageUri, setImageUri] = useState(null);
-  const { user } = useAuthStore();
+  const { user, userId } = useAuthStore();
 
   const cloudinaryUpoad = async () => {
     let cloudinaryId = "";
@@ -65,7 +65,7 @@ const NewPost = ({ navigation }: RouterProps) => {
         method: "GET",
         headers: {
           "Friends-Life-Signature": generateHmacSignature(
-            JSON.stringify({ _id: userId }),
+            JSON.stringify({ userId }),
             API_SECRET
           ),
         },
@@ -153,8 +153,7 @@ const NewPost = ({ navigation }: RouterProps) => {
             <View style={styles.uploadContainer}>
               <TouchableOpacity
                 style={styles.uploadIcon}
-                onPress={handleUploadImageFromPhone}
-              >
+                onPress={handleUploadImageFromPhone}>
                 <Image source={imgUploadIcon} />
               </TouchableOpacity>
             </View>
