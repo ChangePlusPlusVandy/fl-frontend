@@ -68,7 +68,6 @@ const useAuthStore = create<AuthStore>((set) => ({
         },
         body: body,
       });
-      console.log(await data.json());
     } catch (e) {
       console.log(e);
     }
