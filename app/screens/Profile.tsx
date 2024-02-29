@@ -1,5 +1,4 @@
 import useAuthStore, { SignInProps } from "../stores/auth";
-
 import {
   View,
   Text,
@@ -7,33 +6,122 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
+  Alert,
+  Linking,
 } from "react-native";
-import React from "react";
-import ProfilePicture from "../../assets/profilepicture.jpg";
+import React, { useState, useEffect } from "react";
 import HelpIcon from "../../assets/helpicon.png";
 import ChangePasswordIcon from "../../assets/passwordicon.png";
-import DeleteAccountIcon from "../../assets/deleteicon.png";
 import AboutIcon from "../../assets/infoicon.png";
 import LogoutIcon from "../../assets/logouticon.png";
 import Arrow from "../../assets/arrow.png";
 
 import { NavigationProp } from "@react-navigation/native";
 import BackButton from "../components/BackButton";
-
+import { API_URL, API_SECRET } from "@env";
+import { generateHmacSignature } from "../utils/signature";
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
 const Profile = ({ navigation }: RouterProps) => {
+  const { user } = useAuthStore();
   const { logout } = useAuthStore();
+  const [userDetails, setUserDetails] = useState({
+    name: "",
+    emailAddress: "",
+    profilePicture:
+      "https://res.cloudinary.com/dvrcdxqex/image/upload/v1707870630/defaultProfilePic.png",
+  });
+
+  useEffect(() => {
+    const fetchDetailsAsync = async () => {
+      try {
+        const fetchedDetails = await fetchUserData(); // Make sure this is correctly typed or casted
+
+        if (fetchedDetails) {
+          setUserDetails({
+            name: fetchedDetails.name,
+            emailAddress: fetchedDetails.emailAddress,
+            profilePicture: fetchedDetails.profilePicture,
+          });
+        }
+        console.log(userDetails.profilePicture);
+      } catch (error) {
+        console.error("Failed to fetch user details:", error);
+      }
+    };
+
+    fetchDetailsAsync();
+  }, []);
 
   const onLogout = async () => {
     try {
       await logout();
-      navigation.navigate('SignIn')
-
+      navigation.navigate("SignIn");
     } catch (error) {
       alert("Error logging out");
+    }
+  };
+
+  const onAboutUs = async () => {
+    Alert.alert(
+      "Notice",
+      "You're being redirected to https://friendslife.org/",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: () => Linking.openURL("https://friendslife.org/"),
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const onHelpAndFeedback = async () => {
+    Alert.alert(
+      "We're Here to Help!",
+      "Your feedback is valuable to us. If you have any questions, suggestions, or concerns, please reach out. Email us at friendslifedev@gmail.com, and we'll make sure to address your needs promptly.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const fetchUserData = async () => {
+    try {
+      if (user) {
+        const signature = generateHmacSignature(
+          JSON.stringify({ firebaseId: user.uid }),
+          API_SECRET
+        );
+        const response = await fetch(`${API_URL}user/firebase/${user.uid}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": signature,
+          },
+        });
+        const userData = await response.json();
+        return {
+          name: userData.name,
+          emailAddress: userData.emailAddress,
+          profilePicture: userData.profilePicture,
+        };
+      }
+    } catch (error) {
+      console.error("Network error fetching initial data: " + error);
     }
   };
 
@@ -44,19 +132,20 @@ const Profile = ({ navigation }: RouterProps) => {
           <BackButton />
         </TouchableOpacity>
       </View>
-      <Image source={ProfilePicture} style={styles.image}></Image>
-      <Text style={styles.name}>Joseph Quatela</Text>
-      <Text style={styles.email}>joseph.c.quatela@vanderbilt.edu</Text>
+      <Image
+        source={{ uri: userDetails.profilePicture }}
+        style={styles.image}></Image>
+      <Text style={styles.name}>{userDetails.name}</Text>
+      <Text style={styles.email}>{userDetails.emailAddress}</Text>
       <TouchableOpacity
         style={styles.edit}
-        onPress={() => navigation.navigate("EditProfile")}
-      >
+        onPress={() => navigation.navigate("EditProfile")}>
         <Text style={styles.editText}>Edit Profile</Text>
         <Image source={Arrow} style={styles.editArrow}></Image>
       </TouchableOpacity>
       <View style={styles.divider}></View>
       <View>
-        <TouchableOpacity style={styles.option}>
+        <TouchableOpacity style={styles.option} onPress={onHelpAndFeedback}>
           <Image source={HelpIcon} style={styles.icon}></Image>
           <Text style={styles.optionText}>Help and Feedback</Text>
         </TouchableOpacity>
@@ -64,11 +153,7 @@ const Profile = ({ navigation }: RouterProps) => {
           <Image source={ChangePasswordIcon} style={styles.icon}></Image>
           <Text style={styles.optionText}>Change password</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.option}>
-          <Image source={DeleteAccountIcon} style={styles.icon}></Image>
-          <Text style={styles.optionText}>Delete Account</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.option}>
+        <TouchableOpacity style={styles.option} onPress={onAboutUs}>
           <Image source={AboutIcon} style={styles.icon}></Image>
           <Text style={styles.optionText}>About Us</Text>
         </TouchableOpacity>

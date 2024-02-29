@@ -25,8 +25,7 @@ const NavBarFamily = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Home
               </Text>
             );
@@ -39,12 +38,12 @@ const NavBarFamily = () => {
                   width: 28,
                   height: 30,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
           tabBarInactiveTintColor: "#D9D9D9",
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -58,8 +57,7 @@ const NavBarFamily = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Messages
               </Text>
             );
@@ -72,12 +70,12 @@ const NavBarFamily = () => {
                   width: 40,
                   height: 40,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
           tabBarInactiveTintColor: "#D9D9D9",
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -91,8 +89,7 @@ const NavBarFamily = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}
-              >
+                }}>
                 Friends
               </Text>
             );
@@ -105,12 +102,12 @@ const NavBarFamily = () => {
                   width: 45,
                   height: 45,
                   tintColor: color,
-                }}
-              ></Image>
+                }}></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
           tabBarInactiveTintColor: "#D9D9D9",
+          headerShown: false,
         }}
       />
     </Tab.Navigator>
