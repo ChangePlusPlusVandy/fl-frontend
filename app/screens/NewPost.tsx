@@ -65,7 +65,7 @@ const NewPost = ({ navigation }: RouterProps) => {
         method: "GET",
         headers: {
           "Friends-Life-Signature": generateHmacSignature(
-            JSON.stringify({ firebaseId: user?.uid }),
+            JSON.stringify({ _id: userId }),
             API_SECRET
           ),
         },
@@ -117,8 +117,7 @@ const NewPost = ({ navigation }: RouterProps) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
+      style={styles.container}>
       <SafeAreaView>
         <ScrollView>
           <View style={styles.headerContainer}>
@@ -163,8 +162,7 @@ const NewPost = ({ navigation }: RouterProps) => {
 
           <TouchableOpacity
             style={styles.postButton}
-            onPress={() => handlePost()}
-          >
+            onPress={() => handlePost()}>
             <Text style={styles.postButtonText}>Post</Text>
           </TouchableOpacity>
         </ScrollView>
