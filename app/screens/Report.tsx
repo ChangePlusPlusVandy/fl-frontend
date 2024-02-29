@@ -15,6 +15,7 @@ import Post from "../components/Post";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
 import { RouteProp } from "@react-navigation/native";
+import useAuthStore from "../stores/auth";
 
 interface RouterProps {
   route: RouteProp<{ params: { friend: any } }>; // Adjust the string type according to your screen name
@@ -30,7 +31,10 @@ interface ReportItem {
 
 const Report = ({ route, navigation }: RouterProps) => {
   const { friend } = route.params;
+  const { userId } = useAuthStore();
+
   const [reports, setReports] = useState<ReportItem[]>([]);
+  const [showNewReport, setShowNewReport] = useState(false);
 
   const getReports = async () => {
     try {
@@ -61,9 +65,29 @@ const Report = ({ route, navigation }: RouterProps) => {
     }
   };
 
+  const getUserType = async () => {
+    try {
+      const response = await fetch(`${API_URL}user/${userId}`, {
+        method: "GET",
+        headers: {
+          "Friends-Life-Signature": generateHmacSignature(
+            JSON.stringify({ userId }),
+            API_SECRET
+          ),
+        },
+      });
+      const data = await response.json();
+      console.log(data);
+      setShowNewReport(data.type === "Staff");
+    } catch (error) {
+      console.error("Error fetching user data: ", error);
+    }
+  };
+
   useEffect(() => {
     setReports([]);
     getReports();
+    getUserType();
   }, []);
 
   const calculateTimeSincePost = (postTime: string) => {
@@ -101,13 +125,15 @@ const Report = ({ route, navigation }: RouterProps) => {
             onPress={() => navigation.navigate("AttendanceHistory")}>
             <Text style={styles.editText}>View Attendance</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.edit}
-            onPress={() =>
-              navigation.navigate("NewFriendReport", { friend: friend })
-            }>
-            <Text style={styles.editText}>Write New Report</Text>
-          </TouchableOpacity>
+          {showNewReport && (
+            <TouchableOpacity
+              style={styles.edit}
+              onPress={() =>
+                navigation.navigate("NewFriendReport", { friend: friend })
+              }>
+              <Text style={styles.editText}>Write New Report</Text>
+            </TouchableOpacity>
+          )}
         </View>
         {reports.map((report) => (
           <Post
