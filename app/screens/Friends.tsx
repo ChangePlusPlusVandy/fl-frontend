@@ -11,8 +11,13 @@ import {
 import { FontAwesome } from "@expo/vector-icons"; // Import the FontAwesome icons
 import { MaterialCommunityIcons } from "@expo/vector-icons"; // Import MaterialCommunityIcons for the search bar icon
 import moment from "moment";
+import { NavigationProp } from "@react-navigation/native";
 
-const Friends = () => {
+interface RouterProps {
+  navigation: NavigationProp<any, any>;
+}
+
+const Friends = ({ navigation }: RouterProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   // Sample data for friends
   const friendsData = [
@@ -53,17 +58,19 @@ const Friends = () => {
         data={filteredFriends}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item, index }) => (
-          <View
-            style={[
-              styles.friendItem,
-              { backgroundColor: index % 2 === 0 ? "#d4d4d4" : "#f89b40" }, // Alternating colors
-            ]}>
-            <Image source={item.profileImage} style={styles.profileImage} />
-            <View style={styles.friendDetails}>
-              <Text style={styles.friendName}>{item.name}</Text>
-              <Text style={styles.friendAddress}>{item.address}</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Report")}>
+            <View
+              style={[
+                styles.friendItem,
+                { backgroundColor: index % 2 === 0 ? "#d4d4d4" : "#f89b40" }, // Alternating colors
+              ]}>
+              <Image source={item.profileImage} style={styles.profileImage} />
+              <View style={styles.friendDetails}>
+                <Text style={styles.friendName}>{item.name}</Text>
+                <Text style={styles.friendAddress}>{item.address}</Text>
+              </View>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       />
     </View>

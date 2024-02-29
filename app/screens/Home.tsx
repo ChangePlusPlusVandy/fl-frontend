@@ -1,12 +1,9 @@
 import React from "react";
 import { View, Text } from "react-native";
+import NewPost from "./NewPost";
 
 const Home = () => {
-  return (
-    <View>
-      <Text>Home Screen</Text>
-    </View>
-  );
+  return <NewPost></NewPost>;
 };
 
 export default Home;

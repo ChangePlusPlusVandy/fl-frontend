@@ -7,6 +7,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  TouchableWithoutFeedback,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { NavigationProp } from "@react-navigation/native";
 

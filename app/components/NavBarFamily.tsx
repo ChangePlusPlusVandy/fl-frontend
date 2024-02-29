@@ -1,12 +1,13 @@
 import React from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Home from "../screens/StaffHome";
+import Home from "../screens/UserHome";
 import Messages from "../screens/Messages";
 import Friends from "../screens/Friends";
 import HomeIcon from "../../assets/tabhome.png";
 import MessagesIcon from "../../assets/tabmessages.png";
 import FriendsIcon from "../../assets/tabfriends.png";
+import Conversations from "../screens/Conversations";
 
 const Tab = createBottomTabNavigator();
 
@@ -47,8 +48,8 @@ const NavBarFamily = () => {
         }}
       />
       <Tab.Screen
-        name="Messages"
-        component={Messages}
+        name="Conversations"
+        component={Conversations}
         options={{
           tabBarLabel: ({ focused, color }) => {
             return (
