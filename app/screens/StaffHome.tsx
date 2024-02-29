@@ -161,6 +161,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
+    transform: [{ scaleX: .8 }, { scaleY: .8 }]
   },
 });
 

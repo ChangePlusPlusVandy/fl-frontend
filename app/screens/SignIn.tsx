@@ -20,17 +20,20 @@ import FLlogo from "../../assets/friends-life-logo.png";
 import OpenEye from "../../assets/OpenEye.png";
 import ClosedEye from "../../assets/Eye-slash.png";
 import useAuthStore, { SignInProps } from "../stores/auth";
+import { generateHmacSignature } from "../utils/signature";
+import { API_URL, API_SECRET } from "@env";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
 const SignIn = ({ navigation }: RouterProps) => {
-  const { user, signIn } = useAuthStore();
+  const { user, signIn, userId } = useAuthStore();
   const [form, setForm] = useState<SignInProps>({
     emailAddress: "",
     password: "",
   });
+  const [userType, setUserType] = useState(undefined);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
@@ -42,15 +45,51 @@ const SignIn = ({ navigation }: RouterProps) => {
     return unsubscribe;
   }, [navigation]);
 
+  const getUser = async () => {
+    try {
+      const userData = await fetch(`${API_URL}user/${userId}`, {
+        method: "GET",
+        headers: {
+          "Friends-Life-Signature": generateHmacSignature(
+            JSON.stringify({ userId: userId }),
+            API_SECRET
+          ),
+        },
+      });
+
+      const userInfo = await userData.json();
+      setUserType(userInfo.type);
+    } catch (error) {
+      console.error("Error getting name:", error);
+    }
+  };
+
+  //When user finally gets loaded, can get user information
   useEffect(() => {
-    if (user !== null) {
-      navigation.navigate("StaffTabs");
+    console.log('User: ' + user);
+    if (user != null){
+      getUser();
     }
   }, [user]);
 
+  //When user type is determined, navigate to correct tab
+  useEffect(() => {
+    console.log('User Type: ' + userType);
+    if (userType !== undefined) {
+      if (userType === "Staff") {
+        navigation.navigate("StaffTabs");
+      } else if (userType === "Family") {
+        navigation.navigate("UserTabs");
+      } else {
+        alert("Could not verify account type successfully");
+      }
+    } else {
+      getUser();
+    }
+  }, [userType]);
+
   const onLogin = async () => {
     const { emailAddress, password } = form;
-
     try {
       await signIn({ emailAddress, password });
     } catch (error) {
@@ -62,7 +101,8 @@ const SignIn = ({ navigation }: RouterProps) => {
     <TouchableWithoutFeedback
       onPress={() => {
         Keyboard.dismiss();
-      }}>
+      }}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
