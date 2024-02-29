@@ -47,6 +47,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
         setForm({
           fullName: userData.name,
           phoneNumber: userData.phoneNumber,
+          // add image
         });
       }
     } catch (error) {
@@ -73,14 +74,14 @@ const EditProfile = ({ navigation }: RouterProps) => {
         const userBody = {
           name: form.fullName,
           phoneNumber: form.phoneNumber,
+          // add image here
         };
 
         const signature = generateHmacSignature(
           JSON.stringify(userBody),
           API_SECRET
         );
-        // console.log(signature);
-        console.log("start of patch");
+
         const updateResponse = await fetch(`${API_URL}user/${id}`, {
           method: "PATCH",
           headers: {
@@ -89,7 +90,6 @@ const EditProfile = ({ navigation }: RouterProps) => {
           },
           body: JSON.stringify(userBody),
         });
-        console.log("end of patch");
       }
     } catch (error) {
       console.error("Network error:", error.message);

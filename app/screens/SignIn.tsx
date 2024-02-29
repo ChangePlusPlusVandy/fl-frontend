@@ -72,13 +72,17 @@ const SignIn = ({ navigation }: RouterProps) => {
       <Text style={styles.email}>Email</Text>
       <TextInput
         style={styles.usernameBox}
-        onChangeText={(emailAddress: any) => setForm({ ...form, emailAddress })}
-      ></TextInput>
+        value={form.emailAddress}
+        onChangeText={(emailAddress) => setForm({ ...form, emailAddress })}
+      />
+
       <TextInput
         style={styles.passwordBox}
+        value={form.password}
         secureTextEntry={!showPassword}
-        onChangeText={(password: any) => setForm({ ...form, password })}
-      ></TextInput>
+        onChangeText={(password) => setForm({ ...form, password })}
+      />
+
       {/* Add your vector and logo components */}
       <Text style={styles.password}>Password</Text>
       <Text style={styles.forgotPassword}>Forgot Password?</Text>
