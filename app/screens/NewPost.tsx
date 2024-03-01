@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,14 +10,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Button,
+  Alert,
 } from "react-native";
 import { NavigationProp, Router } from "@react-navigation/native";
 import BackButton from "../components/BackButton";
-import fileUploadIcon from "../../assets/file_upload.png";
-import linkUploadIcon from "../../assets/link_upload.png";
 import imgUploadIcon from "../../assets/img_upload.png";
-import { AdvancedImage, upload } from "cloudinary-react-native";
+import { upload } from "cloudinary-react-native";
 import cld from "../utils/cloudinary";
 import * as ImagePicker from "expo-image-picker";
 import { generateHmacSignature } from "../utils/signature";
@@ -31,12 +29,12 @@ interface RouterProps {
 const NewPost = ({ navigation }: RouterProps) => {
   const [subject, setSubject] = useState("");
   const [textBox, setTextBox] = useState("");
-  const [imageUri, setImageUri] = useState(null);
-  const { user, userId } = useAuthStore();
+  const [imageUri, setImageUri] = useState("");
+  const [status, setStatus] = useState("Post");
+
+  const { userId } = useAuthStore();
 
   const cloudinaryUpoad = async () => {
-    let cloudinaryId = "";
-    console.log(imageUri);
     if (imageUri) {
       const options = {
         upload_preset: "ojyuicnt",
@@ -51,8 +49,7 @@ const NewPost = ({ navigation }: RouterProps) => {
             console.error("Upload error:", error);
             return;
           }
-          console.log("Upload successful:", response);
-          cloudinaryId = response.public_id;
+          setImageUri(response.secure_url);
         },
       });
     }
@@ -60,8 +57,13 @@ const NewPost = ({ navigation }: RouterProps) => {
 
   const handlePost = async () => {
     try {
-      cloudinaryUpoad();
-      const userData = await fetch(`${API_URL}user/firebase/${user?.uid}`, {
+      if (!textBox) {
+        Alert.alert("Please enter a message");
+        return;
+      }
+      setStatus("Posting...");
+      await cloudinaryUpoad();
+      const userData = await fetch(`${API_URL}user/${userId}`, {
         method: "GET",
         headers: {
           "Friends-Life-Signature": generateHmacSignature(
@@ -73,25 +75,24 @@ const NewPost = ({ navigation }: RouterProps) => {
 
       const userInfo = await userData.json();
 
-      const body = {
+      const body = JSON.stringify({
         userId: userInfo._id,
         user: userInfo.name,
         title: subject,
         postBody: textBox,
-        image: "test",
-      };
-      const signature = generateHmacSignature(JSON.stringify(body), API_SECRET);
-      const response = await fetch("https://fl-backend.vercel.app/post", {
+        image: imageUri,
+      });
+      const signature = generateHmacSignature(body, API_SECRET);
+      const response = await fetch(`${API_URL}post`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Friends-Life-Signature": signature,
         },
-        body: JSON.stringify(body),
+        body: body,
       });
 
       if (response.ok) {
-        console.log("Post created successfully");
         navigation.navigate("StaffTabs");
       } else {
         console.error("Failed to create post");
@@ -102,17 +103,25 @@ const NewPost = ({ navigation }: RouterProps) => {
   };
 
   const handleUploadImageFromPhone = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-
-    if (!result.canceled) {
-      setImageUri(result.uri);
+    const { canceled } = result;
+    if (canceled) {
+      console.log("Image upload cancelled");
+    } else {
+      setImageUri(result.assets[0].uri);
     }
+    setStatus("Post");
   };
+
+  useEffect(() => {
+    console.log(status === "Post");
+    setStatus("Post");
+  }, []);
 
   return (
     <KeyboardAvoidingView
@@ -161,8 +170,9 @@ const NewPost = ({ navigation }: RouterProps) => {
 
           <TouchableOpacity
             style={styles.postButton}
-            onPress={() => handlePost()}>
-            <Text style={styles.postButtonText}>Post</Text>
+            onPress={() => handlePost()}
+            disabled={status !== "Post"}>
+            <Text style={styles.postButtonText}>{status}</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>

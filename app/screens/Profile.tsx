@@ -32,7 +32,8 @@ const Profile = ({ navigation }: RouterProps) => {
   const [userDetails, setUserDetails] = useState({
     name: "",
     emailAddress: "",
-    profilePicture: "",
+    profilePicture:
+      "https://res.cloudinary.com/dvrcdxqex/image/upload/v1707870630/defaultProfilePic.png",
   });
 
   useFocusEffect(
@@ -123,12 +124,8 @@ const Profile = ({ navigation }: RouterProps) => {
           profilePicture: userData.profilePicture,
         };
       }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error("Error: " + error.message);
-      } else {
-        console.error("Unexpected error");
-      }
+    } catch (error) {
+      console.error("Network error fetching initial data: " + error);
     }
   };
 
@@ -152,8 +149,7 @@ const Profile = ({ navigation }: RouterProps) => {
       <Text style={styles.email}>{userDetails.emailAddress}</Text>
       <TouchableOpacity
         style={styles.edit}
-        onPress={() => navigation.navigate("EditProfile")}
-      >
+        onPress={() => navigation.navigate("EditProfile")}>
         <Text style={styles.editText}>Edit Profile</Text>
         <Image source={Arrow} style={styles.editArrow}></Image>
       </TouchableOpacity>
