@@ -9,12 +9,14 @@ import {
   Alert,
   Linking,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import HelpIcon from "../../assets/helpicon.png";
 import ChangePasswordIcon from "../../assets/passwordicon.png";
 import AboutIcon from "../../assets/infoicon.png";
 import LogoutIcon from "../../assets/logouticon.png";
 import Arrow from "../../assets/arrow.png";
+import DefaultProfilePicture from "../../assets/DefaultProfilePicture.png";
 
 import { NavigationProp } from "@react-navigation/native";
 import BackButton from "../components/BackButton";
@@ -33,7 +35,8 @@ const Profile = ({ navigation }: RouterProps) => {
     profilePicture: "",
   });
 
-  useEffect(() => {
+  useFocusEffect(
+    React.useCallback(() => {
     const fetchDetailsAsync = async () => {
       try {
         const fetchedDetails = await fetchUserData(); // Make sure this is correctly typed or casted
@@ -45,14 +48,15 @@ const Profile = ({ navigation }: RouterProps) => {
             profilePicture: fetchedDetails.profilePicture,
           });
         }
-        console.log(userDetails.profilePicture);
       } catch (error) {
         console.error("Failed to fetch user details:", error);
       }
     };
 
     fetchDetailsAsync();
-  }, []);
+  }, [])
+  );
+  
 
   const onLogout = async () => {
     try {
@@ -119,8 +123,12 @@ const Profile = ({ navigation }: RouterProps) => {
           profilePicture: userData.profilePicture,
         };
       }
-    } catch (error) {
-      console.error("Network error fetching initial data: " + error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error: " + error.message);
+      } else {
+        console.error("Unexpected error");
+      }
     }
   };
 
@@ -132,9 +140,14 @@ const Profile = ({ navigation }: RouterProps) => {
         </TouchableOpacity>
       </View>
       <Image
-        source={{ uri: userDetails.profilePicture }}
+        source={
+          userDetails.profilePicture
+            ? { uri: userDetails.profilePicture }
+            : DefaultProfilePicture
+        }
         style={styles.image}
-      ></Image>
+      />
+
       <Text style={styles.name}>{userDetails.name}</Text>
       <Text style={styles.email}>{userDetails.emailAddress}</Text>
       <TouchableOpacity

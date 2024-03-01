@@ -14,9 +14,12 @@ import React, { useState, useEffect } from "react";
 import { NavigationProp } from "@react-navigation/native";
 import BackButton from "../components/BackButton";
 import CameraIcon from "../../assets/camera.png";
+import DefaultProfilePicture from "../../assets/DefaultProfilePicture.png";
 import useAuthStore from "../stores/auth";
 import { API_URL, API_SECRET } from "@env";
 import { generateHmacSignature } from "../utils/signature";
+import * as ImagePicker from 'expo-image-picker';
+
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -55,10 +58,12 @@ const EditProfile = ({ navigation }: RouterProps) => {
           profilePicture: userData.profilePicture,
         });
       }
-    } catch (error) {
-      console.error(
-        "Network error fetching initial data: " + (error as Error).message
-      );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error: " + error.message);
+      } else {
+        console.error("Unexpected error");
+      }
     }
   };
 
@@ -81,7 +86,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
         const userBody = {
           name: form.fullName,
           phoneNumber: form.phoneNumber,
-          // profilePicture:
+          profilePicture: image.profilePicture
         };
 
         const signature = generateHmacSignature(
@@ -98,10 +103,37 @@ const EditProfile = ({ navigation }: RouterProps) => {
           body: JSON.stringify(userBody),
         });
       }
-    } catch (error) {
-      console.error("Network error:", (error as Error).message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error: " + error.message);
+      } else {
+        console.error("Unexpected error");
+      }
     }
   };
+
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+  
+    let pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+  
+    if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
+      setImage({ ...image, profilePicture: pickerResult.assets[0].uri });
+    }
+  };
+  
+  
+
+  
 
   useEffect(() => {
     fetchInitialData();
@@ -110,7 +142,8 @@ const EditProfile = ({ navigation }: RouterProps) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}>
+      style={styles.container}
+    >
       <SafeAreaView>
         <ScrollView>
           <View style={styles.headerContainer}>
@@ -122,9 +155,16 @@ const EditProfile = ({ navigation }: RouterProps) => {
 
           <View style={styles.profileContainer}>
             <Image
-              source={{ uri: image.profilePicture }}
-              style={styles.image}></Image>
-            <TouchableOpacity>
+              source={
+                image.profilePicture && image.profilePicture.trim() !== ""
+                  ? { uri: image.profilePicture }
+                  : DefaultProfilePicture
+              }
+              style={styles.image}
+            />
+            <TouchableOpacity onPress={async () => {
+                await pickImage();
+              }}>
               <Image source={CameraIcon} style={styles.cameraIcon}></Image>
             </TouchableOpacity>
           </View>
@@ -146,7 +186,8 @@ const EditProfile = ({ navigation }: RouterProps) => {
               onPress={async () => {
                 await onSave();
                 navigation.navigate("Profile");
-              }}>
+              }}
+            >
               <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>
           </View>
