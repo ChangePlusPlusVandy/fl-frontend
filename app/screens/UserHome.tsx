@@ -23,8 +23,7 @@ interface RouterProps {
 
 interface PostItem {
   id: string;
-  profilePic: any;
-  profileName: string;
+  user: string;
   profileTimePosted: string;
   bodyPic?: any;
   bodyText: string;
@@ -54,14 +53,12 @@ const UserHome = ({ navigation }: RouterProps) => {
           if (response.ok) {
             const data = await response.json();
 
-            // Map the fetched data to match the PostItem structure
             const formattedPosts = data.map((post: any) => ({
-              id: post._id, // Use the actual MongoDB _id as the id
-              profilePic: post.user, // Need to grab based off of user ID and fetch from users in mongo
-              profileName: post.user, // Adjust this based on your model
-              profileTimePosted: calculateTimeSincePost(post.dateCreated), // Calculate time since post
-              bodyPic: post.image, // Adjust this based on your model
-              bodyText: post.postBody, // Adjust this based on your model
+              key: post._id,
+              user: post.userId,
+              profileTimePosted: calculateTimeSincePost(post.dateCreated),
+              bodyPic: post.image,
+              bodyText: post.postBody,
             }));
 
             setPosts(formattedPosts.reverse());
@@ -141,8 +138,7 @@ const UserHome = ({ navigation }: RouterProps) => {
         {posts.map((post) => (
           <Post
             key={post.id}
-            profilePic={post.profilePic}
-            profileName={post.profileName}
+            user={post.user}
             profileLocation={"Filler Location"}
             profileTimePosted={post.profileTimePosted}
             bodyPic={post.bodyPic}

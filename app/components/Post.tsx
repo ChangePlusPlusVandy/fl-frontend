@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,10 +11,13 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
+import useAuthStore from "../stores/auth";
+import { generateHmacSignature } from "../utils/signature";
+import { API_SECRET, API_URL } from "@env";
 
 interface PostProps {
-  profilePic: any;
-  profileName: string;
+  key: string;
+  user: string;
   profileLocation: string;
   profileTimePosted: string;
   bodyPic?: any;
@@ -22,20 +25,45 @@ interface PostProps {
 }
 
 const Post: React.FC<PostProps> = ({
-  profilePic,
-  profileName,
+  key,
+  user,
   profileLocation,
   profileTimePosted,
   bodyPic,
   bodyText,
 }) => {
+  const [profileName, setProfileName] = useState("");
+  const [profilePic, setProfilePic] = useState();
+
+  const getUser = async (userId: string) => {
+    const userData = await fetch(`${API_URL}user/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Friends-Life-Signature": generateHmacSignature(
+          JSON.stringify({ userId }),
+          API_SECRET
+        ),
+      },
+    });
+
+    const user = await userData.json();
+
+    setProfileName(user.name);
+    setProfilePic(user.profilePicture);
+  };
+
+  useEffect(() => {
+    getUser(user);
+  }, [user]);
+
   return (
     <View style={styles.postContainer}>
       <View style={styles.postHeader}>
-        <Image source={profilePic} style={styles.postProfilePic} />
+        <Image source={{ uri: profilePic }} style={styles.postProfilePic} />
         <View>
           <Text style={styles.profileName}>{profileName}</Text>
-          <Text style={styles.profileLocation}>{profileLocation}</Text>
+          <Text style={styles.profileLocation}>Friends Life</Text>
         </View>
         <Text style={styles.profileTimePosted}>{profileTimePosted}</Text>
       </View>

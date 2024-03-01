@@ -11,11 +11,11 @@ import {
 import { NavigationProp } from "@react-navigation/native";
 import BackButton from "../components/BackButton";
 import moment from "moment";
-import Post from "../components/Post";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
 import { RouteProp } from "@react-navigation/native";
 import useAuthStore from "../stores/auth";
+import ReportComponent from "../components/Report";
 
 interface RouterProps {
   route: RouteProp<{ params: { friend: any } }>;
@@ -137,11 +137,9 @@ const Report = ({ route, navigation }: RouterProps) => {
           )}
         </View>
         {reports.map((report) => (
-          <Post
+          <ReportComponent
             key={report._id}
-            profilePic={friend.profilePic}
-            profileName={friend.friendName.split(" ")[0]}
-            profileLocation="Report"
+            friend={friend._id}
             profileTimePosted={calculateTimeSincePost(report.date)}
             bodyText={report.reportBody}
           />
