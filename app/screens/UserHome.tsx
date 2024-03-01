@@ -15,6 +15,7 @@ import { generateHmacSignature } from "../utils/signature";
 import { API_URL, API_SECRET } from "@env";
 import moment from "moment";
 import useAuthStore from "../stores/auth";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -34,61 +35,68 @@ const UserHome = ({ navigation }: RouterProps) => {
   const [posts, setPosts] = useState<PostItem[]>([]);
   const { userId } = useAuthStore();
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch(`${API_URL}post`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Friends-Life-Signature": generateHmacSignature("GET", API_SECRET),
-          },
-        });
+  useFocusEffect(
+    React.useCallback(() => {
+      setPosts([]);
+      const fetchPosts = async () => {
+        try {
+          const response = await fetch(`${API_URL}post`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Friends-Life-Signature": generateHmacSignature(
+                "GET",
+                API_SECRET
+              ),
+            },
+          });
 
-        if (response.ok) {
-          const data = await response.json();
+          if (response.ok) {
+            const data = await response.json();
 
-          // Map the fetched data to match the PostItem structure
-          const formattedPosts = data.map((post: any) => ({
-            id: post._id, // Use the actual MongoDB _id as the id
-            profilePic: post.user, // Need to grab based off of user ID and fetch from users in mongo
-            profileName: post.user, // Adjust this based on your model
-            profileTimePosted: calculateTimeSincePost(post.dateCreated), // Calculate time since post
-            bodyPic: post.image, // Adjust this based on your model
-            bodyText: post.postBody, // Adjust this based on your model
-          }));
+            // Map the fetched data to match the PostItem structure
+            const formattedPosts = data.map((post: any) => ({
+              id: post._id, // Use the actual MongoDB _id as the id
+              profilePic: post.user, // Need to grab based off of user ID and fetch from users in mongo
+              profileName: post.user, // Adjust this based on your model
+              profileTimePosted: calculateTimeSincePost(post.dateCreated), // Calculate time since post
+              bodyPic: post.image, // Adjust this based on your model
+              bodyText: post.postBody, // Adjust this based on your model
+            }));
 
-          setPosts(formattedPosts.reverse());
-        } else {
-          console.error("Failed to fetch posts");
+            setPosts(formattedPosts.reverse());
+          } else {
+            console.error("Failed to fetch posts");
+          }
+        } catch (error) {
+          console.error("Error fetching posts:", error);
         }
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-      }
-    };
+      };
 
-    const updateName = async () => {
-      try {
-        const userData = await fetch(`${API_URL}user/${userId}`, {
-          method: "GET",
-          headers: {
-            "Friends-Life-Signature": generateHmacSignature(
-              JSON.stringify({ userId: userId }),
-              API_SECRET
-            ),
-          },
-        });
+      const updateName = async () => {
+        try {
+          const userData = await fetch(`${API_URL}user/${userId}`, {
+            method: "GET",
+            headers: {
+              "Friends-Life-Signature": generateHmacSignature(
+                JSON.stringify({ userId: userId }),
+                API_SECRET
+              ),
+            },
+          });
 
-        const userInfo = await userData.json();
-        setName(userInfo.name.split(" ")[0]);
-      } catch (error) {
-        console.error("Error getting name:", error);
-      }
-    };
+          const userInfo = await userData.json();
+          setName(userInfo.name.split(" ")[0]);
+        } catch (error) {
+          console.error("Error getting name:", error);
+        }
+      };
 
-    updateName();
-    fetchPosts();
-  }, []); // Run only once on component mount
+      updateName();
+      fetchPosts();
+    }, [])
+  );
+  // Run only once on component mount
 
   // Function to calculate time since post
   const calculateTimeSincePost = (postTime: string) => {
@@ -125,8 +133,7 @@ const UserHome = ({ navigation }: RouterProps) => {
           <Text style={styles.nameText}>{name}!</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate("Profile")}
-            style={styles.profilePic}
-          >
+            style={styles.profilePic}>
             <Image source={ProfilePic} />
           </TouchableOpacity>
         </View>

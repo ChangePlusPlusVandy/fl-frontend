@@ -4,7 +4,7 @@ import { NavigationProp } from "@react-navigation/native";
 
 interface FriendProps {
   friend: {
-    _id: number;
+    _id: string;
     friendName: string;
     profilePicture: any;
   };
@@ -24,7 +24,7 @@ const Friend: React.FC<FriendProps> = ({ friend, navigation }) => {
 
   return (
     <TouchableOpacity onPress={handlePress}>
-      <View style={[styles.friendItem, { backgroundColor: "#A0D4E4" }]}>
+      <View style={[styles.friendItem, { backgroundColor: "#F89B40" }]}>
         <Image
           source={{
             uri: "https://res.cloudinary.com/dvrcdxqex/image/upload/v1707870630/defaultProfilePic.png",

@@ -35,7 +35,6 @@ const SignIn = ({ navigation }: RouterProps) => {
   });
   const [userType, setUserType] = useState(undefined);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
@@ -45,36 +44,37 @@ const SignIn = ({ navigation }: RouterProps) => {
     return unsubscribe;
   }, [navigation]);
 
-  const getUser = async () => {
-    try {
-      const userData = await fetch(`${API_URL}user/${userId}`, {
-        method: "GET",
-        headers: {
-          "Friends-Life-Signature": generateHmacSignature(
-            JSON.stringify({ userId: userId }),
-            API_SECRET
-          ),
-        },
-      });
-
-      const userInfo = await userData.json();
-      setUserType(userInfo.type);
-    } catch (error) {
-      console.error("Error getting name:", error);
-    }
-  };
-
-  //When user finally gets loaded, can get user information
   useEffect(() => {
-    console.log('User: ' + user);
-    if (user != null){
-      getUser();
-    }
-  }, [user]);
+    const onSuccessfulSignIn = async () => {
+      try {
+        // Fetch user data
+        const userData = await fetch(`${API_URL}user/${userId}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature(
+              JSON.stringify({ userId: userId }),
+              API_SECRET
+            ),
+          },
+        });
 
-  //When user type is determined, navigate to correct tab
+        // Parse user data
+        const userInfo = await userData.json();
+        setUserType(userInfo.type);
+      } catch (error) {
+        console.error("Error getting user type:", error);
+        // Handle error fetching user data
+      }
+    };
+
+    // If user is not null, attempt to fetch user data
+    if (user) {
+      onSuccessfulSignIn();
+    }
+  }, [user, userId]); // Run this effect whenever user or userId changes
+
   useEffect(() => {
-    console.log('User Type: ' + userType);
+    console.log("User Type: " + userType);
     if (userType !== undefined) {
       if (userType === "Staff") {
         navigation.navigate("StaffTabs");
@@ -83,10 +83,8 @@ const SignIn = ({ navigation }: RouterProps) => {
       } else {
         alert("Could not verify account type successfully");
       }
-    } else {
-      getUser();
     }
-  }, [userType]);
+  }, [userType, navigation]);
 
   const onLogin = async () => {
     const { emailAddress, password } = form;
@@ -101,8 +99,7 @@ const SignIn = ({ navigation }: RouterProps) => {
     <TouchableWithoutFeedback
       onPress={() => {
         Keyboard.dismiss();
-      }}
-    >
+      }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>

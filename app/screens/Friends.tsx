@@ -1,27 +1,32 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  FlatList,
-} from "react-native";
+import React, { useState } from "react";
+import { View, Text, TextInput, StyleSheet, FlatList } from "react-native";
 import { FontAwesome } from "@expo/vector-icons"; // Import the FontAwesome icons
 import { NavigationProp } from "@react-navigation/native";
 import Friend from "../components/Friend";
 import { API_URL, API_SECRET } from "@env";
 import { generateHmacSignature } from "../utils/signature";
 import { useFocusEffect } from "@react-navigation/native";
+import useAuthStore from "../stores/auth";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
+interface Friend {
+  _id: string;
+  friendName: string;
+  profilePicture: string;
+  reports: string[];
+  attendance: string[];
+  schedule: number[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 const Friends = ({ navigation }: RouterProps) => {
+  const { userId } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
-  const [friendsData, setFriendsData] = useState([]);
+  const [friendsData, setFriendsData] = useState<Friend[]>([]);
 
   const filteredFriends = friendsData.filter((friend: any) => {
     return friend.friendName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -29,14 +34,42 @@ const Friends = ({ navigation }: RouterProps) => {
 
   const getFriends = async () => {
     try {
-      const response = await fetch(`${API_URL}friend`, {
+      const userRes = await fetch(`${API_URL}user/${userId}`, {
         method: "GET",
         headers: {
-          "Friends-Life-Signature": generateHmacSignature("GET", API_SECRET),
+          "Friends-Life-Signature": generateHmacSignature(
+            JSON.stringify({ userId }),
+            API_SECRET
+          ),
         },
       });
-      const data = await response.json();
-      setFriendsData(data);
+      const userData = await userRes.json();
+
+      if (userData.type === "Staff" || userData.type === "admin") {
+        const friendRes = await fetch(`${API_URL}friend`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature("GET", API_SECRET),
+          },
+        });
+        const friendData: Friend[] = await friendRes.json();
+        setFriendsData(friendData);
+      } else {
+        const friendIds: string[] = userData.friends;
+        friendIds?.forEach(async (friendId: string) => {
+          const response = await fetch(`${API_URL}friend/${friendId}`, {
+            method: "GET",
+            headers: {
+              "Friends-Life-Signature": generateHmacSignature(
+                JSON.stringify({ friendId }),
+                API_SECRET
+              ),
+            },
+          });
+          const friend: Friend = await response.json();
+          setFriendsData((prevState: Friend[]) => [...prevState, friend]);
+        });
+      }
     } catch (error) {
       console.error("Error fetching friend data: ", error);
     }
@@ -44,6 +77,7 @@ const Friends = ({ navigation }: RouterProps) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      setFriendsData([]);
       getFriends();
     }, [])
   );
