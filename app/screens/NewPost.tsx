@@ -12,7 +12,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { NavigationProp, Router } from "@react-navigation/native";
+import { NavigationProp } from "@react-navigation/native";
 import BackButton from "../components/BackButton";
 import imgUploadIcon from "../../assets/img_upload.png";
 import { upload } from "cloudinary-react-native";
@@ -21,6 +21,7 @@ import * as ImagePicker from "expo-image-picker";
 import { generateHmacSignature } from "../utils/signature";
 import { API_URL, API_SECRET } from "@env";
 import useAuthStore from "../stores/auth";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -31,27 +32,63 @@ const NewPost = ({ navigation }: RouterProps) => {
   const [textBox, setTextBox] = useState("");
   const [imageUri, setImageUri] = useState("");
   const [status, setStatus] = useState("Post");
+  const [imagePicked, setImagePicked] = useState(false);
 
   const { userId } = useAuthStore();
 
-  const cloudinaryUpoad = async () => {
-    if (imageUri) {
-      const options = {
-        upload_preset: "ojyuicnt",
-        unsigned: true,
-      };
+  const cloudinaryUpload = async () => {
+    try {
+      if (imageUri) {
+        const options = {
+          upload_preset: "ojyuicnt",
+          unsigned: true,
+        };
 
-      await upload(cld, {
-        file: imageUri,
-        options: options,
-        callback: (error: any, response: any) => {
-          if (error) {
-            console.error("Upload error:", error);
-            return;
-          }
-          setImageUri(response.secure_url);
-        },
-      });
+        await upload(cld, {
+          file: imageUri,
+          options: options,
+          callback: async (error: any, response: any) => {
+            if (error) {
+              console.error("Upload error:", error);
+              return;
+            }
+
+            const userData = await fetch(`${API_URL}user/${userId}`, {
+              method: "GET",
+              headers: {
+                "Friends-Life-Signature": generateHmacSignature(
+                  JSON.stringify({ userId }),
+                  API_SECRET
+                ),
+              },
+            });
+
+            const userInfo = await userData.json();
+
+            const body = JSON.stringify({
+              userId: userInfo._id,
+              user: userInfo.name,
+              title: subject,
+              postBody: textBox,
+              image: response.secure_url,
+            });
+
+            await fetch(`${API_URL}post`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Friends-Life-Signature": generateHmacSignature(
+                  body,
+                  API_SECRET
+                ),
+              },
+              body: body,
+            });
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Cloudinary upload error:", error);
     }
   };
 
@@ -62,47 +99,47 @@ const NewPost = ({ navigation }: RouterProps) => {
         return;
       }
       setStatus("Posting...");
-      await cloudinaryUpoad();
-      const userData = await fetch(`${API_URL}user/${userId}`, {
-        method: "GET",
-        headers: {
-          "Friends-Life-Signature": generateHmacSignature(
-            JSON.stringify({ userId }),
-            API_SECRET
-          ),
-        },
-      });
+      if (imagePicked) await cloudinaryUpload();
+      else {
+        const userData = await fetch(`${API_URL}user/${userId}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature(
+              JSON.stringify({ userId }),
+              API_SECRET
+            ),
+          },
+        });
 
-      const userInfo = await userData.json();
+        const userInfo = await userData.json();
 
-      const body = JSON.stringify({
-        userId: userInfo._id,
-        user: userInfo.name,
-        title: subject,
-        postBody: textBox,
-        image: imageUri,
-      });
-      const signature = generateHmacSignature(body, API_SECRET);
-      const response = await fetch(`${API_URL}post`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Friends-Life-Signature": signature,
-        },
-        body: body,
-      });
+        const body = JSON.stringify({
+          userId: userInfo._id,
+          user: userInfo.name,
+          title: subject,
+          postBody: textBox,
+          // image: imageUri,
+        });
 
-      if (response.ok) {
-        navigation.navigate("StaffTabs");
-      } else {
-        console.error("Failed to create post");
+        await fetch(`${API_URL}post`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Friends-Life-Signature": generateHmacSignature(body, API_SECRET),
+          },
+          body: body,
+        });
       }
+
+      navigation.navigate("StaffTabs");
+      setStatus("Post");
     } catch (error) {
       console.error("Error creating post:", error);
     }
   };
 
   const handleUploadImageFromPhone = async () => {
+    setImagePicked(true);
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -118,10 +155,12 @@ const NewPost = ({ navigation }: RouterProps) => {
     setStatus("Post");
   };
 
-  useEffect(() => {
-    console.log(status === "Post");
-    setStatus("Post");
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      setImagePicked(false);
+      setStatus("Post");
+    }, [])
+  );
 
   return (
     <KeyboardAvoidingView

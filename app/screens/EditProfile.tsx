@@ -18,8 +18,10 @@ import DefaultProfilePicture from "../../assets/DefaultProfilePicture.png";
 import useAuthStore from "../stores/auth";
 import { API_URL, API_SECRET } from "@env";
 import { generateHmacSignature } from "../utils/signature";
-import * as ImagePicker from 'expo-image-picker';
-
+import * as ImagePicker from "expo-image-picker";
+import cld from "../utils/cloudinary";
+import { upload } from "cloudinary-react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -32,9 +34,9 @@ const EditProfile = ({ navigation }: RouterProps) => {
     phoneNumber: "",
   });
 
-  const [image, setImage] = useState({
-    profilePicture: "",
-  });
+  const [image, setImage] = useState("");
+  const [imageChanged, setImageChanged] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
   const fetchInitialData = async () => {
     try {
@@ -54,9 +56,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
           fullName: userData.name,
           phoneNumber: userData.phoneNumber,
         });
-        setImage({
-          profilePicture: userData.profilePicture,
-        });
+        setImage(userData.profilePicture);
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -67,26 +67,51 @@ const EditProfile = ({ navigation }: RouterProps) => {
     }
   };
 
-  const onSave = async () => {
+  const cloudinaryUpload = async () => {
     try {
-      if (user) {
-        const firebaseSignature = generateHmacSignature(
-          JSON.stringify({ firebaseId: user.uid }),
-          API_SECRET
-        );
-        const response = await fetch(`${API_URL}user/firebase/${user.uid}`, {
-          method: "GET",
-          headers: {
-            "Friends-Life-Signature": firebaseSignature,
+      if (image !== "") {
+        const options = {
+          upload_preset: "ojyuicnt",
+          unsigned: true,
+        };
+
+        await upload(cld, {
+          file: image,
+          options: options,
+          callback: async (error: any, response: any) => {
+            if (error) {
+              console.error("Upload error:", error);
+              return;
+            }
+
+            await fetch(`${API_URL}user/${userId}`, {
+              method: "PATCH",
+              headers: {
+                "Friends-Life-Signature": generateHmacSignature(
+                  JSON.stringify({ profilePicture: response.secure_url }),
+                  API_SECRET
+                ),
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ profilePicture: response.secure_url }),
+            });
           },
         });
-        const userData = await response.json();
-        const id = userData._id;
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+    }
+  };
+
+  const onSave = async () => {
+    try {
+      setDisabled(true);
+      if (user) {
+        if (imageChanged) await cloudinaryUpload();
 
         const userBody = {
           name: form.fullName,
           phoneNumber: form.phoneNumber,
-          profilePicture: image.profilePicture
         };
 
         const signature = generateHmacSignature(
@@ -94,7 +119,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
           API_SECRET
         );
 
-        const updateResponse = await fetch(`${API_URL}user/${userId}`, {
+        await fetch(`${API_URL}user/${userId}`, {
           method: "PATCH",
           headers: {
             "Friends-Life-Signature": signature,
@@ -103,6 +128,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
           body: JSON.stringify(userBody),
         });
       }
+      setDisabled(false);
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error("Error: " + error.message);
@@ -113,37 +139,41 @@ const EditProfile = ({ navigation }: RouterProps) => {
   };
 
   const pickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    setImageChanged(true);
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissionResult.granted === false) {
-      alert('Permission to access camera roll is required!');
+      alert("Permission to access camera roll is required!");
       return;
     }
-  
-    let pickerResult = await ImagePicker.launchImageLibraryAsync({
+
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-  
-    if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
-      setImage({ ...image, profilePicture: pickerResult.assets[0].uri });
+
+    if (
+      !pickerResult.canceled &&
+      pickerResult.assets &&
+      pickerResult.assets.length > 0
+    ) {
+      setImage(pickerResult.assets[0].uri);
     }
   };
-  
-  
 
-  
-
-  useEffect(() => {
-    fetchInitialData();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      setImageChanged(false);
+      fetchInitialData();
+    }, [])
+  );
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
+      style={styles.container}>
       <SafeAreaView>
         <ScrollView>
           <View style={styles.headerContainer}>
@@ -156,13 +186,14 @@ const EditProfile = ({ navigation }: RouterProps) => {
           <View style={styles.profileContainer}>
             <Image
               source={
-                image.profilePicture && image.profilePicture.trim() !== ""
-                  ? { uri: image.profilePicture }
+                image && image.trim() !== ""
+                  ? { uri: image }
                   : DefaultProfilePicture
               }
               style={styles.image}
             />
-            <TouchableOpacity onPress={async () => {
+            <TouchableOpacity
+              onPress={async () => {
                 await pickImage();
               }}>
               <Image source={CameraIcon} style={styles.cameraIcon}></Image>
@@ -187,7 +218,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
                 await onSave();
                 navigation.navigate("Profile");
               }}
-            >
+              disabled={disabled}>
               <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>
           </View>
