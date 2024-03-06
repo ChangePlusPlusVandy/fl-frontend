@@ -63,7 +63,7 @@ const NavBarStaff = () => {
             return (
               <Text
                 style={{
-                  fontSize: 15,
+                  fontSize: 14,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
                 }}>
