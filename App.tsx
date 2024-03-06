@@ -7,16 +7,15 @@ import Profile from "./app/screens/Profile";
 import EditProfile from "./app/screens/EditProfile";
 import NewPost from "./app/screens/NewPost";
 import Launch from "./app/screens/Launch";
-import UserHome from "./app/screens/UserHome";
 import Report from "./app/screens/Report";
 import Messages from "./app/screens/Messages";
 import NewFriendReport from "./app/screens/NewFriendReport";
+import ForgotPassword from "./app/screens/ForgotPassword";
 
 const Stack = createNativeStackNavigator();
 import { NavigationContainer } from "@react-navigation/native";
 import NavBarFamily from "./app/components/NavBarFamily";
 import NavBarStaff from "./app/components/NavBarStaff";
-import { API_SECRET } from "@env";
 import AttendanceHistory from "./app/screens/AttendanceHistory";
 import { StatusBar } from "react-native";
 
@@ -35,6 +34,11 @@ export default function App() {
           <Stack.Screen
             name="SignIn"
             component={SignIn}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ForgotPassword"
+            component={ForgotPassword}
             options={{ headerShown: false }}
           />
           <Stack.Screen
