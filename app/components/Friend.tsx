@@ -24,13 +24,17 @@ const Friend: React.FC<FriendProps> = ({ friend, navigation }) => {
 
   return (
     <TouchableOpacity onPress={handlePress}>
-      <View style={[styles.friendItem, { backgroundColor: "#F89B40" }]}>
-        <Image
-          source={{
-            uri: "https://res.cloudinary.com/dvrcdxqex/image/upload/v1707870630/defaultProfilePic.png",
-          }}
-          style={styles.profileImage}
-        />
+      <View style={styles.friendItem}>
+        <View style={styles.profileImage}>
+          <Image
+            source={{
+              uri: friend.profilePicture
+                ? friend.profilePicture
+                : "https://res.cloudinary.com/dvrcdxqex/image/upload/v1707870630/defaultProfilePic.png",
+            }}
+            style={{ width: 50, height: 50 }}
+          />
+        </View>
         <View style={styles.friendDetails}>
           <Text style={styles.friendName}>{friendName}</Text>
         </View>
@@ -46,11 +50,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 10,
     padding: 16, // Added padding to match the style
+    backgroundColor: "#fff",
+    borderColor: "#000",
+    borderWidth: 1,
   },
   profileImage: {
     width: 50,
     height: 50,
     borderRadius: 25,
+    overflow: "hidden",
+    backgroundColor: "white",
   },
   friendDetails: {
     marginLeft: 15,

@@ -170,7 +170,7 @@ const AttendanceNavigator = ({ navigation }: RouterProps) => {
           name="AttendanceHistory"
           component={AttendanceHistory}
           options={{
-            headerTitle: "Attendence Record",
+            headerTitle: "Attendance Record",
             headerBackTitle: "Back",
           }}
         />
@@ -178,7 +178,7 @@ const AttendanceNavigator = ({ navigation }: RouterProps) => {
           name="DayAttendance"
           component={DayAttendance}
           options={{
-            headerTitle: "Attendence - Date",
+            headerTitle: "Attendance - Date",
             headerBackTitle: "Back",
           }}
         />
