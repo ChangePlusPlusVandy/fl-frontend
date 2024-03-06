@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Image } from "react-native";
+import { StyleSheet, View, Image, Alert } from "react-native";
 import logo from "../../assets/logo-with-title.png";
 import { API_SECRET, API_URL } from "@env";
 import { generateHmacSignature } from "../utils/signature";
 
-import { NavigationProp, Router } from "@react-navigation/native";
+import { NavigationProp } from "@react-navigation/native";
 import useAuthStore from "../stores/auth";
 
 interface RouterProps {
@@ -12,13 +12,13 @@ interface RouterProps {
 }
 
 export default function Launch({ navigation }: RouterProps) {
-  const { user, userId } = useAuthStore();
+  const { user, userId, logout } = useAuthStore();
   const [userType, setUserType] = useState(undefined);
+  const [approved, setApproved] = useState(false);
 
   useEffect(() => {
     const onSuccessfulSignIn = async () => {
       try {
-        // Fetch user data
         const userData = await fetch(`${API_URL}user/${userId}`, {
           method: "GET",
           headers: {
@@ -29,8 +29,17 @@ export default function Launch({ navigation }: RouterProps) {
           },
         });
 
-        // Parse user data
         const userInfo = await userData.json();
+
+        if (!userInfo.approved) {
+          Alert.alert(
+            "Account not approved",
+            "Your account has not been approved yet. Please contact the admin or email friendslifedev@gmail.com for more information."
+          );
+          await logout();
+          return;
+        }
+
         setUserType(userInfo.type);
       } catch (error) {
         console.error("Error getting user type:", error);

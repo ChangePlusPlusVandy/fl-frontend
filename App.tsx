@@ -23,8 +23,6 @@ import useAuthStore from "./app/stores/auth";
 export default function App() {
   const { userId } = useAuthStore();
 
-  const [user, setUser] = useState("family");
-  console.log(userId);
   return (
     <>
       <StatusBar backgroundColor="#000000" barStyle="dark-content" />
