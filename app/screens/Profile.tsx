@@ -1,4 +1,4 @@
-import useAuthStore, { SignInProps } from "../stores/auth";
+import useAuthStore from "../stores/auth";
 import {
   View,
   Text,
@@ -9,22 +9,27 @@ import {
   Alert,
   Linking,
 } from "react-native";
-import React, { useState, useEffect, useCallback } from "react";
-import { useFocusEffect } from '@react-navigation/native';
+import React, { useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import HelpIcon from "../../assets/helpicon.png";
 import ChangePasswordIcon from "../../assets/passwordicon.png";
 import AboutIcon from "../../assets/infoicon.png";
 import LogoutIcon from "../../assets/logouticon.png";
 import Arrow from "../../assets/arrow.png";
 import DefaultProfilePicture from "../../assets/DefaultProfilePicture.png";
-
+import { sendPasswordResetEmail, getAuth } from "firebase/auth";
+import { useFirebase } from "../firebase";
 import { NavigationProp } from "@react-navigation/native";
 import BackButton from "../components/BackButton";
 import { API_URL, API_SECRET } from "@env";
 import { generateHmacSignature } from "../utils/signature";
+
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
+
+const firebase = useFirebase();
+const auth = getAuth(firebase);
 
 const Profile = ({ navigation }: RouterProps) => {
   const { user } = useAuthStore();
@@ -38,26 +43,25 @@ const Profile = ({ navigation }: RouterProps) => {
 
   useFocusEffect(
     React.useCallback(() => {
-    const fetchDetailsAsync = async () => {
-      try {
-        const fetchedDetails = await fetchUserData(); // Make sure this is correctly typed or casted
+      const fetchDetailsAsync = async () => {
+        try {
+          const fetchedDetails = await fetchUserData(); // Make sure this is correctly typed or casted
 
-        if (fetchedDetails) {
-          setUserDetails({
-            name: fetchedDetails.name,
-            emailAddress: fetchedDetails.emailAddress,
-            profilePicture: fetchedDetails.profilePicture,
-          });
+          if (fetchedDetails) {
+            setUserDetails({
+              name: fetchedDetails.name,
+              emailAddress: fetchedDetails.emailAddress,
+              profilePicture: fetchedDetails.profilePicture,
+            });
+          }
+        } catch (error) {
+          console.error("Failed to fetch user details:", error);
         }
-      } catch (error) {
-        console.error("Failed to fetch user details:", error);
-      }
-    };
+      };
 
-    fetchDetailsAsync();
-  }, [])
+      fetchDetailsAsync();
+    }, [])
   );
-  
 
   const onLogout = async () => {
     try {
@@ -75,7 +79,6 @@ const Profile = ({ navigation }: RouterProps) => {
       [
         {
           text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
           style: "cancel",
         },
         {
@@ -98,6 +101,25 @@ const Profile = ({ navigation }: RouterProps) => {
         },
         {
           text: "OK",
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const changePassword = async () => {
+    Alert.alert(
+      "Password Reset",
+      "Are you sure you want to change your password?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: async () =>
+            await sendPasswordResetEmail(auth, userDetails.emailAddress),
         },
       ],
       { cancelable: false }
@@ -159,7 +181,7 @@ const Profile = ({ navigation }: RouterProps) => {
           <Image source={HelpIcon} style={styles.icon}></Image>
           <Text style={styles.optionText}>Help and Feedback</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.option}>
+        <TouchableOpacity style={styles.option} onPress={changePassword}>
           <Image source={ChangePasswordIcon} style={styles.icon}></Image>
           <Text style={styles.optionText}>Change password</Text>
         </TouchableOpacity>

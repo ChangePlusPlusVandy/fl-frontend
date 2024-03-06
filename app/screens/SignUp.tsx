@@ -27,7 +27,7 @@ const SignUp = ({ navigation }: RouterProps) => {
     password: "",
     confirmPassword: "",
     username: "",
-    type: "Staff",
+    type: "Family",
   });
   const { user, createAccount } = useAuthStore();
   const [secure, setSecure] = useState(true);
@@ -95,7 +95,7 @@ const SignUp = ({ navigation }: RouterProps) => {
                 onChangeText={(text) => updateForm({ emailAddress: text })}
               />
 
-              <Text style={styles.boxLabel}>Username</Text>
+              <Text style={styles.boxLabel}>Full Name</Text>
               <TextInput
                 style={styles.input}
                 value={form.username}

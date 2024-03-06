@@ -17,8 +17,6 @@ import { NavigationProp } from "@react-navigation/native";
 import { Dimensions } from "react-native";
 
 import FLlogo from "../../assets/friends-life-logo.png";
-import OpenEye from "../../assets/OpenEye.png";
-import ClosedEye from "../../assets/Eye-slash.png";
 import useAuthStore, { SignInProps } from "../stores/auth";
 import { generateHmacSignature } from "../utils/signature";
 import { API_URL, API_SECRET } from "@env";
@@ -137,7 +135,11 @@ const SignIn = ({ navigation }: RouterProps) => {
             </TouchableOpacity> */}
 
               <View style={styles.forgotPasswordWrap}>
-                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+                <Text
+                  style={styles.forgotPassword}
+                  onPress={() => navigation.navigate("ForgotPassword")}>
+                  Forgot Password?
+                </Text>
               </View>
 
               <TouchableOpacity style={styles.loginBox} onPress={onLogin}>
