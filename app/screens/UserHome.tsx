@@ -9,13 +9,13 @@ import {
   ScrollView,
 } from "react-native";
 import { NavigationProp } from "@react-navigation/native";
-import ProfilePic from "../../assets/User_circle.png";
 import Post from "../components/Post";
 import { generateHmacSignature } from "../utils/signature";
 import { API_URL, API_SECRET } from "@env";
 import moment from "moment";
 import useAuthStore from "../stores/auth";
 import { useFocusEffect } from "@react-navigation/native";
+import { Dimensions } from "react-native";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -30,9 +30,13 @@ interface PostItem {
 }
 
 const UserHome = ({ navigation }: RouterProps) => {
-  const [name, setName] = useState("Name");
   const [posts, setPosts] = useState<PostItem[]>([]);
   const { userId } = useAuthStore();
+  const [userDetails, setUserDetails] = useState({
+    name: "",
+    profilePicture:
+      "https://res.cloudinary.com/dvrcdxqex/image/upload/v1707870630/defaultProfilePic.png",
+  });
 
   useFocusEffect(
     React.useCallback(() => {
@@ -70,7 +74,7 @@ const UserHome = ({ navigation }: RouterProps) => {
         }
       };
 
-      const updateName = async () => {
+      const updateUserInfo = async () => {
         try {
           const userData = await fetch(`${API_URL}user/${userId}`, {
             method: "GET",
@@ -83,13 +87,16 @@ const UserHome = ({ navigation }: RouterProps) => {
           });
 
           const userInfo = await userData.json();
-          setName(userInfo.name.split(" ")[0]);
+          setUserDetails({
+            name: userInfo.name.split(" ")[0],
+            profilePicture: userInfo.profilePicture,
+          });
         } catch (error) {
           console.error("Error getting name:", error);
         }
       };
 
-      updateName();
+      updateUserInfo();
       fetchPosts();
     }, [])
   );
@@ -126,13 +133,19 @@ const UserHome = ({ navigation }: RouterProps) => {
     <SafeAreaView style={styles.container}>
       <ScrollView>
         <View style={styles.headerContainer}>
-          <Text style={styles.headerText}>Welcome </Text>
-          <Text style={styles.nameText}>{name}!</Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Profile")}
-            style={styles.profilePic}>
-            <Image source={ProfilePic} />
-          </TouchableOpacity>
+          <View style={styles.nameWrapper}>
+            <Text style={styles.headerText}>Welcome </Text>
+            <Text style={styles.nameText}>{userDetails.name}!</Text>
+          </View>
+
+          <View style={styles.profilePic}>
+            <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+              <Image
+                source={{ uri: userDetails.profilePicture }}
+                style={styles.profileImage}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {posts.map((post) => (
@@ -150,8 +163,11 @@ const UserHome = ({ navigation }: RouterProps) => {
   );
 };
 
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   headerContainer: {
+    position: "relative",
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
@@ -159,6 +175,14 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     borderBottomWidth: 2,
     borderBottomColor: "grey",
+    width: width,
+  },
+  nameWrapper: {
+    width: width * 0.7,
+    position: "relative",
+    flexDirection: "row",
+    alignItems: "center",
+    height: height * 0.04,
   },
   headerText: {
     fontSize: 25,
@@ -174,7 +198,19 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   profilePic: {
-    marginLeft: "auto",
+    position: "relative",
+    marginRight: 0,
+    width: 0.3 * width,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  profileImage: {
+    overflow: "hidden",
+    borderRadius: 100,
+    resizeMode: "cover",
+    width: width * 0.15,
+    height: width * 0.15,
   },
 });
 
