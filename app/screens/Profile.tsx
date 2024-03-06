@@ -66,7 +66,7 @@ const Profile = ({ navigation }: RouterProps) => {
   const onLogout = async () => {
     try {
       await logout();
-      navigation.navigate("SignIn");
+      // navigation.navigate("SignIn");
     } catch (error) {
       alert("Error logging out");
     }

@@ -42,47 +42,46 @@ const SignIn = ({ navigation }: RouterProps) => {
     return unsubscribe;
   }, [navigation]);
 
-  useEffect(() => {
-    const onSuccessfulSignIn = async () => {
-      try {
-        // Fetch user data
-        const userData = await fetch(`${API_URL}user/${userId}`, {
-          method: "GET",
-          headers: {
-            "Friends-Life-Signature": generateHmacSignature(
-              JSON.stringify({ userId: userId }),
-              API_SECRET
-            ),
-          },
-        });
+  // useEffect(() => {
+  //   const onSuccessfulSignIn = async () => {
+  //     try {
+  //       // Fetch user data
+  //       const userData = await fetch(`${API_URL}user/${userId}`, {
+  //         method: "GET",
+  //         headers: {
+  //           "Friends-Life-Signature": generateHmacSignature(
+  //             JSON.stringify({ userId: userId }),
+  //             API_SECRET
+  //           ),
+  //         },
+  //       });
 
-        // Parse user data
-        const userInfo = await userData.json();
-        setUserType(userInfo.type);
-      } catch (error) {
-        console.error("Error getting user type:", error);
-        // Handle error fetching user data
-      }
-    };
+  //       // Parse user data
+  //       const userInfo = await userData.json();
+  //       setUserType(userInfo.type);
+  //     } catch (error) {
+  //       console.error("Error getting user type:", error);
+  //       // Handle error fetching user data
+  //     }
+  //   };
 
-    // If user is not null, attempt to fetch user data
-    if (user) {
-      onSuccessfulSignIn();
-    }
-  }, [user, userId]); // Run this effect whenever user or userId changes
+  //   // If user is not null, attempt to fetch user data
+  //   if (user) {
+  //     onSuccessfulSignIn();
+  //   }
+  // }, [user, userId]); // Run this effect whenever user or userId changes
 
-  useEffect(() => {
-    console.log("User Type: " + userType);
-    if (userType !== undefined) {
-      if (userType === "Staff") {
-        navigation.navigate("StaffTabs");
-      } else if (userType === "Family") {
-        navigation.navigate("UserTabs");
-      } else {
-        alert("Could not verify account type successfully");
-      }
-    }
-  }, [userType, navigation]);
+  // useEffect(() => {
+  //   if (userType !== undefined) {
+  //     if (userType === "Staff") {
+  //       navigation.navigate("StaffTabs");
+  //     } else if (userType === "Family") {
+  //       navigation.navigate("UserTabs");
+  //     } else {
+  //       alert("Could not verify account type successfully");
+  //     }
+  //   }
+  // }, [userType, navigation]);
 
   const onLogin = async () => {
     const { emailAddress, password } = form;
