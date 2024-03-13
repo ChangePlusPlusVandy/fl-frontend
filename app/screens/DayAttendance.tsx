@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,15 +11,145 @@ import {
 } from "react-native";
 import searchIcon from "../../assets/search.png";
 import AttendanceSingle from "../components/AttendanceSingle";
-import { NavigationProp } from "@react-navigation/native";
+import { NavigationProp, RouteProp, useRoute } from "@react-navigation/native";
 import DayAttendanceSingle from "../components/DayAttendanceSingle";
+import { API_SECRET, API_URL } from "@env";
+import { generateHmacSignature } from "../utils/signature";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
+type DayScreenRouteProp = {
+  Day: { date: string };
+};
+
+interface AttendanceItem {
+  __v: number;
+  _id: string;
+  createdAt: string;
+  date: string;
+  friendId: string;
+  timeIns: string[];
+  timeOuts: string[];
+  updatedAt: string;
+}
+
+interface AttendanceData {
+  friendId: string;
+  timeIns: string[];
+  timeOuts: string[];
+  friendName: string;
+}
+
 const DayAttendance = ({ navigation }: RouterProps) => {
   const [searchValue, setSearchValue] = useState("");
+  const [display, setDisplay] = useState<AttendanceData[]>([]);
+  const [filteredDisplay, setFilteredDisplay] = useState<AttendanceData[]>([]);
+  const route = useRoute<RouteProp<DayScreenRouteProp, "Day">>();
+  const { date } = route.params;
+
+  useEffect(() => {
+    let tempAttendance: AttendanceItem[] = [];
+
+    const getAttendance = async () => {
+      try {
+        const filterObject = { date: date };
+        const filterString = JSON.stringify(filterObject);
+        const encodedFilterString = encodeURIComponent(filterString);
+
+        const signature = generateHmacSignature(
+          JSON.stringify({ filter: `{"date":"${date}"}` }),
+          API_SECRET
+        );
+
+        const response = await fetch(
+          `${API_URL}attendance?filter=${encodedFilterString}`,
+          {
+            method: "GET",
+            headers: {
+              "Friends-Life-Signature": signature,
+            },
+          }
+        );
+        const res = await response.json();
+        tempAttendance = res;
+        fetchData();
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getAttendance();
+
+    const getFriendById = async (friendId: string) => {
+      try {
+        const signature = generateHmacSignature(
+          JSON.stringify({ friendId: friendId }),
+          API_SECRET
+        );
+
+        const response = await fetch(`${API_URL}friend/${friendId}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": signature,
+          },
+        });
+
+        const res = await response.json();
+        return res;
+      } catch (error) {
+        console.error("Error fetching friend:", error);
+        return null;
+      }
+    };
+
+    const fetchData = async () => {
+      const newData: AttendanceData[] = [];
+
+      await Promise.all(
+        tempAttendance.map(async (obj) => {
+          const { friendId, timeIns, timeOuts } = obj;
+          try {
+            const friend = await getFriendById(friendId);
+            if (friend && friend.friendName) {
+              newData.push({
+                friendId,
+                timeIns,
+                timeOuts,
+                friendName: friend.friendName,
+              });
+            } else {
+              console.log(`Friend information not found for ${friendId}`);
+            }
+          } catch (error) {
+            console.error("Error fetching friend:", error);
+          }
+        })
+      );
+
+      setDisplay(newData);
+      setFilteredDisplay(newData);
+    };
+  }, []);
+
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+
+    const filteredDisplay = display
+      .filter((item) => {
+        const friendName = item.friendName.toLowerCase() || "";
+        return friendName.includes(value.toLowerCase());
+      })
+      .map(({ friendId, timeIns, timeOuts, friendName }) => ({
+        friendId,
+        timeIns,
+        timeOuts,
+        friendName,
+      }));
+
+    setFilteredDisplay(filteredDisplay);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.topBar}>
@@ -27,7 +157,7 @@ const DayAttendance = ({ navigation }: RouterProps) => {
           <Image source={searchIcon} style={{ width: 30, height: 30 }}></Image>
           <TextInput
             placeholder="Search"
-            onChangeText={(newValue) => setSearchValue(newValue)}
+            onChangeText={handleSearch}
             defaultValue={searchValue}
             style={styles.searchInput}
           ></TextInput>
@@ -40,9 +170,14 @@ const DayAttendance = ({ navigation }: RouterProps) => {
         </TouchableOpacity>
       </View>
       <ScrollView style={styles.attendanceContainer}>
-        <DayAttendanceSingle />
-        <DayAttendanceSingle />
-        <DayAttendanceSingle />
+        {filteredDisplay.map((item) => (
+          <DayAttendanceSingle
+            key={item.friendId}
+            friendName={item.friendName}
+            timeIn={item.timeIns}
+            timeOut={item.timeOuts}
+          />
+        ))}
       </ScrollView>
     </SafeAreaView>
   );

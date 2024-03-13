@@ -19,39 +19,61 @@ interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
+interface FriendData {
+  friendName: string;
+  friendId: string;
+  attendance: [string];
+}
+
 const Attendance = ({ navigation }: RouterProps) => {
-  const getAttendance = async () => {
+  const [friends, setFriends] = useState<FriendData[]>([]);
+  const [filteredFriends, setFilteredFriends] = useState<FriendData[]>([]);
+  const [searchValue, setSearchValue] = useState("");
+
+  const getFriends = async () => {
     try {
-      const today = new Date();
-
-      const formattedDate = today.toISOString().split("T")[0];
-
-      const queryString: string = `date=${formattedDate}`;
-      console.log(queryString);
-
       const signature = generateHmacSignature("GET", API_SECRET);
-      const response = await fetch(
-        `https://fl-backend.vercel.app/attendance?${queryString}`,
-        {
-          method: "GET",
-          headers: {
-            "Friends-Life-Signature": signature,
-          },
-          // date: { $gte: new Date("2024-01-01"), $lte: new Date("2024-12-31") },
-          // status: "present",
-        }
-      );
+
+      const response = await fetch(`${API_URL}/friend`, {
+        method: "GET",
+        headers: {
+          "Friends-Life-Signature": signature,
+        },
+      });
       const res = await response.json();
-      console.log(res);
+
+      const extractedFriends: FriendData[] = res.map((friend: any) => ({
+        friendName: friend.friendName,
+        friendId: friend._id,
+        attendance: friend.attendance,
+      }));
+
+      setFriends(extractedFriends);
+      setFilteredFriends(extractedFriends);
     } catch (error) {
-      console.log(error);
+      console.error("Error");
     }
   };
 
-  const [searchValue, setSearchValue] = useState("");
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+
+    const filteredDisplay = friends
+      .filter((item) => {
+        const friendName = item.friendName.toLowerCase() || "";
+        return friendName.includes(value.toLowerCase());
+      })
+      .map(({ friendId, attendance, friendName }) => ({
+        friendId,
+        attendance,
+        friendName,
+      }));
+
+    setFilteredFriends(filteredDisplay);
+  };
 
   useEffect(() => {
-    getAttendance();
+    getFriends();
   }, []);
 
   return (
@@ -61,7 +83,7 @@ const Attendance = ({ navigation }: RouterProps) => {
           <Image source={searchIcon} style={{ width: 30, height: 30 }}></Image>
           <TextInput
             placeholder="Search"
-            onChangeText={(newValue) => setSearchValue(newValue)}
+            onChangeText={handleSearch}
             defaultValue={searchValue}
             style={styles.searchInput}
           ></TextInput>
@@ -74,9 +96,14 @@ const Attendance = ({ navigation }: RouterProps) => {
         </TouchableOpacity>
       </View>
       <ScrollView style={styles.attendanceContainer}>
-        <AttendanceSingle />
-        <AttendanceSingle />
-        <AttendanceSingle />
+        {filteredFriends.map((friend) => (
+          <AttendanceSingle
+            key={friend.friendId}
+            friendId={friend.friendId}
+            friendName={friend.friendName}
+            attendanceIds={friend.attendance}
+          />
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
