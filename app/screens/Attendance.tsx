@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,13 +12,70 @@ import {
 import searchIcon from "../../assets/search.png";
 import AttendanceSingle from "../components/AttendanceSingle";
 import { NavigationProp } from "@react-navigation/native";
+import { generateHmacSignature } from "../utils/signature";
+import { API_URL, API_SECRET } from "@env";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
+interface FriendData {
+  friendName: string;
+  friendId: string;
+  attendance: [string];
+}
+
 const Attendance = ({ navigation }: RouterProps) => {
+  const [friends, setFriends] = useState<FriendData[]>([]);
+  const [filteredFriends, setFilteredFriends] = useState<FriendData[]>([]);
   const [searchValue, setSearchValue] = useState("");
+
+  const getFriends = async () => {
+    try {
+      const signature = generateHmacSignature("GET", API_SECRET);
+
+      const response = await fetch(`${API_URL}/friend`, {
+        method: "GET",
+        headers: {
+          "Friends-Life-Signature": signature,
+        },
+      });
+      const res = await response.json();
+
+      const extractedFriends: FriendData[] = res.map((friend: any) => ({
+        friendName: friend.friendName,
+        friendId: friend._id,
+        attendance: friend.attendance,
+      }));
+
+      setFriends(extractedFriends);
+      setFilteredFriends(extractedFriends);
+    } catch (error) {
+      console.error("Error");
+    }
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+
+    const filteredDisplay = friends
+      .filter((item) => {
+        const friendName = item.friendName.toLowerCase() || "";
+        return friendName.includes(value.toLowerCase());
+      })
+      .map(({ friendId, attendance, friendName }) => ({
+        friendId,
+        attendance,
+        friendName,
+      }));
+
+    setFilteredFriends(filteredDisplay);
+  };
+
+  useEffect(() => {
+    getFriends();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.topBar}>
@@ -26,7 +83,7 @@ const Attendance = ({ navigation }: RouterProps) => {
           <Image source={searchIcon} style={{ width: 30, height: 30 }}></Image>
           <TextInput
             placeholder="Search"
-            onChangeText={(newValue) => setSearchValue(newValue)}
+            onChangeText={handleSearch}
             defaultValue={searchValue}
             style={styles.searchInput}
           ></TextInput>
@@ -39,9 +96,14 @@ const Attendance = ({ navigation }: RouterProps) => {
         </TouchableOpacity>
       </View>
       <ScrollView style={styles.attendanceContainer}>
-        <AttendanceSingle />
-        <AttendanceSingle />
-        <AttendanceSingle />
+        {filteredFriends.map((friend) => (
+          <AttendanceSingle
+            key={friend.friendId}
+            friendId={friend.friendId}
+            friendName={friend.friendName}
+            attendanceIds={friend.attendance}
+          />
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
