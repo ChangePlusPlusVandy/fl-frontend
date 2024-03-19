@@ -24,23 +24,25 @@ interface RouterProps {
 }
 const Messages = ({navigation}: RouterProps) => {
   const route = useRoute();
+  const [recieverID, setRecieverID] = useState(route.params.recieverID)
   const {reciever, chatID} = route.params;
   const { userId } = useAuthStore();
 
   const [messages, setMessages] = useState<Message[]>([]);
   useEffect(()=>{
     setMessages([])
+
     const getChats = async () =>{
       try{
-
+        if(chatID){
         const chatResponse =  await fetch(`https://fl-backend.vercel.app/chat/${chatID}`, {
           method: "GET",
           headers: {
             "Friends-Life-Signature": generateHmacSignature(JSON.stringify({chatId: chatID}), API_SECRET),
           }
         })
-
       const chatJSON = await chatResponse.json();
+        setRecieverID(chatJSON.user1 ==userId? chatJSON.user2 : chatJSON.user2);
       const messagePromises = chatJSON.messages.map(async message => {
         const messageStr = String(message);
         console.log("Message" + messageStr);
@@ -59,13 +61,16 @@ const Messages = ({navigation}: RouterProps) => {
             time: messageJSON.timestamps,
         };
     });
-    Promise.all(messagePromises).then(messages => {
-        setMessages(prevMessages => [...messages, ...prevMessages]);
-        console.log(messages);
-    }).catch(error => {
-        console.log(error);
+    Promise.all(messagePromises)
+    .then(messages => {
+      setMessages(prevMessages => [...messages.reverse(), ...prevMessages]);
+      console.log(messages);
+    })
+    .catch(error => {
+      console.log(error);
     });
-  }    
+    console.log(messages)
+        }}
       catch(error){
         console.log(error)
       }
@@ -75,16 +80,40 @@ const Messages = ({navigation}: RouterProps) => {
     }, [])
   const [newMessage, setNewMessage] = useState("");
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (newMessage.trim() !== "") {
       const newMessageObj = {
         id: (messages.length + 1).toString(),
         text: newMessage,
         sender: "user",
       };
-      setMessages([...messages, newMessageObj]);
+      const body = JSON.stringify({
+        messageBody: newMessage,
+        chatId: chatID,
+        sender: userId,
+        recipient: recieverID,
+      })
+      console.log(body)
+      const response = await fetch(`${API_URL}message`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Friends-Life-Signature": generateHmacSignature(
+            body,
+            API_SECRET
+          ),
+        },
+        body: body,
+      })
+      console.log(response)
+    
+      setMessages([newMessageObj, ...messages]);
+
+
+      
       setNewMessage("");
     }
+  
   };
 
   return (

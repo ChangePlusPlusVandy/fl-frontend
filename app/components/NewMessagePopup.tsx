@@ -1,28 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, Image} from 'react-native';
 import { Modal,  FlatList} from 'react-native';
+import { NavigationProp } from "@react-navigation/native";
+import moment from "moment";
+import { API_SECRET, API_URL } from "@env";
+import { generateHmacSignature } from "../utils/signature";
+import useAuthStore from "../stores/auth";
 
 const NewMessagePopup = ({onClose, navigation }) => {
   const [searchText, setSearchText] = useState('');
+  const { userId } = useAuthStore();
 
-  // Sample user data (replace with your actual user data)
-  const users = [];
+  const [users, setUsers] = useState([]);
 
-  for (let i = 1; i <= 100; i++) {
-    const user = {
-      id: i,
-      name: `User ${i}`,
-      profileImage: require("../../assets/friends-life-logo.png"),
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(`${API_URL}/user`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature("GET", API_SECRET),
+          }
+        });
+        const userJSON = await response.json();
+        setUsers(userJSON); // Set the users array in the state
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
     };
-    users.push(user);
-  }
 
-  const handleUserClick = (user) => {
+    fetchUsers(); // Call the function to fetch users when the component mounts
+  }, []); 
+
+  const handleUserClick = async (user) => {
     // Close the popup
     onClose();
+    const chats = await fetch(`${API_URL}/chat`, {
+      method: "GET",
+      headers: {
+        "Friends-Life-Signature": generateHmacSignature("GET", API_SECRET),
+      }
+    });
+    const chatJSON = await chats.json();
 
+    for(const chat of chatJSON){
+      console.log(chat)
+
+      if((chat.user1 == userId && chat.user2 == user._id) || (chat.user1 == user._id && chat.user2 == userId)){
+        navigation.navigate('Messages', { reciever: user.name, chatID: chat._id });
+      }
+    }
     // Navigate to the Message component with the selected user
-    navigation.navigate('Messages', { reciever: user.name });
+    navigation.navigate('Messages', { reciever: user.name, chatID: undefined });
   };
 
   return (
@@ -39,11 +68,10 @@ const NewMessagePopup = ({onClose, navigation }) => {
         />
         <View style={styles.listContainer}>
         <FlatList style={styles.list}
- data = {users
-          .filter((user) =>
-            user.name.toLowerCase().includes(searchText.toLowerCase())
-          )}
-          keyExtractor={(item) => item.id.toString()}
+ data = {Array.isArray(users) ? users.filter((user) =>
+  user.name.toLowerCase().includes(searchText.toLowerCase())
+) : []}
+          keyExtractor={(item) => item._id.toString()}
           renderItem={({item})=>(<TouchableOpacity
             onPress={() => handleUserClick(item)}
             style={styles.userItem}
