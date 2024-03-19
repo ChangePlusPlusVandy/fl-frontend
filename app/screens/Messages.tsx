@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,57 +10,69 @@ import {
 import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome icons
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { NavigationProp, RouteProp } from "@react-navigation/native";
+import { generateHmacSignature } from "../utils/signature";
+import { API_SECRET, API_URL } from "@env";
+import useAuthStore from "../stores/auth";
+
+interface Message {
+  id: string;
+  sender: string,
+  text: string,
+  time: string}
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 const Messages = ({navigation}: RouterProps) => {
   const route = useRoute();
-  const personName = route.params?.reciever;
-  console.log(route);
-  //const navigation = useNavigation();
+  const {reciever, chatID} = route.params;
+  const { userId } = useAuthStore();
 
-  //note that these are listed from newest to oldest.
-  const [messages, setMessages] = useState([
-    { id: "1", text: "Hello!", sender: "user" },
-    { id: "2", text: "Hi there!", sender: "other" },
-    { id: "3", text: "How are you doing?", sender: "user" },
-    { id: "4", text: "I'm good, thanks!", sender: "other" },
-    { id: "5", text: "What have you been up to?", sender: "user" },
-    { id: "6", text: "Not much, just working.", sender: "other" },
-    { id: "7", text: "Do you have any plans for the weekend?", sender: "user" },
-    { id: "8", text: "I'm going to a concert on Saturday.", sender: "other" },
-    { id: "9", text: "Sounds like fun!", sender: "user" },
-    {
-      id: "10",
-      text: "Yes, I'm really looking forward to it.",
-      sender: "other",
-    },
-    { id: "11", text: "What kind of music do you like?", sender: "user" },
-    { id: "12", text: "I enjoy rock and pop music.", sender: "other" },
-    { id: "13", text: "Cool, I'm a fan of those genres too.", sender: "user" },
-    {
-      id: "14",
-      text: "We should go to a concert together sometime.",
-      sender: "other",
-    },
-    { id: "15", text: "That sounds like a great idea!", sender: "user" },
-    { id: "16", text: "I'll check for upcoming concerts.", sender: "user" },
-    { id: "17", text: "Sure, let me know!", sender: "other" },
-    { id: "18", text: "Hey, did you watch that new movie?", sender: "user" },
-    { id: "19", text: "Not yet, but I heard it's good.", sender: "other" },
-    { id: "20", text: "We should watch it together sometime.", sender: "user" },
-    { id: "21", text: "Definitely, I'm up for it!", sender: "other" },
-    { id: "22", text: "What time works for you?", sender: "user" },
-    { id: "23", text: "How about Saturday evening?", sender: "other" },
-    { id: "24", text: "Sounds perfect!", sender: "user" },
-    { id: "25", text: "I'll bring some snacks.", sender: "user" },
-    { id: "26", text: "Great, I'll bring drinks!", sender: "other" },
-    { id: "27", text: "Looking forward to it!", sender: "user" },
-    { id: "28", text: "Me too, it'll be fun!", sender: "other" },
-    { id: "29", text: "Hey, how's it going?", sender: "user" },
-    { id: "30", text: "I'm good, thanks! How about you?", sender: "other" },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  useEffect(()=>{
+    setMessages([])
+    const getChats = async () =>{
+      try{
 
+        const chatResponse =  await fetch(`https://fl-backend.vercel.app/chat/${chatID}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature(JSON.stringify({chatId: chatID}), API_SECRET),
+          }
+        })
+
+      const chatJSON = await chatResponse.json();
+      const messagePromises = chatJSON.messages.map(async message => {
+        const messageStr = String(message);
+        console.log("Message" + messageStr);
+        const messageResponse = await fetch(`https://fl-backend.vercel.app/message/${messageStr}`, {
+            method: "GET",
+            headers: {
+                "Friends-Life-Signature": generateHmacSignature(JSON.stringify({ messageId: message }), API_SECRET),
+            }
+        });
+        const messageJSON = await messageResponse.json();
+        console.log(messageJSON);
+        return {
+            id: messageStr,
+            text: messageJSON.messageBody,
+            sender: messageJSON.sender == userId ? "user" : "other",
+            time: messageJSON.timestamps,
+        };
+    });
+    Promise.all(messagePromises).then(messages => {
+        setMessages(prevMessages => [...messages, ...prevMessages]);
+        console.log(messages);
+    }).catch(error => {
+        console.log(error);
+    });
+  }    
+      catch(error){
+        console.log(error)
+      }
+    }
+
+    getChats();
+    }, [])
   const [newMessage, setNewMessage] = useState("");
 
   const sendMessage = () => {
@@ -70,8 +82,7 @@ const Messages = ({navigation}: RouterProps) => {
         text: newMessage,
         sender: "user",
       };
-      setMessages([newMessageObj, ...messages]);
-      console.log(messages);
+      setMessages([...messages, newMessageObj]);
       setNewMessage("");
     }
   };
@@ -82,12 +93,12 @@ const Messages = ({navigation}: RouterProps) => {
         <TouchableOpacity onPress={() => navigation.navigate("Conversations")}>
           <FontAwesome name="arrow-left" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{personName}</Text>
+        <Text style={styles.headerTitle}>{reciever}</Text>
       </View>
       <View style={styles.divider} />
       <FlatList
         data={messages}
-        //keyExtractor={item => item.id}
+        keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <View
             style={
@@ -97,7 +108,6 @@ const Messages = ({navigation}: RouterProps) => {
           </View>
         )}
         inverted={true}
-        
         showsVerticalScrollIndicator={false}
       />
       <View style={styles.messageInputContainer}>

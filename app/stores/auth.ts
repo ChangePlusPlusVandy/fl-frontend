@@ -9,6 +9,7 @@ import { create } from "zustand";
 import { useFirebase } from "../firebase";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
+import { Alert } from "react-native";
 
 export interface CreateUserProps {
   username: string;
@@ -25,6 +26,7 @@ export interface SignInProps {
 
 interface AuthStore {
   user: User | null;
+  userId: string | null;
   createAccount: ({
     username,
     emailAddress,
@@ -40,6 +42,7 @@ const auth = getAuth(firebase);
 
 const useAuthStore = create<AuthStore>((set) => ({
   user: null,
+  userId: null,
   createAccount: async ({
     username,
     emailAddress,
@@ -66,9 +69,8 @@ const useAuthStore = create<AuthStore>((set) => ({
         },
         body: body,
       });
-      console.log(await data.json());
-      set({ user });
     } catch (e) {
+      Alert.alert("Invalid sign up. Please try again.");
       console.log(e);
     }
   },
@@ -79,8 +81,22 @@ const useAuthStore = create<AuthStore>((set) => ({
         emailAddress,
         password
       );
+
+      const userData = await fetch(`${API_URL}user/firebase/${user.uid}`, {
+        method: "GET",
+        headers: {
+          "Friends-Life-Signature": generateHmacSignature(
+            JSON.stringify({ firebaseId: user.uid }),
+            API_SECRET
+          ),
+        },
+      });
+      const userId = (await userData.json())._id;
+
       set({ user });
+      set({ userId });
     } catch (error) {
+      Alert.alert("Invalid credentials. Please try again.");
       console.log(error);
     }
   },
@@ -95,6 +111,7 @@ const useAuthStore = create<AuthStore>((set) => ({
       }
 
       set({ user: null });
+      set({ userId: null });
     } catch (error) {
       console.log(error);
     }
