@@ -117,25 +117,26 @@ const Report = ({ route, navigation }: RouterProps) => {
         </TouchableOpacity>
         <Text style={styles.nameText}>{friend.friendName.split(" ")[0]}</Text>
       </View>
-      <ScrollView>
-        <View style={styles.buttonContainer}>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.edit}
+          onPress={() =>
+            navigation.navigate("AttendanceHistory", { friend: friend })
+          }>
+          <Text style={styles.editText}>View Attendance</Text>
+        </TouchableOpacity>
+        {showNewReport && (
           <TouchableOpacity
             style={styles.edit}
             onPress={() =>
-              navigation.navigate("AttendanceHistory", { friend: friend })
+              navigation.navigate("NewFriendReport", { friend: friend })
             }>
-            <Text style={styles.editText}>View Attendance</Text>
+            <Text style={styles.editText}>Write New Report</Text>
           </TouchableOpacity>
-          {showNewReport && (
-            <TouchableOpacity
-              style={styles.edit}
-              onPress={() =>
-                navigation.navigate("NewFriendReport", { friend: friend })
-              }>
-              <Text style={styles.editText}>Write New Report</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        )}
+      </View>
+      <Text style={styles.reportHeader}>Reports</Text>
+      <ScrollView>
         {reports.map((report) => (
           <ReportComponent
             key={report._id}
@@ -195,6 +196,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 40,
     paddingBottom: 25,
+  },
+  reportHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
   },
 });
 
