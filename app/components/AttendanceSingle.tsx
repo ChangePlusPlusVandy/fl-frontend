@@ -16,6 +16,7 @@ interface FriendData {
   friendName: string;
   friendId: string;
   attendanceIds: [string];
+  profilePicture: any;
 }
 
 interface AttendanceData {
@@ -31,6 +32,7 @@ const AttendanceSingle = ({
   friendName,
   friendId,
   attendanceIds,
+  profilePicture,
 }: FriendData) => {
   const [T, setT] = useState(false);
   const toggleT = () => setT((previousState) => !previousState);
@@ -225,7 +227,14 @@ const AttendanceSingle = ({
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <Image source={friendPFP} style={{ width: 60, height: 60 }}></Image>
+        <Image
+          source={{
+            uri: profilePicture
+              ? profilePicture
+              : "https://res.cloudinary.com/dvrcdxqex/image/upload/v1707870630/defaultProfilePic.png",
+          }}
+          style={{ width: 80, height: 80 }}
+        ></Image>
       </View>
 
       <View>
@@ -315,6 +324,7 @@ const styles = StyleSheet.create({
     height: 80,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
   buttonContainer: {
     flexDirection: "row",

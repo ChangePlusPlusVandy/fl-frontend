@@ -16,6 +16,7 @@ import AttendanceHistory from "../screens/AttendanceHistory";
 import BackButton from "./BackButton";
 import { Header } from "react-native/Libraries/NewAppScreen";
 import DayAttendance from "../screens/DayAttendance";
+import DayAttendanceUser from "../screens/DayAttendanceUser";
 const Stack = createNativeStackNavigator();
 
 const Tab = createBottomTabNavigator();
@@ -23,7 +24,8 @@ const Tab = createBottomTabNavigator();
 const NavBarStaff = () => {
   return (
     <Tab.Navigator
-      screenOptions={{ tabBarStyle: { height: 90 }, headerShown: false }}>
+      screenOptions={{ tabBarStyle: { height: 90 }, headerShown: false }}
+    >
       <Tab.Screen
         name="Home"
         component={Home}
@@ -35,7 +37,8 @@ const NavBarStaff = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}>
+                }}
+              >
                 Home
               </Text>
             );
@@ -48,7 +51,8 @@ const NavBarStaff = () => {
                   width: 28,
                   height: 30,
                   tintColor: color,
-                }}></Image>
+                }}
+              ></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
@@ -66,7 +70,8 @@ const NavBarStaff = () => {
                   fontSize: 14,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}>
+                }}
+              >
                 Attendance
               </Text>
             );
@@ -79,7 +84,8 @@ const NavBarStaff = () => {
                   width: 35,
                   height: 35,
                   tintColor: color,
-                }}></Image>
+                }}
+              ></Image>
             );
           },
           headerShown: false,
@@ -98,7 +104,8 @@ const NavBarStaff = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}>
+                }}
+              >
                 Messages
               </Text>
             );
@@ -111,7 +118,8 @@ const NavBarStaff = () => {
                   width: 40,
                   height: 40,
                   tintColor: color,
-                }}></Image>
+                }}
+              ></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
@@ -129,7 +137,8 @@ const NavBarStaff = () => {
                   fontSize: 15,
                   marginTop: -10,
                   color: focused ? "black" : "#D9D9D9",
-                }}>
+                }}
+              >
                 Friends
               </Text>
             );
@@ -142,7 +151,8 @@ const NavBarStaff = () => {
                   width: 45,
                   height: 45,
                   tintColor: color,
-                }}></Image>
+                }}
+              ></Image>
             );
           },
           tabBarActiveTintColor: "#F89B40",
@@ -177,6 +187,14 @@ const AttendanceNavigator = ({ navigation }: RouterProps) => {
         <Stack.Screen
           name="DayAttendance"
           component={DayAttendance}
+          options={{
+            headerTitle: "Attendance - Date",
+            headerBackTitle: "Back",
+          }}
+        />
+        <Stack.Screen
+          name="DayAttendanceUser"
+          component={DayAttendanceUser}
           options={{
             headerTitle: "Attendance - Date",
             headerBackTitle: "Back",

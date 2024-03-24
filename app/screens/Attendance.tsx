@@ -23,6 +23,7 @@ interface FriendData {
   friendName: string;
   friendId: string;
   attendance: [string];
+  profilePicture: any;
 }
 
 const Attendance = ({ navigation }: RouterProps) => {
@@ -46,6 +47,7 @@ const Attendance = ({ navigation }: RouterProps) => {
         friendName: friend.friendName,
         friendId: friend._id,
         attendance: friend.attendance,
+        profilePicture: friend.profilePicture,
       }));
 
       setFriends(extractedFriends);
@@ -63,10 +65,11 @@ const Attendance = ({ navigation }: RouterProps) => {
         const friendName = item.friendName.toLowerCase() || "";
         return friendName.includes(value.toLowerCase());
       })
-      .map(({ friendId, attendance, friendName }) => ({
+      .map(({ friendId, attendance, friendName, profilePicture }) => ({
         friendId,
         attendance,
         friendName,
+        profilePicture,
       }));
 
     setFilteredFriends(filteredDisplay);
@@ -90,7 +93,11 @@ const Attendance = ({ navigation }: RouterProps) => {
         </View>
         <TouchableOpacity
           style={styles.history}
-          onPress={() => navigation.navigate("AttendanceHistory")}
+          onPress={() =>
+            navigation.navigate("AttendanceHistory", {
+              friend: "all",
+            })
+          }
         >
           <Text style={styles.historyText}>History</Text>
         </TouchableOpacity>
@@ -102,6 +109,7 @@ const Attendance = ({ navigation }: RouterProps) => {
             friendId={friend.friendId}
             friendName={friend.friendName}
             attendanceIds={friend.attendance}
+            profilePicture={friend.profilePicture}
           />
         ))}
       </ScrollView>

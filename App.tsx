@@ -11,6 +11,7 @@ import Report from "./app/screens/Report";
 import Messages from "./app/screens/Messages";
 import NewFriendReport from "./app/screens/NewFriendReport";
 import ForgotPassword from "./app/screens/ForgotPassword";
+import DayAttendanceUser from "./app/screens/DayAttendanceUser";
 
 const Stack = createNativeStackNavigator();
 import { NavigationContainer } from "@react-navigation/native";
@@ -33,7 +34,8 @@ export default function App() {
             headerShown: false,
             gestureEnabled: false,
             gestureDirection: "horizontal",
-          }}>
+          }}
+        >
           {userId === null ? (
             <>
               <Stack.Screen name="SignIn" component={SignIn} />
@@ -81,6 +83,11 @@ export default function App() {
                 name="AttendanceHistory"
                 component={AttendanceHistory}
                 options={{ headerShown: true }}
+              />
+              <Stack.Screen
+                name="DayAttendanceUser"
+                component={DayAttendanceUser}
+                options={{ headerShown: true, headerBackTitle: "Back" }}
               />
               <Stack.Screen
                 name="Messages"
