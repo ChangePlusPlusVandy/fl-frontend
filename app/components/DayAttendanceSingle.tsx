@@ -14,9 +14,15 @@ interface AttendanceData {
   timeIn: string[];
   timeOut: string[];
   friendName?: string;
+  profilePicture: any;
 }
 
-const AttendanceSingle = ({ friendName, timeIn, timeOut }: AttendanceData) => {
+const AttendanceSingle = ({
+  friendName,
+  timeIn,
+  timeOut,
+  profilePicture,
+}: AttendanceData) => {
   const [T, setT] = useState(false);
   const toggleT = () => setT((previousState) => !previousState);
 
@@ -26,7 +32,14 @@ const AttendanceSingle = ({ friendName, timeIn, timeOut }: AttendanceData) => {
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <Image source={friendPFP} style={{ width: 60, height: 60 }}></Image>
+        <Image
+          source={{
+            uri: profilePicture
+              ? profilePicture
+              : "https://res.cloudinary.com/dvrcdxqex/image/upload/v1707870630/defaultProfilePic.png",
+          }}
+          style={{ width: 80, height: 80 }}
+        ></Image>
       </View>
 
       <View>
@@ -35,13 +48,15 @@ const AttendanceSingle = ({ friendName, timeIn, timeOut }: AttendanceData) => {
           <View style={styles.superContainer}>
             <View
               style={
-                timeIn.length > timeOut.length
+                timeIn.length >= timeOut.length && timeIn.length != 0
                   ? styles.buttonContainerGreen
                   : styles.buttonContainerRed
               }
             >
               <Text style={styles.buttonText}>
-                {timeIn.length > timeOut.length ? "Present" : "Absent"}
+                {timeIn.length >= timeOut.length && timeIn.length != 0
+                  ? "Present"
+                  : "Absent"}
               </Text>
             </View>
           </View>
@@ -106,6 +121,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
+    overflow: "hidden",
   },
   superContainer: {
     justifyContent: "center",
