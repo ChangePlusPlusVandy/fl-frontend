@@ -25,8 +25,8 @@ function isDST(date: Date) {
 export const formatTimeToAMPM = (dateString: string) => {
   if (dateString) {
     let date = new Date(dateString);
-    let hours = date.getHours();
-    let minutes = date.getMinutes();
+    let hours = date.getUTCHours();
+    let minutes = date.getUTCMinutes();
     let formattedTime = `${hours < 10 ? "0" : ""}${hours}:${
       minutes < 10 ? "0" : ""
     }${minutes}`;

@@ -164,8 +164,8 @@ const styles = StyleSheet.create({
   },
   timeContainer: {
     flexDirection: "row",
-    gap: 30,
-    justifyContent: "space-between",
+    gap: 18,
+    justifyContent: "space-around",
     marginHorizontal: 7,
   },
   divider: {
