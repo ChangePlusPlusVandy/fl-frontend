@@ -9,13 +9,12 @@ import {
   FlatList,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons"; // Import the FontAwesome icons
-import { MaterialCommunityIcons } from "@expo/vector-icons"; // Import MaterialCommunityIcons for the search bar icon
-import { NavigationProp } from "@react-navigation/native";
+import { NavigationProp, useFocusEffect } from "@react-navigation/native";
 import moment from "moment";
-import { API_SECRET, API_URL } from "@env";
+import { API_SECRET } from "@env";
 import useAuthStore from "../stores/auth";
 import { generateHmacSignature } from "../utils/signature";
-import NewMessagePopup from '../components/NewMessagePopup'; // Assuming the file is in the same directory
+import NewMessagePopup from "../components/NewMessagePopup"; // Assuming the file is in the same directory
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -34,89 +33,140 @@ const Conversations = ({ navigation }: RouterProps) => {
     setPopupVisible(true);
   };
 
-
   const { userId } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
 
-  
-  const [chats, setChats] = useState<Chat[]>([]);  
+  const [chats, setChats] = useState<Chat[]>([]);
+
   const filteredChats = chats?.filter((chat) =>
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  useEffect(() => {
-    const getChats = async () => {
-      try {
-        setChats([]); // Clear chats before fetching new ones
-        const userResponse = await fetch(`https://fl-backend.vercel.app/user/${userId}`, {
-          method: "GET",
-          headers: {
-            "Friends-Life-Signature": generateHmacSignature(JSON.stringify({userId: userId}), API_SECRET),
-          }
-        });
-        const userJSON = await userResponse.json();
-        
-        
-        for (const chatID of userJSON.chats) {
-          const chatResponse = await fetch(`https://fl-backend.vercel.app/chat/${chatID}`, {
-            method: "GET",
-            headers: {
-              "Friends-Life-Signature": generateHmacSignature(JSON.stringify({chatId: chatID}), API_SECRET),
+    chat.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const getChats = async () => {
+        try {
+          setChats([]); // Clear chats before fetching new ones
+          const userResponse = await fetch(
+            `https://fl-backend.vercel.app/user/${userId}`,
+            {
+              method: "GET",
+              headers: {
+                "Friends-Life-Signature": generateHmacSignature(
+                  JSON.stringify({ userId: userId }),
+                  API_SECRET
+                ),
+              },
             }
-          });
-          const chat = await chatResponse.json();
-          
-          if (chat.messages?.length > 0) {
-            const messagesResponse = await fetch(`https://fl-backend.vercel.app/message/${chat.messages[chat.messages.length - 1]}`, {
-              method: "GET",
-              headers: {
-                "Friends-Life-Signature": generateHmacSignature(JSON.stringify({messageId: chat.messages[chat.messages.length - 1]}), API_SECRET),
-              }
-            });
-            const messageJSON = await messagesResponse.json();
-            
-            const otherUser = (chat.user1 == userId ? chat.user2 : chat.user1);
-            const userResponse = await fetch(`https://fl-backend.vercel.app/user/${otherUser}`, {
-              method: "GET",
-              headers: {
-                "Friends-Life-Signature": generateHmacSignature(JSON.stringify({userId: otherUser}), API_SECRET),
-              }
-            });
-            const userJSON = await userResponse.json();
-            
-            const newChatObj: Chat = {
-              id: chat._id,
-              name: userJSON.name,
-              profileImage: userJSON.profilePicture,
-              lastMessage: messageJSON.messageBody,
-              lastMessageTime: moment(messageJSON.timestamps).fromNow(),
-            };
-            console.log(newChatObj)
-            setChats((prevChats: Chat[]) => [...prevChats, newChatObj]); // Update chats with the temporary array
+          );
+          const userJSON = await userResponse.json();
 
+          for (const chatID of userJSON.chats) {
+            const chatResponse = await fetch(
+              `https://fl-backend.vercel.app/chat/${chatID}`,
+              {
+                method: "GET",
+                headers: {
+                  "Friends-Life-Signature": generateHmacSignature(
+                    JSON.stringify({ chatId: chatID }),
+                    API_SECRET
+                  ),
+                },
+              }
+            );
+            const chat = await chatResponse.json();
+
+            if (chat.messages?.length > 0) {
+              const messagesResponse = await fetch(
+                `https://fl-backend.vercel.app/message/${
+                  chat.messages[chat.messages.length - 1]
+                }`,
+                {
+                  method: "GET",
+                  headers: {
+                    "Friends-Life-Signature": generateHmacSignature(
+                      JSON.stringify({
+                        messageId: chat.messages[chat.messages.length - 1],
+                      }),
+                      API_SECRET
+                    ),
+                  },
+                }
+              );
+              const messageJSON = await messagesResponse.json();
+
+              const otherUser = chat.user1 == userId ? chat.user2 : chat.user1;
+              const userResponse = await fetch(
+                `https://fl-backend.vercel.app/user/${otherUser}`,
+                {
+                  method: "GET",
+                  headers: {
+                    "Friends-Life-Signature": generateHmacSignature(
+                      JSON.stringify({ userId: otherUser }),
+                      API_SECRET
+                    ),
+                  },
+                }
+              );
+              const userJSON = await userResponse.json();
+
+              const newChatObj: Chat = {
+                id: chat._id,
+                name: userJSON.name,
+                profileImage: userJSON.profilePicture,
+                lastMessage: messageJSON.messageBody,
+                lastMessageTime: moment(messageJSON.timestamps).fromNow(),
+              };
+              setChats((prevChats: Chat[]) => [...prevChats, newChatObj]); // Update chats with the temporary array
+            } else {
+              const otherUser = chat.user1 == userId ? chat.user2 : chat.user1;
+              const userResponse = await fetch(
+                `https://fl-backend.vercel.app/user/${otherUser}`,
+                {
+                  method: "GET",
+                  headers: {
+                    "Friends-Life-Signature": generateHmacSignature(
+                      JSON.stringify({ userId: otherUser }),
+                      API_SECRET
+                    ),
+                  },
+                }
+              );
+              const userJSON = await userResponse.json();
+
+              const newChatObj: Chat = {
+                id: chat._id,
+                name: userJSON.name,
+                profileImage: userJSON.profilePicture,
+                lastMessage: "No messages yet",
+                lastMessageTime: "New Chat",
+              };
+
+              setChats((prevChats: Chat[]) => [...prevChats, newChatObj]); // Update chats with the temporary array
+            }
           }
+        } catch (error) {
+          console.log(error);
         }
-        console.log(chats)
-        
-      } catch(error) {
-        console.log(error);
-      }
-    };
-  
-    getChats()
-  }, []);
-  
-
+      };
+      setChats([]); // Clear chats before fetching new ones
+      getChats();
+    }, [])
+  );
 
   return (
     <View style={styles.root}>
-
       <View style={styles.header}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Messages</Text>
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={()=>setPopupVisible(true)}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setPopupVisible(true)}>
           <View style={styles.plusButton}>
             <FontAwesome name="plus" size={20} color="#fff" />
-          </View></TouchableOpacity>
+          </View>
+        </TouchableOpacity>
       </View>
       <View style={styles.divider} />
       <View style={styles.searchContainer}>
@@ -136,10 +186,17 @@ const Conversations = ({ navigation }: RouterProps) => {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.chatItem}
-            onPress={() => navigation.navigate("Messages", {reciever: item.name, chatID: item.id, recieverID: undefined})}
-            >
-
-            <Image source={{uri: item.profileImage}} style={styles.profileImage} />
+            onPress={() =>
+              navigation.navigate("Messages", {
+                reciever: item.name,
+                chatID: item.id,
+                recieverID: undefined,
+              })
+            }>
+            <Image
+              source={{ uri: item.profileImage }}
+              style={styles.profileImage}
+            />
             <View style={styles.chatInfo}>
               <Text style={styles.chatName}>{item.name}</Text>
               <Text style={styles.lastMessage}>
@@ -149,10 +206,12 @@ const Conversations = ({ navigation }: RouterProps) => {
           </TouchableOpacity>
         )}
       />
-            {isPopupVisible&&<NewMessagePopup
-        onClose={() => setPopupVisible(false)}
-        navigation={navigation}
-      />}
+      {isPopupVisible && (
+        <NewMessagePopup
+          onClose={() => setPopupVisible(false)}
+          navigation={navigation}
+        />
+      )}
     </View>
   );
 };

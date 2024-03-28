@@ -6,9 +6,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome icons
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import { NavigationProp, RouteProp } from "@react-navigation/native";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
@@ -16,131 +18,190 @@ import useAuthStore from "../stores/auth";
 
 interface Message {
   id: string;
-  sender: string,
-  text: string,
-  time: string}
+  sender: string;
+  text: string;
+  time: string;
+}
+
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
-const Messages = ({navigation}: RouterProps) => {
+
+const Messages = ({ navigation }: RouterProps) => {
   const route = useRoute();
-  const [recieverID, setRecieverID] = useState(route.params.recieverID)
-  let {reciever} = route.params;
-  const [chatID, setChatID] = useState(route.params.chatID)
   const { userId } = useAuthStore();
-
+  let { reciever, recieverId, chatID } = route.params as any;
+  const [recieverID, setRecieverID] = useState(recieverId);
+  const [chatId, setChatId] = useState(chatID);
   const [messages, setMessages] = useState<Message[]>([]);
-  useEffect(()=>{
-    console.log(userId)
-    setMessages([])
 
-    const getChats = async () =>{
-      try{
-        if(chatID){
-        const chatResponse =  await fetch(`https://fl-backend.vercel.app/chat/${chatID}`, {
-          method: "GET",
-          headers: {
-            "Friends-Life-Signature": generateHmacSignature(JSON.stringify({chatId: chatID}), API_SECRET),
-          }
-        })
-          const chatJSON = await chatResponse.json();
-          setRecieverID(chatJSON.user1 ==userId? chatJSON.user2 : chatJSON.user2);
-          const messagePromises = chatJSON.messages.map(async message => {
-          const messageStr = String(message);
-
-        const messageResponse = await fetch(`https://fl-backend.vercel.app/message/${messageStr}`, {
+  const getChats = async () => {
+    setMessages([]);
+    try {
+      if (chatId) {
+        const chatResponse = await fetch(
+          `https://fl-backend.vercel.app/chat/${chatId}`,
+          {
             method: "GET",
             headers: {
-                "Friends-Life-Signature": generateHmacSignature(JSON.stringify({ messageId: message }), API_SECRET),
+              "Friends-Life-Signature": generateHmacSignature(
+                JSON.stringify({ chatId: chatId }),
+                API_SECRET
+              ),
+            },
+          }
+        );
+        const chatJSON = await chatResponse.json();
+
+        setRecieverID(
+          chatJSON.user1 === userId ? chatJSON.user2 : chatJSON.user1
+        );
+
+        const messagePromises = chatJSON.messages.map(async (message: any) => {
+          const messageStr = String(message);
+
+          const messageResponse = await fetch(
+            `https://fl-backend.vercel.app/message/${messageStr}`,
+            {
+              method: "GET",
+              headers: {
+                "Friends-Life-Signature": generateHmacSignature(
+                  JSON.stringify({ messageId: message }),
+                  API_SECRET
+                ),
+              },
             }
-        });
-        const messageJSON = await messageResponse.json();
-        return {
+          );
+          const messageJSON = await messageResponse.json();
+          return {
             id: messageStr,
             text: messageJSON.messageBody,
             sender: messageJSON.sender == userId ? "user" : "other",
             time: messageJSON.timestamps,
-        };
-    });
-    Promise.all(messagePromises)
-    .then(messages => {
-      setMessages(prevMessages => [...messages.reverse(), ...prevMessages]);
-      console.log(messages);
-    })
-    .catch(error => {
-      console.log(error);
-    });
-    console.log(messages)
-        }}
-      catch(error){
-        console.log(error)
+          };
+        });
+        Promise.all(messagePromises)
+          .then((messages) => {
+            setMessages((prevMessages) => [
+              ...messages.reverse(),
+              ...prevMessages,
+            ]);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       }
+    } catch (error) {
+      console.log(error);
     }
+  };
 
+  const updateMessages = async () => {
+    if (chatId) {
+      const chatResponse = await fetch(
+        `https://fl-backend.vercel.app/chat/${chatId}`,
+        {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature(
+              JSON.stringify({ chatId: chatId }),
+              API_SECRET
+            ),
+          },
+        }
+      );
+      const chatJSON = await chatResponse.json();
+
+      const messagePromises = chatJSON.messages.map(async (message: any) => {
+        const messageStr = String(message);
+
+        const messageResponse = await fetch(
+          `https://fl-backend.vercel.app/message/${messageStr}`,
+          {
+            method: "GET",
+            headers: {
+              "Friends-Life-Signature": generateHmacSignature(
+                JSON.stringify({ messageId: message }),
+                API_SECRET
+              ),
+            },
+          }
+        );
+        const messageJSON = await messageResponse.json();
+        return {
+          id: messageStr,
+          text: messageJSON.messageBody,
+          sender: messageJSON.sender == userId ? "user" : "other",
+          time: messageJSON.timestamps,
+        };
+      });
+      Promise.all(messagePromises)
+        .then((messages) => {
+          messages.forEach((message) => {
+            if (!messages.includes(message)) {
+              setMessages((prevMessages) => [...prevMessages, message]);
+            }
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  useEffect(() => {
     getChats();
-    }, [])
+  }, []);
+
   const [newMessage, setNewMessage] = useState("");
 
   const sendMessage = async () => {
     if (newMessage.trim() !== "") {
-      if(!chatID){
-        console.log("hey")
+      if (!chatId) {
         const body = JSON.stringify({
           user1: userId,
           user2: recieverID,
-          messages: []
-        })
-         const chatResponse = await fetch(`${API_URL}chat`, {
+          messages: [],
+        });
+        const chatResponse = await fetch(`${API_URL}chat`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Friends-Life-Signature": generateHmacSignature(
-              body,
-              API_SECRET
-            ),
+            "Friends-Life-Signature": generateHmacSignature(body, API_SECRET),
           },
           body: body,
-        })
-        const chatResponseJSON = await chatResponse.json()
-        console.log(chatResponseJSON.body)
-        setChatID(chatResponseJSON?.body?._id)
-        console.log(chatID)
+        });
+        const chatResponseJSON = await chatResponse.json();
+        setChatId(chatResponseJSON?.body?._id);
       }
+
       const newMessageObj = {
         id: (messages.length + 1).toString(),
         text: newMessage,
         sender: "user",
+        time: new Date().toISOString(),
       };
-      
+
       const body = JSON.stringify({
         messageBody: newMessage,
-        chatId: chatID,
+        chatId: chatId,
         sender: userId,
         recipient: recieverID,
-      })
-      const response = await fetch(`${API_URL}message`, {
+      });
+
+      await fetch(`${API_URL}message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Friends-Life-Signature": generateHmacSignature(
-            body,
-            API_SECRET
-          ),
+          "Friends-Life-Signature": generateHmacSignature(body, API_SECRET),
         },
         body: body,
-      })
-      console.log(generateHmacSignature(
-        body,
-        API_SECRET
-      ))
-    
+      });
+
       setMessages([newMessageObj, ...messages]);
 
-
-      
       setNewMessage("");
     }
-  
   };
 
   return (
@@ -154,7 +215,7 @@ const Messages = ({navigation}: RouterProps) => {
       <View style={styles.divider} />
       <FlatList
         data={messages}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View
             style={
@@ -166,17 +227,20 @@ const Messages = ({navigation}: RouterProps) => {
         inverted={true}
         showsVerticalScrollIndicator={false}
       />
-      <View style={styles.messageInputContainer}>
-        <TextInput
-          style={styles.messageInput}
-          placeholder="Type a message..."
-          value={newMessage}
-          onChangeText={(text) => setNewMessage(text)}
-        />
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-          <FontAwesome name="send" size={20} color="#fff" />
-        </TouchableOpacity>
-      </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <View style={styles.messageInputContainer}>
+          <TextInput
+            style={styles.messageInput}
+            placeholder="Type a message..."
+            value={newMessage}
+            onChangeText={(text) => setNewMessage(text)}
+          />
+          <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+            <FontAwesome name="send" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -208,7 +272,7 @@ const styles = StyleSheet.create({
   },
   userMessage: {
     alignSelf: "flex-end",
-    backgroundColor: "#868686",
+    backgroundColor: "#001f3f",
     borderRadius: 12,
     borderBottomRightRadius: 0,
     paddingHorizontal: 16,
@@ -219,7 +283,7 @@ const styles = StyleSheet.create({
   },
   otherMessage: {
     alignSelf: "flex-start",
-    backgroundColor: "#001f3f",
+    backgroundColor: "#868686",
     borderRadius: 12,
     borderBottomLeftRadius: 0,
     paddingHorizontal: 16,
