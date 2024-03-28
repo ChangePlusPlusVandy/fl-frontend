@@ -39,7 +39,9 @@ const NewMessagePopup = ({
 
         setUsers(
           userJSON.filter(
-            (user: any) => user.type === "Family" || user.type === "Staff"
+            (user: any) =>
+              (user.type === "Family" || user.type === "Staff") &&
+              user._id !== userId
           )
         );
       } catch (error) {
@@ -62,8 +64,6 @@ const NewMessagePopup = ({
     const chatJSON = await chats.json();
     //check if there's already messages between these people
     for (const chat of chatJSON) {
-      console.log(chat);
-
       if (
         (chat.user1 == userId && chat.user2 == user._id) ||
         (chat.user1 == user._id && chat.user2 == userId)
@@ -71,7 +71,7 @@ const NewMessagePopup = ({
         navigation.navigate("Messages", {
           reciever: user.name,
           chatID: chat._id,
-          recieverID: undefined,
+          recieverID: user._id,
         });
       }
     }

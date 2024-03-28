@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome icons
 import { useRoute } from "@react-navigation/native";
-import { NavigationProp, RouteProp } from "@react-navigation/native";
+import { NavigationProp } from "@react-navigation/native";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
 import useAuthStore from "../stores/auth";
@@ -30,14 +30,14 @@ interface RouterProps {
 const Messages = ({ navigation }: RouterProps) => {
   const route = useRoute();
   const { userId } = useAuthStore();
-  let { reciever, recieverId, chatID } = route.params as any;
-  const [recieverID, setRecieverID] = useState(recieverId);
+  let { reciever, recieverID, chatID } = route.params as any;
+  const [recieverId, setRecieverId] = useState(recieverID);
   const [chatId, setChatId] = useState(chatID);
   const [messages, setMessages] = useState<Message[]>([]);
 
   const getChats = async () => {
-    setMessages([]);
     try {
+      setMessages([]);
       if (chatId) {
         const chatResponse = await fetch(
           `https://fl-backend.vercel.app/chat/${chatId}`,
@@ -53,7 +53,7 @@ const Messages = ({ navigation }: RouterProps) => {
         );
         const chatJSON = await chatResponse.json();
 
-        setRecieverID(
+        setRecieverId(
           chatJSON.user1 === userId ? chatJSON.user2 : chatJSON.user1
         );
 
@@ -98,54 +98,57 @@ const Messages = ({ navigation }: RouterProps) => {
 
   const updateMessages = async () => {
     if (chatId) {
-      const chatResponse = await fetch(
-        `https://fl-backend.vercel.app/chat/${chatId}`,
-        {
-          method: "GET",
-          headers: {
-            "Friends-Life-Signature": generateHmacSignature(
-              JSON.stringify({ chatId: chatId }),
-              API_SECRET
-            ),
-          },
-        }
-      );
-      const chatJSON = await chatResponse.json();
-
-      const messagePromises = chatJSON.messages.map(async (message: any) => {
-        const messageStr = String(message);
-
-        const messageResponse = await fetch(
-          `https://fl-backend.vercel.app/message/${messageStr}`,
+      try {
+        const chatResponse = await fetch(
+          `https://fl-backend.vercel.app/chat/${chatId}`,
           {
             method: "GET",
             headers: {
               "Friends-Life-Signature": generateHmacSignature(
-                JSON.stringify({ messageId: message }),
+                JSON.stringify({ chatId: chatId }),
                 API_SECRET
               ),
             },
           }
         );
-        const messageJSON = await messageResponse.json();
-        return {
-          id: messageStr,
-          text: messageJSON.messageBody,
-          sender: messageJSON.sender == userId ? "user" : "other",
-          time: messageJSON.timestamps,
-        };
-      });
-      Promise.all(messagePromises)
-        .then((messages) => {
-          messages.forEach((message) => {
-            if (!messages.includes(message)) {
-              setMessages((prevMessages) => [...prevMessages, message]);
-            }
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+        const chatJSON = await chatResponse.json();
+
+        const existingMessageIds = new Set(messages.map((msg) => msg.id)); // Assuming `id` is a unique identifier for each message
+        console.log("Existing message IDs:", existingMessageIds);
+
+        const messagePromises = chatJSON.messages.map(
+          async (messageId: string) => {
+            if (existingMessageIds.has(messageId)) return;
+            console.log("Fetching message", messageId);
+            const messageResponse = await fetch(
+              `https://fl-backend.vercel.app/message/${messageId}`,
+              {
+                method: "GET",
+                headers: {
+                  "Friends-Life-Signature": generateHmacSignature(
+                    JSON.stringify({ messageId }),
+                    API_SECRET
+                  ),
+                },
+              }
+            );
+            return await messageResponse.json();
+          }
+        );
+
+        const newMessages = (await Promise.all(messagePromises))
+          .filter(Boolean) // Remove nulls (messages we skipped)
+          .map((messageJSON) => ({
+            id: String(messageJSON._id), // Assuming `_id` is the identifier in your messageJSON
+            text: messageJSON.messageBody,
+            sender: messageJSON.sender === userId ? "user" : "other",
+            time: messageJSON.timestamps,
+          }));
+
+        setMessages((prevMessages) => [...messages.reverse(), ...prevMessages]);
+      } catch (error) {
+        console.error("Error updating messages:", error);
+      }
     }
   };
 
@@ -153,17 +156,75 @@ const Messages = ({ navigation }: RouterProps) => {
     getChats();
   }, []);
 
+  // useEffect(() => {
+  //   const interval = setInterval(updateMessages, 5000); // Fetch new messages every 5 seconds
+  //   return () => clearInterval(interval);
+  // }, [messages, chatId]);
+
   const [newMessage, setNewMessage] = useState("");
 
   const sendMessage = async () => {
     if (newMessage.trim() !== "") {
       if (!chatId) {
-        const body = JSON.stringify({
+        console.log("Creating new chat");
+        const body2 = JSON.stringify({
           user1: userId,
-          user2: recieverID,
+          user2: recieverId,
           messages: [],
         });
         const chatResponse = await fetch(`${API_URL}chat`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Friends-Life-Signature": generateHmacSignature(body2, API_SECRET),
+          },
+          body: body2,
+        });
+        const chatResponseJSON = await chatResponse.json();
+        setChatId(chatResponseJSON._id);
+
+        const newMessageObj = {
+          id: (messages.length + 1).toString(),
+          text: newMessage,
+          sender: "user",
+          time: new Date().toISOString(),
+        };
+
+        const body1 = JSON.stringify({
+          messageBody: newMessage,
+          chatId: chatResponseJSON._id,
+          sender: userId,
+          recipient: recieverId,
+        });
+
+        await fetch(`${API_URL}message`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Friends-Life-Signature": generateHmacSignature(body1, API_SECRET),
+          },
+          body: body1,
+        });
+
+        setMessages([newMessageObj, ...messages]);
+
+        setNewMessage("");
+      } else {
+        const newMessageObj = {
+          id: (messages.length + 1).toString(),
+          text: newMessage,
+          sender: "user",
+          time: new Date().toISOString(),
+        };
+
+        const body = JSON.stringify({
+          messageBody: newMessage,
+          chatId: chatId,
+          sender: userId,
+          recipient: recieverId,
+        });
+
+        await fetch(`${API_URL}message`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -171,36 +232,11 @@ const Messages = ({ navigation }: RouterProps) => {
           },
           body: body,
         });
-        const chatResponseJSON = await chatResponse.json();
-        setChatId(chatResponseJSON?.body?._id);
+
+        setMessages([newMessageObj, ...messages]);
+
+        setNewMessage("");
       }
-
-      const newMessageObj = {
-        id: (messages.length + 1).toString(),
-        text: newMessage,
-        sender: "user",
-        time: new Date().toISOString(),
-      };
-
-      const body = JSON.stringify({
-        messageBody: newMessage,
-        chatId: chatId,
-        sender: userId,
-        recipient: recieverID,
-      });
-
-      await fetch(`${API_URL}message`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Friends-Life-Signature": generateHmacSignature(body, API_SECRET),
-        },
-        body: body,
-      });
-
-      setMessages([newMessageObj, ...messages]);
-
-      setNewMessage("");
     }
   };
 

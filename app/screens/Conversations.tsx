@@ -25,6 +25,7 @@ interface Chat {
   profileImage: any;
   lastMessage: string;
   lastMessageTime: string;
+  lastMessageTimestamp?: string;
 }
 
 const Conversations = ({ navigation }: RouterProps) => {
@@ -47,6 +48,7 @@ const Conversations = ({ navigation }: RouterProps) => {
       const getChats = async () => {
         try {
           setChats([]); // Clear chats before fetching new ones
+          const tempChats = [];
           const userResponse = await fetch(
             `https://fl-backend.vercel.app/user/${userId}`,
             {
@@ -116,8 +118,9 @@ const Conversations = ({ navigation }: RouterProps) => {
                 profileImage: userJSON.profilePicture,
                 lastMessage: messageJSON.messageBody,
                 lastMessageTime: moment(messageJSON.timestamps).fromNow(),
+                lastMessageTimestamp: messageJSON.timestamps,
               };
-              setChats((prevChats: Chat[]) => [...prevChats, newChatObj]); // Update chats with the temporary array
+              tempChats.push(newChatObj);
             } else {
               const otherUser = chat.user1 == userId ? chat.user2 : chat.user1;
               const userResponse = await fetch(
@@ -140,11 +143,20 @@ const Conversations = ({ navigation }: RouterProps) => {
                 profileImage: userJSON.profilePicture,
                 lastMessage: "No messages yet",
                 lastMessageTime: "New Chat",
+                lastMessageTimestamp: "",
               };
 
-              setChats((prevChats: Chat[]) => [...prevChats, newChatObj]); // Update chats with the temporary array
+              tempChats.push(newChatObj);
             }
           }
+          const sortedChats = tempChats.sort((a, b) => {
+            // Convert to moment objects for comparison, assuming timestamps is in a compatible format
+            return moment(b.lastMessageTimestamp).diff(
+              moment(a.lastMessageTimestamp)
+            );
+          });
+
+          setChats(sortedChats);
         } catch (error) {
           console.log(error);
         }
