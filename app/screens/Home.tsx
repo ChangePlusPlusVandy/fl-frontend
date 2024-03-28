@@ -3,7 +3,7 @@ import { View, Text } from "react-native";
 import NewPost from "./NewPost";
 
 const Home = () => {
-  return <NewPost></NewPost>;
+  return <Text>How'd you get here?</Text>;
 };
 
 export default Home;
