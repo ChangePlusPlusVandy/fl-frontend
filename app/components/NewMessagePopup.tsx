@@ -42,16 +42,16 @@ const NewMessagePopup = ({onClose, navigation }) => {
       }
     });
     const chatJSON = await chats.json();
-
+    //check if there's already messages between these people
     for(const chat of chatJSON){
       console.log(chat)
 
       if((chat.user1 == userId && chat.user2 == user._id) || (chat.user1 == user._id && chat.user2 == userId)){
-        navigation.navigate('Messages', { reciever: user.name, chatID: chat._id });
+        navigation.navigate('Messages', { reciever: user.name, chatID: chat._id, recieverID: undefined});
       }
     }
     // Navigate to the Message component with the selected user
-    navigation.navigate('Messages', { reciever: user.name, chatID: undefined });
+    navigation.navigate('Messages', { reciever: user.name, chatID: undefined, recieverID: user._id });
   };
 
   return (
