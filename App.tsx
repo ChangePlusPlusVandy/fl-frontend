@@ -13,7 +13,7 @@ import NewFriendReport from "./app/screens/NewFriendReport";
 import ForgotPassword from "./app/screens/ForgotPassword";
 import DayAttendanceUser from "./app/screens/DayAttendanceUser";
 
-const Stack = createNativeStackNavigator();
+
 import { NavigationContainer } from "@react-navigation/native";
 import NavBarFamily from "./app/components/NavBarFamily";
 import NavBarStaff from "./app/components/NavBarStaff";
@@ -21,6 +21,7 @@ import AttendanceHistory from "./app/screens/AttendanceHistory";
 import { StatusBar } from "react-native";
 import useAuthStore from "./app/stores/auth";
 
+const Stack = createNativeStackNavigator();
 export default function App() {
   const { userId } = useAuthStore();
 

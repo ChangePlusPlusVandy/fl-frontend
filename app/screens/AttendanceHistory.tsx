@@ -10,6 +10,7 @@ import { RouteProp } from "@react-navigation/native";
 interface RouterProps {
   route: RouteProp<{ params: { friend: any } }>;
   navigation: NavigationProp<any, any>;
+  recipient: String;
 }
 
 const AttendanceHistory = ({ route, navigation }: RouterProps) => {
