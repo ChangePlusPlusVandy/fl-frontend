@@ -1,47 +1,31 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  SafeAreaView,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from "react-native";
-import useAuthStore from "../stores/auth";
+import { View, Text, StyleSheet, Image } from "react-native";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
 
-interface PostProps {
+interface ReportProps {
   key: string;
-  user: string;
-  profileLocation: string;
+  friend: string;
   profileTimePosted: string;
-  bodyPic?: any;
   bodyText: string;
 }
 
-const Post: React.FC<PostProps> = ({
+const ReportComponent: React.FC<ReportProps> = ({
   key,
-  user,
-  profileLocation,
+  friend,
   profileTimePosted,
-  bodyPic,
   bodyText,
 }) => {
   const [profileName, setProfileName] = useState("");
   const [profilePic, setProfilePic] = useState();
 
-  const getUser = async (userId: string) => {
-    const userData = await fetch(`${API_URL}user/${userId}`, {
+  const getUser = async (friendId: string) => {
+    const userData = await fetch(`${API_URL}friend/${friendId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         "Friends-Life-Signature": generateHmacSignature(
-          JSON.stringify({ userId }),
+          JSON.stringify({ friendId }),
           API_SECRET
         ),
       },
@@ -49,13 +33,13 @@ const Post: React.FC<PostProps> = ({
 
     const user = await userData.json();
 
-    setProfileName(user.name);
+    setProfileName(user.friendName);
     setProfilePic(user.profilePicture);
   };
 
   useEffect(() => {
-    getUser(user);
-  }, [user]);
+    getUser(friend);
+  }, [friend]);
 
   return (
     <View style={styles.postContainer}>
@@ -68,9 +52,6 @@ const Post: React.FC<PostProps> = ({
         <Text style={styles.profileTimePosted}>{profileTimePosted}</Text>
       </View>
       <View style={styles.postBody}>
-        {bodyPic && bodyPic !== "test" && (
-          <Image source={{ uri: bodyPic }} style={styles.postBodyImage} />
-        )}
         <Text style={styles.bodyText}>{bodyText}</Text>
       </View>
     </View>
@@ -128,4 +109,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Post;
+export default ReportComponent;

@@ -21,7 +21,7 @@ interface RouterProps {
 }
 
 type DayScreenRouteProp = {
-  Day: { date: string };
+  Params: { params: { date: string; friendId: string } };
 };
 
 interface AttendanceItem {
@@ -47,20 +47,20 @@ const DayAttendance = ({ navigation }: RouterProps) => {
   const [searchValue, setSearchValue] = useState("");
   const [display, setDisplay] = useState<AttendanceData[]>([]);
   const [filteredDisplay, setFilteredDisplay] = useState<AttendanceData[]>([]);
-  const route = useRoute<RouteProp<DayScreenRouteProp, "Day">>();
-  const { date } = route.params;
+  const route = useRoute<RouteProp<DayScreenRouteProp, "Params">>();
+  const { params } = route.params;
 
   useEffect(() => {
     let tempAttendance: AttendanceItem[] = [];
 
     const getAttendance = async () => {
       try {
-        const filterObject = { date: date };
+        const filterObject = { date: params.date };
         const filterString = JSON.stringify(filterObject);
         const encodedFilterString = encodeURIComponent(filterString);
 
         const signature = generateHmacSignature(
-          JSON.stringify({ filter: `{"date":"${date}"}` }),
+          JSON.stringify({ filter: `{"date":"${params.date}"}` }),
           API_SECRET
         );
 
@@ -107,11 +107,13 @@ const DayAttendance = ({ navigation }: RouterProps) => {
     const fetchData = async () => {
       const newData: AttendanceData[] = [];
 
-      await Promise.all(
-        tempAttendance.map(async (obj) => {
+      tempAttendance
+        .filter((obj) => obj.friendId === params.friendId)
+        .map(async (obj) => {
           const { friendId, timeIns, timeOuts } = obj;
           try {
             const friend = await getFriendById(friendId);
+
             if (friend && friend.friendName) {
               newData.push({
                 friendId,
@@ -120,17 +122,15 @@ const DayAttendance = ({ navigation }: RouterProps) => {
                 friendName: friend.friendName,
                 profilePicture: friend.profilePicture,
               });
+              setDisplay(newData);
+              setFilteredDisplay(newData);
             } else {
               console.log(`Friend information not found for ${friendId}`);
             }
           } catch (error) {
             console.error("Error fetching friend:", error);
           }
-        })
-      );
-
-      setDisplay(newData);
-      setFilteredDisplay(newData);
+        });
     };
   }, []);
 
@@ -167,9 +167,7 @@ const DayAttendance = ({ navigation }: RouterProps) => {
         </View>
         <TouchableOpacity
           style={styles.history}
-          onPress={() =>
-            navigation.navigate("AttendanceHistory", { friend: "all" })
-          }
+          onPress={() => navigation.navigate("AttendanceHistory")}
         >
           <Text style={styles.historyText}>History</Text>
         </TouchableOpacity>

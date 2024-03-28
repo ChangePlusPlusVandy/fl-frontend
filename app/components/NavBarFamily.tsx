@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Home from "../screens/Home";
+import Home from "../screens/UserHome";
 import Messages from "../screens/Messages";
 import Friends from "../screens/Friends";
 import HomeIcon from "../../assets/tabhome.png";
@@ -13,7 +13,7 @@ const Tab = createBottomTabNavigator();
 
 const NavBarFamily = () => {
   return (
-    <Tab.Navigator screenOptions={{ tabBarStyle: { height: 90 } }}>
+    <Tab.Navigator screenOptions={{ tabBarStyle: { height: 90 }, headerShown: false }}>
       <Tab.Screen
         name="Home"
         component={Home}
@@ -43,6 +43,7 @@ const NavBarFamily = () => {
           },
           tabBarActiveTintColor: "#F89B40",
           tabBarInactiveTintColor: "#D9D9D9",
+          headerShown: false,
         }}
       />
       <Tab.Screen
@@ -106,6 +107,7 @@ const NavBarFamily = () => {
           },
           tabBarActiveTintColor: "#F89B40",
           tabBarInactiveTintColor: "#D9D9D9",
+          headerShown: false,
         }}
       />
     </Tab.Navigator>

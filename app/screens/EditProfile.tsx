@@ -10,22 +10,170 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavigationProp } from "@react-navigation/native";
 import BackButton from "../components/BackButton";
-import ProfilePicture from "../../assets/profilepicture.jpg";
 import CameraIcon from "../../assets/camera.png";
+import DefaultProfilePicture from "../../assets/DefaultProfilePicture.png";
+import useAuthStore from "../stores/auth";
+import { API_URL, API_SECRET } from "@env";
+import { generateHmacSignature } from "../utils/signature";
+import * as ImagePicker from "expo-image-picker";
+import cld from "../utils/cloudinary";
+import { upload } from "cloudinary-react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
 const EditProfile = ({ navigation }: RouterProps) => {
+  const { user, userId } = useAuthStore();
+  const [form, setForm] = useState({
+    fullName: "",
+    phoneNumber: "",
+  });
+
+  const [image, setImage] = useState("");
+  const [imageChanged, setImageChanged] = useState(false);
+  const [disabled, setDisabled] = useState(false);
+
+  const fetchInitialData = async () => {
+    try {
+      if (user) {
+        const signature = generateHmacSignature(
+          JSON.stringify({ userId }),
+          API_SECRET
+        );
+        const response = await fetch(`${API_URL}user/${userId}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": signature,
+          },
+        });
+        const userData = await response.json();
+        setForm({
+          fullName: userData.name,
+          phoneNumber: userData.phoneNumber,
+        });
+        setImage(userData.profilePicture);
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error: " + error.message);
+      } else {
+        console.error("Unexpected error");
+      }
+    }
+  };
+
+  const cloudinaryUpload = async () => {
+    try {
+      if (image !== "") {
+        const options = {
+          upload_preset: "ojyuicnt",
+          unsigned: true,
+        };
+
+        await upload(cld, {
+          file: image,
+          options: options,
+          callback: async (error: any, response: any) => {
+            if (error) {
+              console.error("Upload error:", error);
+              return;
+            }
+
+            await fetch(`${API_URL}user/${userId}`, {
+              method: "PATCH",
+              headers: {
+                "Friends-Life-Signature": generateHmacSignature(
+                  JSON.stringify({ profilePicture: response.secure_url }),
+                  API_SECRET
+                ),
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ profilePicture: response.secure_url }),
+            });
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+    }
+  };
+
+  const onSave = async () => {
+    try {
+      setDisabled(true);
+      if (user) {
+        if (imageChanged) await cloudinaryUpload();
+
+        const userBody = {
+          name: form.fullName,
+          phoneNumber: form.phoneNumber,
+        };
+
+        const signature = generateHmacSignature(
+          JSON.stringify(userBody),
+          API_SECRET
+        );
+
+        await fetch(`${API_URL}user/${userId}`, {
+          method: "PATCH",
+          headers: {
+            "Friends-Life-Signature": signature,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userBody),
+        });
+      }
+      setDisabled(false);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error: " + error.message);
+      } else {
+        console.error("Unexpected error");
+      }
+    }
+  };
+
+  const pickImage = async () => {
+    setImageChanged(true);
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      alert("Permission to access camera roll is required!");
+      return;
+    }
+
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (
+      !pickerResult.canceled &&
+      pickerResult.assets &&
+      pickerResult.assets.length > 0
+    ) {
+      setImage(pickerResult.assets[0].uri);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setImageChanged(false);
+      fetchInitialData();
+    }, [])
+  );
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
+      style={styles.container}>
       <SafeAreaView>
         <ScrollView>
           <View style={styles.headerContainer}>
@@ -36,8 +184,18 @@ const EditProfile = ({ navigation }: RouterProps) => {
           </View>
 
           <View style={styles.profileContainer}>
-            <Image source={ProfilePicture} style={styles.image}></Image>
-            <TouchableOpacity>
+            <Image
+              source={
+                image && image.trim() !== ""
+                  ? { uri: image }
+                  : DefaultProfilePicture
+              }
+              style={styles.image}
+            />
+            <TouchableOpacity
+              onPress={async () => {
+                await pickImage();
+              }}>
               <Image source={CameraIcon} style={styles.cameraIcon}></Image>
             </TouchableOpacity>
           </View>
@@ -45,19 +203,22 @@ const EditProfile = ({ navigation }: RouterProps) => {
             <Text style={styles.label}>Full Name</Text>
             <TextInput
               style={styles.input}
-              defaultValue="Joseph Quatela"
-            ></TextInput>
-            <Text style={styles.label}>Email Address</Text>
-            <TextInput
-              style={styles.input}
-              defaultValue="joseph.c.quatela@vanderbilt.edu"
-            ></TextInput>
+              value={form.fullName}
+              onChangeText={(text) => setForm({ ...form, fullName: text })}
+            />
             <Text style={styles.label}>Phone Number</Text>
             <TextInput
               style={styles.input}
-              defaultValue="954-593-3365"
-            ></TextInput>
-            <TouchableOpacity style={styles.save}>
+              value={form.phoneNumber}
+              onChangeText={(text) => setForm({ ...form, phoneNumber: text })}
+            />
+            <TouchableOpacity
+              style={styles.save}
+              onPress={async () => {
+                await onSave();
+                navigation.navigate("Profile");
+              }}
+              disabled={disabled}>
               <Text style={styles.saveText}>Save</Text>
             </TouchableOpacity>
           </View>

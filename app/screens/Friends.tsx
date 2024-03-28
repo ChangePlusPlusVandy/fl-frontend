@@ -1,42 +1,90 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  FlatList,
-} from "react-native";
+import { View, Text, TextInput, StyleSheet, FlatList } from "react-native";
 import { FontAwesome } from "@expo/vector-icons"; // Import the FontAwesome icons
-import { MaterialCommunityIcons } from "@expo/vector-icons"; // Import MaterialCommunityIcons for the search bar icon
-import moment from "moment";
+import { NavigationProp } from "@react-navigation/native";
+import Friend from "../components/Friend";
+import { API_URL, API_SECRET } from "@env";
+import { generateHmacSignature } from "../utils/signature";
+import { useFocusEffect } from "@react-navigation/native";
+import useAuthStore from "../stores/auth";
 
-const Friends = () => {
+interface RouterProps {
+  navigation: NavigationProp<any, any>;
+}
+
+interface Friend {
+  _id: string;
+  friendName: string;
+  profilePicture: string;
+  reports: string[];
+  attendance: string[];
+  schedule: number[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+const Friends = ({ navigation }: RouterProps) => {
+  const { userId } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
-  // Sample data for friends
-  const friendsData = [
-    {
-      id: 1,
-      name: "John Doe",
-      address: "123 Main St, City",
-      profileImage: require("../../assets/friends-life-logo.png"), // Replace with actual image source
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      address: "456 Elm St, Town",
-      profileImage: require("../../assets/friends-life-logo.png"), // Replace with actual image source
-    },
-    // Add more friend data as needed
-  ];
-  const filteredFriends = friendsData.filter((friend) =>
-    friend.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const [friendsData, setFriendsData] = useState<Friend[]>([]);
+
+  const filteredFriends = friendsData.filter((friend: any) => {
+    return friend.friendName.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  const getFriends = async () => {
+    try {
+      const userRes = await fetch(`${API_URL}user/${userId}`, {
+        method: "GET",
+        headers: {
+          "Friends-Life-Signature": generateHmacSignature(
+            JSON.stringify({ userId }),
+            API_SECRET
+          ),
+        },
+      });
+      const userData = await userRes.json();
+
+      if (userData.type === "Staff" || userData.type === "admin") {
+        const friendRes = await fetch(`${API_URL}friend`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature("GET", API_SECRET),
+          },
+        });
+        const friendData: Friend[] = await friendRes.json();
+        setFriendsData(friendData);
+      } else {
+        const friendIds: string[] = userData.friends;
+        friendIds?.forEach(async (friendId: string) => {
+          const response = await fetch(`${API_URL}friend/${friendId}`, {
+            method: "GET",
+            headers: {
+              "Friends-Life-Signature": generateHmacSignature(
+                JSON.stringify({ friendId }),
+                API_SECRET
+              ),
+            },
+          });
+          const friend: Friend = await response.json();
+          setFriendsData((prevState: Friend[]) => [...prevState, friend]);
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching friend data: ", error);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setFriendsData([]);
+      getFriends();
+    }, [])
   );
 
   return (
     <View style={styles.root}>
-      <Text style={styles.title}>My Friends</Text>
+      <Text style={styles.title}>Friends</Text>
       <View style={styles.divider} />
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
@@ -51,19 +99,9 @@ const Friends = () => {
       </View>
       <FlatList
         data={filteredFriends}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item, index }) => (
-          <View
-            style={[
-              styles.friendItem,
-              { backgroundColor: index % 2 === 0 ? "#d4d4d4" : "#f89b40" }, // Alternating colors
-            ]}>
-            <Image source={item.profileImage} style={styles.profileImage} />
-            <View style={styles.friendDetails}>
-              <Text style={styles.friendName}>{item.name}</Text>
-              <Text style={styles.friendAddress}>{item.address}</Text>
-            </View>
-          </View>
+        keyExtractor={(item: any) => item._id.toString()}
+        renderItem={({ item }) => (
+          <Friend friend={item} navigation={navigation} />
         )}
       />
     </View>

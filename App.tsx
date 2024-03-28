@@ -7,67 +7,110 @@ import Profile from "./app/screens/Profile";
 import EditProfile from "./app/screens/EditProfile";
 import NewPost from "./app/screens/NewPost";
 import Launch from "./app/screens/Launch";
-import UserHome from "./app/screens/UserHome";
+import Report from "./app/screens/Report";
+import Messages from "./app/screens/Messages";
+import NewFriendReport from "./app/screens/NewFriendReport";
+import ForgotPassword from "./app/screens/ForgotPassword";
+import DayAttendanceUser from "./app/screens/DayAttendanceUser";
 
 
 import { NavigationContainer } from "@react-navigation/native";
 import NavBarFamily from "./app/components/NavBarFamily";
 import NavBarStaff from "./app/components/NavBarStaff";
-import Messages from "./app/screens/Messages";
+import AttendanceHistory from "./app/screens/AttendanceHistory";
+import { StatusBar } from "react-native";
+import useAuthStore from "./app/stores/auth";
 
 const Stack = createNativeStackNavigator();
 export default function App() {
-  const [user, setUser] = useState("family");
+  const { userId } = useAuthStore();
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="SignIn">
-        <Stack.Screen
-          name="Launch"
-          component={Launch}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="SignIn"
-          component={SignIn}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="SignUp"
-          component={SignUp}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Profile"
-          component={Profile}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="EditProfile"
-          component={EditProfile}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="NewPost"
-          component={NewPost}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="UserTabs"
-          component={NavBarFamily}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="StaffTabs"
-          component={NavBarStaff}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Messages"
-          component={Messages}
-          options={{ headerShown: false }}
-          />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <>
+      <StatusBar backgroundColor="#000000" barStyle="dark-content" />
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName={userId ? "Launch" : "SignIn"}
+          screenOptions={{
+            headerShown: false,
+            gestureEnabled: false,
+            gestureDirection: "horizontal",
+          }}
+        >
+          {userId === null ? (
+            <>
+              <Stack.Screen name="SignIn" component={SignIn} />
+              <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+              <Stack.Screen name="SignUp" component={SignUp} />
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="Launch" component={Launch} />
+              <Stack.Screen
+                name="Profile"
+                component={Profile}
+                options={{
+                  gestureEnabled: true,
+                  gestureDirection: "horizontal",
+                }}
+              />
+              <Stack.Screen
+                name="EditProfile"
+                component={EditProfile}
+                options={{
+                  gestureEnabled: true,
+                  gestureDirection: "horizontal",
+                }}
+              />
+              <Stack.Screen
+                name="NewPost"
+                component={NewPost}
+                options={{
+                  gestureEnabled: true,
+                  gestureDirection: "horizontal",
+                }}
+              />
+              <Stack.Screen name="UserTabs" component={NavBarFamily} />
+              <Stack.Screen name="StaffTabs" component={NavBarStaff} />
+              <Stack.Screen
+                name="Report"
+                component={Report}
+                options={{
+                  gestureEnabled: true,
+                  gestureDirection: "horizontal",
+                }}
+              />
+              <Stack.Screen
+                name="AttendanceHistory"
+                component={AttendanceHistory}
+                options={{ headerShown: true }}
+              />
+              <Stack.Screen
+                name="DayAttendanceUser"
+                component={DayAttendanceUser}
+                options={{ headerShown: true, headerBackTitle: "Back" }}
+              />
+              <Stack.Screen
+                name="Messages"
+                component={Messages}
+                options={{
+                  gestureEnabled: true,
+                  gestureDirection: "horizontal",
+                }}
+              />
+              <Stack.Screen
+                name="NewFriendReport"
+                component={NewFriendReport}
+                options={{
+                  gestureEnabled: true,
+                  gestureDirection: "horizontal",
+                }}
+              />
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </>
   );
 }
 

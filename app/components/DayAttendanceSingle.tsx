@@ -8,8 +8,21 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import friendPFP from "../../assets/friendImage.png";
+import { formatTimeToAMPM } from "../utils/timezone";
 
-const AttendanceSingle = () => {
+interface AttendanceData {
+  timeIn: string[];
+  timeOut: string[];
+  friendName?: string;
+  profilePicture: any;
+}
+
+const AttendanceSingle = ({
+  friendName,
+  timeIn,
+  timeOut,
+  profilePicture,
+}: AttendanceData) => {
   const [T, setT] = useState(false);
   const toggleT = () => setT((previousState) => !previousState);
 
@@ -19,31 +32,49 @@ const AttendanceSingle = () => {
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <Image source={friendPFP} style={{ width: 60, height: 60 }}></Image>
+        <Image
+          source={{
+            uri: profilePicture
+              ? profilePicture
+              : "https://res.cloudinary.com/dvrcdxqex/image/upload/v1707870630/defaultProfilePic.png",
+          }}
+          style={{ width: 80, height: 80 }}
+        ></Image>
       </View>
 
       <View>
-        <Text style={styles.name}>Neel Gundavarapu</Text>
+        <Text style={styles.name}>{friendName}</Text>
         <View style={{ flexDirection: "row", gap: 12 }}>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Present</Text>
-            </TouchableOpacity>
+          <View style={styles.superContainer}>
+            <View
+              style={
+                timeIn.length >= timeOut.length && timeIn.length != 0
+                  ? styles.buttonContainerGreen
+                  : styles.buttonContainerRed
+              }
+            >
+              <Text style={styles.buttonText}>
+                {timeIn.length >= timeOut.length && timeIn.length != 0
+                  ? "Present"
+                  : "Absent"}
+              </Text>
+            </View>
           </View>
-          <View>
+          <View style={{ marginBottom: 8 }}>
             <View style={styles.timeHeaderContainer}>
               <Text style={styles.timeHeader}>Time in</Text>
               <Text style={styles.timeHeader}>Time out</Text>
             </View>
-            <View style={styles.timeContainer}>
-              <Text style={styles.timeText}>0:00</Text>
-              <Text style={styles.timeText}>0:00</Text>
-            </View>
-            <View style={styles.divider}></View>
-            <View style={styles.timeContainer}>
-              <Text style={styles.timeText}>0:00</Text>
-              <Text style={styles.timeText}>0:00</Text>
-            </View>
+            {timeIn.map((item, index) => (
+              <View style={styles.timeContainer}>
+                <Text style={styles.timeText}>
+                  {formatTimeToAMPM(timeIn[index])}
+                </Text>
+                <Text style={styles.timeText}>
+                  {formatTimeToAMPM(timeOut[index])}
+                </Text>
+              </View>
+            ))}
           </View>
         </View>
       </View>
@@ -89,22 +120,33 @@ const styles = StyleSheet.create({
     height: 80,
     alignItems: "center",
     justifyContent: "center",
+    alignSelf: "center",
+    overflow: "hidden",
   },
-  buttonContainer: {
-    flexDirection: "row",
-    gap: 10,
+  superContainer: {
+    justifyContent: "center",
+  },
+  buttonContainerRed: {
     marginTop: 10,
     marginBottom: 15,
-  },
-  button: {
-    backgroundColor: "#EC88AA",
-    paddingVertical: 15,
-    paddingHorizontal: 30,
     borderRadius: 10,
+    backgroundColor: "#EC88AA",
+    justifyContent: "center",
+    paddingHorizontal: 1,
+  },
+  buttonContainerGreen: {
+    marginTop: 10,
+    marginBottom: 15,
+    borderRadius: 10,
+    backgroundColor: "#A3CFB2",
+    justifyContent: "center",
   },
   buttonText: {
     fontWeight: "600",
     fontSize: 16,
+
+    paddingVertical: 15,
+    paddingHorizontal: 30,
   },
   timeHeader: {
     fontWeight: "500",
@@ -118,11 +160,13 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 6,
     justifyContent: "center",
+    marginTop: 5,
   },
   timeContainer: {
     flexDirection: "row",
     gap: 30,
-    justifyContent: "center",
+    justifyContent: "space-between",
+    marginHorizontal: 7,
   },
   divider: {
     borderBottomColor: "black",

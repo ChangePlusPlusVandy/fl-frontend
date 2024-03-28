@@ -35,6 +35,7 @@ interface AuthStore {
   }: CreateUserProps) => Promise<void>;
   signIn: ({ emailAddress, password }: SignInProps) => Promise<void>;
   logout: () => Promise<void>;
+  initializeAuthState: () => Promise<void>;
 }
 
 const firebase = useFirebase();
@@ -116,6 +117,35 @@ const useAuthStore = create<AuthStore>((set) => ({
       console.log(error);
     }
   },
+  initializeAuthState: async () => {
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        // User is logged in
+        try {
+          const userData = await fetch(`${API_URL}user/firebase/${user.uid}`, {
+            method: "GET",
+            headers: {
+              "Friends-Life-Signature": generateHmacSignature(
+                JSON.stringify({ firebaseId: user.uid }),
+                API_SECRET
+              ),
+            },
+          });
+          const userId = (await userData.json())._id;
+
+          set({ user, userId });
+        } catch (error) {
+          console.error("Failed to fetch user data", error);
+          // Handle error, e.g., by setting user to null or showing an error message
+        }
+      } else {
+        // User is logged out
+        set({ user: null, userId: null });
+      }
+    });
+  },
 }));
+
+useAuthStore.getState().initializeAuthState();
 
 export default useAuthStore;

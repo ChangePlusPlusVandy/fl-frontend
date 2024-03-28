@@ -1,203 +1,279 @@
-import React, {useEffect, useState} from 'react';
-import {Button, View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { NavigationProp } from '@react-navigation/native';
+import React, { useEffect, useState } from "react";
+import {
+  Button,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { NavigationProp } from "@react-navigation/native";
+import { Dimensions } from "react-native";
 
 import FLlogo from "../../assets/friends-life-logo.png";
-import OpenEye from "../../assets/OpenEye.png"
-import ClosedEye from "../../assets/Eye-slash.png"
-import useAuthStore, { SignInProps } from '../stores/auth';
+import useAuthStore, { SignInProps } from "../stores/auth";
+import { generateHmacSignature } from "../utils/signature";
+import { API_URL, API_SECRET } from "@env";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
 
 const SignIn = ({ navigation }: RouterProps) => {
-    const { user, signIn } = useAuthStore();
-    const [form, setForm] = useState<SignInProps>({ emailAddress: "", password: "" });
-    const [showPassword, setShowPassword] = useState(false);
+  const { user, signIn, userId } = useAuthStore();
+  const [form, setForm] = useState<SignInProps>({
+    emailAddress: "",
+    password: "",
+  });
+  const [userType, setUserType] = useState(undefined);
+  const [showPassword, setShowPassword] = useState(false);
 
-    useEffect(() => {
-      if (user !== null) {
-        navigation.navigate('UserTabs');
-      }
-    }, [user]);
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      setForm({ emailAddress: "", password: "" });
+    });
 
-    const onLogin = async () =>{
-        const { emailAddress, password } = form;
+    return unsubscribe;
+  }, [navigation]);
 
-        try {
-          await signIn({ emailAddress, password });
-        } catch (error) {
-          alert('Invalid credentials. Please try again.')
-        }
+  // useEffect(() => {
+  //   const onSuccessfulSignIn = async () => {
+  //     try {
+  //       // Fetch user data
+  //       const userData = await fetch(`${API_URL}user/${userId}`, {
+  //         method: "GET",
+  //         headers: {
+  //           "Friends-Life-Signature": generateHmacSignature(
+  //             JSON.stringify({ userId: userId }),
+  //             API_SECRET
+  //           ),
+  //         },
+  //       });
+
+  //       // Parse user data
+  //       const userInfo = await userData.json();
+  //       setUserType(userInfo.type);
+  //     } catch (error) {
+  //       console.error("Error getting user type:", error);
+  //       // Handle error fetching user data
+  //     }
+  //   };
+
+  //   // If user is not null, attempt to fetch user data
+  //   if (user) {
+  //     onSuccessfulSignIn();
+  //   }
+  // }, [user, userId]); // Run this effect whenever user or userId changes
+
+  // useEffect(() => {
+  //   if (userType !== undefined) {
+  //     if (userType === "Staff") {
+  //       navigation.navigate("StaffTabs");
+  //     } else if (userType === "Family") {
+  //       navigation.navigate("UserTabs");
+  //     } else {
+  //       alert("Could not verify account type successfully");
+  //     }
+  //   }
+  // }, [userType, navigation]);
+
+  const onLogin = async () => {
+    const { emailAddress, password } = form;
+    try {
+      await signIn({ emailAddress, password });
+    } catch (error) {
+      alert("Invalid credentials. Please try again.");
     }
-
-    return (
-      <View style={styles.root}>
-        <Text style={styles.login}>Login</Text>
-        <Text style={styles.pleaseSignInToContinue}>Please sign in to continue</Text>
-        <TouchableOpacity style={styles.donTHaveAnAccountSignUp}>
-          <Text style={styles.labelWrapper}>
-            <Text style={styles.label}>Don't have an account ?</Text>
-            <Text style={styles.label2} onPress={() => navigation.navigate('SignUp')}> Sign up</Text>
-          </Text>
-        </TouchableOpacity>
-        <Text style={styles.email}>Email</Text>
-        <TextInput style={styles.usernameBox} onChangeText={(emailAddress: any) => setForm({ ...form, emailAddress })}></TextInput>
-        <TextInput style={styles.passwordBox} secureTextEntry={!showPassword} onChangeText={(password: any) => setForm({ ...form, password })}></TextInput>
-        {/* Add your vector and logo components */}
-        <Text style={styles.password}>Password</Text>
-        <Text style={styles.forgotPassword}>Forgot Password?</Text>
-        <TouchableOpacity style={styles.loginBox} onPress={onLogin}>
-
-      </TouchableOpacity>
-      <Text style={styles.logIn}>Log in</Text>
-        <Text style={styles.rememberMe}>Remember Me</Text>
-        <Image source={showPassword ? ClosedEye: OpenEye} style={styles.vector}/>
-
-        <TouchableOpacity style={styles.vector} onPress={()=>setShowPassword(!showPassword)}></TouchableOpacity>
-        
-
-        <Image source={FLlogo} style={styles.screenshot2023114At1171}/>
-
-      </View>
-    );
   };
-  
+
+  return (
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+      }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.root}>
+            <Image source={FLlogo} style={styles.logo} />
+            <View style={styles.container}>
+              <Text style={styles.login}>Login</Text>
+              <Text style={styles.pleaseSignInToContinue}>
+                Please sign in to continue
+              </Text>
+
+              <Text style={styles.email}>Email</Text>
+              <TextInput
+                style={styles.usernameBox}
+                value={form.emailAddress}
+                onChangeText={(emailAddress) =>
+                  setForm({ ...form, emailAddress })
+                }
+              />
+
+              <Text style={styles.password}>Password</Text>
+              <TextInput
+                style={styles.passwordBox}
+                value={form.password}
+                secureTextEntry={!showPassword}
+                onChangeText={(password) => setForm({ ...form, password })}
+              />
+              {/* <TouchableOpacity
+              style={styles.showPasswordButton}
+              onPress={() => setShowPassword(!showPassword)}>
+              <Image
+                source={showPassword ? ClosedEye : OpenEye}
+                style={styles.eyeIcon}
+              />
+            </TouchableOpacity> */}
+
+              <View style={styles.forgotPasswordWrap}>
+                <Text
+                  style={styles.forgotPassword}
+                  onPress={() => navigation.navigate("ForgotPassword")}>
+                  Forgot Password?
+                </Text>
+              </View>
+
+              <TouchableOpacity style={styles.loginBox} onPress={onLogin}>
+                <Text style={styles.loginLabel}>Log in</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.signUp}>
+                <Text style={styles.labelWrapper}>
+                  <Text style={styles.label}>Don't have an account? </Text>
+                  <Text
+                    style={styles.label2}
+                    onPress={() => navigation.navigate("SignUp")}>
+                    Sign up
+                  </Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
+  );
+};
 
 export default SignIn;
 
+const { width, height } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
-    root: {
-      position: 'relative',
-      width: 390,
-      height: 844,
-      alignItems: 'flex-start',
-      backgroundColor: '#fff',
-      overflow: 'hidden',
-    },
-    login: {
-      color: '#000',
-      fontSize: 29,
-      fontWeight: '600',
-      position: 'absolute',
-      left: 26,
-      top: 269,
-    },
-    pleaseSignInToContinue: {
-      color: '#818181',
-      fontSize: 16,
-      position: 'absolute',
-      left: 25,
-      top: 313,
-    },
-    donTHaveAnAccountSignUp: {
-      position: 'absolute',
-      left: 65,
-      top: 799,
-    },
-    labelWrapper: {
-      fontSize: 16,
-    },
-    label: {
-      color: '#818181',
-      fontSize: 16,
-    },
-    label2: {
-      color: '#f89b40',
-      fontSize: 16,
-      fontWeight: '500',
-    },
-    email: {
-      color: '#818181',
-      fontSize: 17,
-      position: 'absolute',
-      left: 25,
-      top: 364,
-    },
-    usernameBox: {
-      position: 'absolute',
-      left: 25,
-      top: 393,
-      width: 340,
-      height: 58,
-      borderRadius: 9,
-      fontSize: 25,
-      backgroundColor: '#f4f4f4',
-    },
-    passwordBox: {
-      position: 'absolute',
-      left: 25,
-      top: 499,
-      width: 340,
-      height: 58,
-      borderRadius: 9,
-      fontSize: 25,
-      backgroundColor: '#f4f4f4',
-    },
-    password: {
-      color: '#818181',
-      fontSize: 17,
-      position: 'absolute',
-      left: 25,
-      top: 470,
-    },
-    forgotPassword: {
-      color: '#000',
-      fontSize: 15,
-      position: 'absolute',
-      left: 233,
-      top: 566,
-    },
-    loginBox: {
-      position: 'absolute',
-      left: 17,
-      top: 641,
-      width: 357,
-      height: 63,
-      borderRadius: 12,
-      backgroundColor: '#f89b40',
-    },
-    logIn: {
-      color: '#313b54',
-      fontSize: 17,
-      fontWeight: 'bold',
-      position: 'absolute',
-      left: 170,
-      top: 660,
-    },
-    rememberMe: {
-      color: '#000',
-      fontSize: 15,
-      position: 'absolute',
-      left: 54,
-      top: 566,
-    },
-    // Add styles for your logo component
-    logo: {
-      position: 'absolute',
-      left: 78,
-      top: -9,
-      width: 235,
-      height: 278,
-    },
-    // Add styles for screenshot2023114At1171 component
-    screenshot2023114At1171: {
-      position: 'absolute',
-      left: 75,
-      top: 18,
-      width: 239,
-      height: 232,
-      // Add background image styling here
-    },
-    vector: {
-      position: 'absolute',
-      left: '83.3333%',
-      right: '11.4716%',
-      top: '61.3%',
-      overflow: 'visible',
-      width: 13,
-      height: 13,
-      tintColor: 'grey',
-    },
-  });
+  root: {
+    justifyContent: "center", // Center items vertically
+    alignItems: "center", // Center items horizontally
+    width: width,
+    height: height,
+    backgroundColor: "#fff",
+    overflow: "hidden",
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  logo: {
+    position: "relative",
+    width: 0.6 * width,
+    height: 0.6 * width,
+  },
+  container: {
+    width: 0.8 * width,
+    backgroundColor: "#fff",
+    overflow: "hidden",
+    marginBottom: 0.04 * height,
+  },
+  login: {
+    position: "relative",
+    fontSize: 0.08 * width,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  pleaseSignInToContinue: {
+    position: "relative",
+    fontSize: 0.04 * width,
+    height: 0.05 * height,
+    fontWeight: "normal",
+    color: "#818181",
+  },
+  email: {
+    position: "relative",
+    fontSize: 0.05 * width,
+    color: "#818181",
+  },
+  usernameBox: {
+    position: "relative",
+    height: 0.06 * height,
+    backgroundColor: "#F4F4F4", // Light gray background color
+    borderColor: "#F4F4F4",
+    borderRadius: 10,
+    padding: 10,
+    fontSize: 0.05 * width,
+  },
+  password: {
+    position: "relative",
+    fontSize: 0.05 * width,
+    color: "#818181",
+    marginTop: 0.01 * height,
+  },
+  passwordBox: {
+    position: "relative",
+    height: 0.06 * height,
+    backgroundColor: "#F4F4F4", // Light gray background color
+    borderColor: "#F4F4F4",
+    borderRadius: 10,
+    padding: 10,
+  },
+
+  forgotPasswordWrap: {
+    position: "relative",
+    justifyContent: "flex-end", // Align to the end of the parent view
+    alignSelf: "flex-end",
+    marginTop: 0.01 * height,
+  },
+  forgotPassword: {
+    fontSize: 0.03 * width,
+    color: "#000",
+  },
+  loginBox: {
+    position: "relative",
+    backgroundColor: "#F89B40",
+    borderRadius: 10,
+    height: 0.06 * height,
+    marginBottom: 0.02 * height,
+    marginTop: 0.02 * height,
+    justifyContent: "center", // Center items vertically
+    alignItems: "center", // Center items horizontally
+  },
+  loginLabel: {
+    fontSize: 0.05 * width,
+    color: "#000",
+    fontWeight: "bold",
+  },
+  signUp: {
+    position: "relative",
+    justifyContent: "center", // Center items vertically
+    alignItems: "center", // Center items horizontally
+  },
+  labelWrapper: {
+    fontSize: 0.04 * width,
+    color: "#818181",
+  },
+  label: {
+    fontSize: 0.04 * width,
+    color: "#818181",
+  },
+  label2: {
+    fontSize: 0.04 * width,
+    color: "#F89B40",
+  },
+});
