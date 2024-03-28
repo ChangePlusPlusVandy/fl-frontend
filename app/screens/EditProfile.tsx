@@ -28,7 +28,7 @@ interface RouterProps {
 }
 
 const EditProfile = ({ navigation }: RouterProps) => {
-  const { user, userId } = useAuthStore();
+  const { user, userId, checkApproved } = useAuthStore();
   const [form, setForm] = useState({
     fullName: "",
     phoneNumber: "",
@@ -165,6 +165,7 @@ const EditProfile = ({ navigation }: RouterProps) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      checkApproved();
       setImageChanged(false);
       fetchInitialData();
     }, [])

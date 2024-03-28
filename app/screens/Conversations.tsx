@@ -34,7 +34,7 @@ const Conversations = ({ navigation }: RouterProps) => {
     setPopupVisible(true);
   };
 
-  const { userId } = useAuthStore();
+  const { userId, checkApproved } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
 
   const [chats, setChats] = useState<Chat[]>([]);
@@ -45,6 +45,7 @@ const Conversations = ({ navigation }: RouterProps) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      checkApproved();
       const getChats = async () => {
         try {
           setChats([]); // Clear chats before fetching new ones

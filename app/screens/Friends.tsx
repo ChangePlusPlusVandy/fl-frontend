@@ -24,7 +24,7 @@ interface Friend {
 }
 
 const Friends = ({ navigation }: RouterProps) => {
-  const { userId } = useAuthStore();
+  const { userId, checkApproved } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [friendsData, setFriendsData] = useState<Friend[]>([]);
 
@@ -77,6 +77,7 @@ const Friends = ({ navigation }: RouterProps) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      checkApproved();
       setFriendsData([]);
       getFriends();
     }, [])

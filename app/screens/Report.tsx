@@ -8,7 +8,7 @@ import {
   Image,
   ScrollView,
 } from "react-native";
-import { NavigationProp } from "@react-navigation/native";
+import { NavigationProp, useFocusEffect } from "@react-navigation/native";
 import BackButton from "../components/BackButton";
 import moment from "moment";
 import { generateHmacSignature } from "../utils/signature";
@@ -31,7 +31,7 @@ interface ReportItem {
 
 const Report = ({ route, navigation }: RouterProps) => {
   const { friend } = route.params;
-  const { userId } = useAuthStore();
+  const { userId, checkApproved } = useAuthStore();
 
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [showNewReport, setShowNewReport] = useState(false);
@@ -83,11 +83,14 @@ const Report = ({ route, navigation }: RouterProps) => {
     }
   };
 
-  useEffect(() => {
-    setReports([]);
-    getReports();
-    getUserType();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      checkApproved();
+      setReports([]);
+      getReports();
+      getUserType();
+    }, [])
+  );
 
   const calculateTimeSincePost = (postTime: string) => {
     const postMoment = moment(postTime);

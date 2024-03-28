@@ -10,11 +10,12 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { NavigationProp } from "@react-navigation/native";
+import { NavigationProp, useFocusEffect } from "@react-navigation/native";
 import BackButton from "../components/BackButton";
 import { RouteProp } from "@react-navigation/native";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
+import useAuthStore from "../stores/auth";
 
 interface RouterProps {
   route: RouteProp<{ params: { friend: any } }>;
@@ -25,6 +26,7 @@ const NewFriendReport = ({ navigation, route }: RouterProps) => {
   const { friend } = route.params;
   const [subject, setSubject] = useState("");
   const [textBox, setTextBox] = useState("");
+  const { checkApproved } = useAuthStore();
 
   const handlePost = async () => {
     try {
@@ -53,9 +55,11 @@ const NewFriendReport = ({ navigation, route }: RouterProps) => {
     }
   };
 
-  // useEffect(() => {
-  //   console.log(friend);
-  // }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      checkApproved();
+    }, [])
+  );
 
   return (
     <KeyboardAvoidingView

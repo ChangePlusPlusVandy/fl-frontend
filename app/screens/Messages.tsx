@@ -10,7 +10,7 @@ import {
   Platform,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome icons
-import { useRoute } from "@react-navigation/native";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { NavigationProp } from "@react-navigation/native";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
@@ -29,7 +29,7 @@ interface RouterProps {
 
 const Messages = ({ navigation }: RouterProps) => {
   const route = useRoute();
-  const { userId } = useAuthStore();
+  const { userId, checkApproved } = useAuthStore();
   let { reciever, recieverID, chatID } = route.params as any;
   const [recieverId, setRecieverId] = useState(recieverID);
   const [chatId, setChatId] = useState(chatID);
@@ -156,10 +156,11 @@ const Messages = ({ navigation }: RouterProps) => {
     getChats();
   }, []);
 
-  // useEffect(() => {
-  //   const interval = setInterval(updateMessages, 5000); // Fetch new messages every 5 seconds
-  //   return () => clearInterval(interval);
-  // }, [messages, chatId]);
+  useFocusEffect(
+    React.useCallback(() => {
+      checkApproved();
+    }, [])
+  );
 
   const [newMessage, setNewMessage] = useState("");
 

@@ -19,7 +19,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import useAuthStore from "../stores/auth";
 import { Dimensions } from "react-native";
 
-
 interface RouterProps {
   navigation: NavigationProp<any, any>;
 }
@@ -39,10 +38,12 @@ const StaffHome = ({ navigation }: RouterProps) => {
     profilePicture:
       "https://res.cloudinary.com/dvrcdxqex/image/upload/v1707870630/defaultProfilePic.png",
   });
-  const { userId } = useAuthStore();
+  const { userId, checkApproved } = useAuthStore();
 
   useFocusEffect(
     React.useCallback(() => {
+      checkApproved();
+
       setPosts([]);
       const fetchPosts = async () => {
         try {
@@ -164,8 +165,7 @@ const StaffHome = ({ navigation }: RouterProps) => {
 
       <TouchableOpacity
         style={styles.addPic}
-        onPress={() => navigation.navigate("NewPost")}
-      >
+        onPress={() => navigation.navigate("NewPost")}>
         <Image source={AddPic} />
       </TouchableOpacity>
     </SafeAreaView>

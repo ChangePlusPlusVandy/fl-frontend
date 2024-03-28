@@ -31,7 +31,7 @@ interface PostItem {
 
 const UserHome = ({ navigation }: RouterProps) => {
   const [posts, setPosts] = useState<PostItem[]>([]);
-  const { userId } = useAuthStore();
+  const { userId, checkApproved } = useAuthStore();
   const [userDetails, setUserDetails] = useState({
     name: "",
     profilePicture:
@@ -40,6 +40,7 @@ const UserHome = ({ navigation }: RouterProps) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      checkApproved();
       setPosts([]);
       const fetchPosts = async () => {
         try {

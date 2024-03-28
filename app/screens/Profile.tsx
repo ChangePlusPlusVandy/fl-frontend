@@ -32,8 +32,7 @@ const firebase = useFirebase();
 const auth = getAuth(firebase);
 
 const Profile = ({ navigation }: RouterProps) => {
-  const { user } = useAuthStore();
-  const { logout } = useAuthStore();
+  const { user, logout, checkApproved } = useAuthStore();
   const [userDetails, setUserDetails] = useState({
     name: "",
     emailAddress: "",
@@ -43,6 +42,7 @@ const Profile = ({ navigation }: RouterProps) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      checkApproved();
       const fetchDetailsAsync = async () => {
         try {
           const fetchedDetails = await fetchUserData(); // Make sure this is correctly typed or casted

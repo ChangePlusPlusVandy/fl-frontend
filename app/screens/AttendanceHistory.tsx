@@ -6,6 +6,7 @@ import { NavigationProp } from "@react-navigation/native";
 import { API_URL, API_SECRET } from "@env";
 import { generateHmacSignature } from "../utils/signature";
 import { RouteProp } from "@react-navigation/native";
+import useAuthStore from "../stores/auth";
 
 interface RouterProps {
   route: RouteProp<{ params: { friend: any } }>;
@@ -14,6 +15,9 @@ interface RouterProps {
 }
 
 const AttendanceHistory = ({ route, navigation }: RouterProps) => {
+  const { checkApproved } = useAuthStore();
+  const { friend } = route.params;
+
   const navigateDay = (day: DateData) => {
     if (friend === "all") {
       navigation.navigate("DayAttendance", {
@@ -25,7 +29,7 @@ const AttendanceHistory = ({ route, navigation }: RouterProps) => {
       });
     }
   };
-  const { friend } = route.params;
+
   return (
     <View>
       <Calendar

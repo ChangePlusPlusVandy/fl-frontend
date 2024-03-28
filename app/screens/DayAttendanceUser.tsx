@@ -15,6 +15,7 @@ import { NavigationProp, RouteProp, useRoute } from "@react-navigation/native";
 import DayAttendanceSingle from "../components/DayAttendanceSingle";
 import { API_SECRET, API_URL } from "@env";
 import { generateHmacSignature } from "../utils/signature";
+import useAuthStore from "../stores/auth";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -49,8 +50,10 @@ const DayAttendance = ({ navigation }: RouterProps) => {
   const [filteredDisplay, setFilteredDisplay] = useState<AttendanceData[]>([]);
   const route = useRoute<RouteProp<DayScreenRouteProp, "Params">>();
   const { params } = route.params;
+  const { checkApproved } = useAuthStore();
 
   useEffect(() => {
+    checkApproved();
     let tempAttendance: AttendanceItem[] = [];
 
     const getAttendance = async () => {
@@ -162,13 +165,11 @@ const DayAttendance = ({ navigation }: RouterProps) => {
             placeholder="Search"
             onChangeText={handleSearch}
             defaultValue={searchValue}
-            style={styles.searchInput}
-          ></TextInput>
+            style={styles.searchInput}></TextInput>
         </View>
         <TouchableOpacity
           style={styles.history}
-          onPress={() => navigation.navigate("AttendanceHistory")}
-        >
+          onPress={() => navigation.navigate("AttendanceHistory")}>
           <Text style={styles.historyText}>History</Text>
         </TouchableOpacity>
       </View>

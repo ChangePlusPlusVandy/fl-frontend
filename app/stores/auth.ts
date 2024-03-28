@@ -36,6 +36,7 @@ interface AuthStore {
   signIn: ({ emailAddress, password }: SignInProps) => Promise<void>;
   logout: () => Promise<void>;
   initializeAuthState: () => Promise<void>;
+  checkApproved: () => Promise<void>;
 }
 
 const firebase = useFirebase();
@@ -144,8 +145,34 @@ const useAuthStore = create<AuthStore>((set) => ({
       }
     });
   },
+  checkApproved: async () => {
+    try {
+      if (useAuthStore.getState().userId !== null) {
+        const response = await fetch(
+          `${API_URL}user/${useAuthStore.getState().userId}`,
+          {
+            method: "GET",
+            headers: {
+              "Friends-Life-Signature": generateHmacSignature(
+                JSON.stringify({ userId: useAuthStore.getState().userId }),
+                API_SECRET
+              ),
+            },
+          }
+        );
+        const user = await response.json();
+        if (!user.approved) {
+          alert("Your account is not approved yet. Please wait for approval.");
+          await useAuthStore.getState().logout();
+        }
+      }
+    } catch (error) {
+      console.error("Error checking if user is approved:", error);
+    }
+  },
 }));
 
 useAuthStore.getState().initializeAuthState();
+useAuthStore.getState().checkApproved();
 
 export default useAuthStore;

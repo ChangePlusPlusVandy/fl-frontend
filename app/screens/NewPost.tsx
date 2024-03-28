@@ -34,7 +34,7 @@ const NewPost = ({ navigation }: RouterProps) => {
   const [status, setStatus] = useState("Post");
   const [imagePicked, setImagePicked] = useState(false);
 
-  const { userId } = useAuthStore();
+  const { userId, checkApproved } = useAuthStore();
 
   const cloudinaryUpload = async () => {
     try {
@@ -157,6 +157,7 @@ const NewPost = ({ navigation }: RouterProps) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      checkApproved();
       setImagePicked(false);
       setStatus("Post");
     }, [])

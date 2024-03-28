@@ -14,6 +14,7 @@ import AttendanceSingle from "../components/AttendanceSingle";
 import { NavigationProp } from "@react-navigation/native";
 import { generateHmacSignature } from "../utils/signature";
 import { API_URL, API_SECRET } from "@env";
+import useAuthStore from "../stores/auth";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -30,6 +31,7 @@ const Attendance = ({ navigation }: RouterProps) => {
   const [friends, setFriends] = useState<FriendData[]>([]);
   const [filteredFriends, setFilteredFriends] = useState<FriendData[]>([]);
   const [searchValue, setSearchValue] = useState("");
+  const { checkApproved } = useAuthStore();
 
   const getFriends = async () => {
     try {
@@ -88,8 +90,7 @@ const Attendance = ({ navigation }: RouterProps) => {
             placeholder="Search"
             onChangeText={handleSearch}
             defaultValue={searchValue}
-            style={styles.searchInput}
-          ></TextInput>
+            style={styles.searchInput}></TextInput>
         </View>
         <TouchableOpacity
           style={styles.history}
@@ -97,8 +98,7 @@ const Attendance = ({ navigation }: RouterProps) => {
             navigation.navigate("AttendanceHistory", {
               friend: "all",
             })
-          }
-        >
+          }>
           <Text style={styles.historyText}>History</Text>
         </TouchableOpacity>
       </View>
