@@ -8,7 +8,9 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl
 } from "react-native";
+
 import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome icons
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { NavigationProp } from "@react-navigation/native";
@@ -161,7 +163,15 @@ const Messages = ({ navigation }: RouterProps) => {
       checkApproved();
     }, [])
   );
-
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setMessages([]);
+    getChats();
+    // Fetch new data here...
+    // After fetching data, set refreshing to false
+    setRefreshing(false);
+  }, []);
   const [newMessage, setNewMessage] = useState("");
 
   const sendMessage = async () => {
@@ -250,20 +260,29 @@ const Messages = ({ navigation }: RouterProps) => {
         <Text style={styles.headerTitle}>{reciever}</Text>
       </View>
       <View style={styles.divider} />
-      <FlatList
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View
-            style={
-              item.sender === "user" ? styles.userMessage : styles.otherMessage
-            }>
-            <Text style={styles.messageText}>{item.text}</Text>
-          </View>
-        )}
-        inverted={true}
-        showsVerticalScrollIndicator={false}
+  <FlatList
+    data={messages}
+    keyExtractor={(item) => item.id}
+    renderItem={({ item }) => (
+      <View
+        style={
+          item.sender === 'user' ? styles.userMessage : styles.otherMessage
+        }>
+        <Text style={styles.messageText}>{item.text}</Text>
+      </View>
+    )}
+    inverted={true}
+    showsVerticalScrollIndicator={false}
+    refreshControl={
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        colors={["#f89b40"]} // Set the colors of the refresh indicator
+        tintColor="#f89b40" // Set the color of the refresh indicator
       />
+    }
+  />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <View style={styles.messageInputContainer}>
