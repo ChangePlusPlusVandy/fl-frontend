@@ -11,14 +11,16 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera to take photos.",
-        "NSPhotoLibraryUsageDescription": "This app accesses the photo library to select photos."
+        "NSPhotoLibraryUsageDescription": "This app accesses the photo library to select photos.",
+        "UIBackgroundModes": ["remote-notification"],
+        "entitlements": {
+          "aps-environment": "production"
+        }
       },
       "bundleIdentifier": "com.friendslifedev.friendslifeapp"
     },
@@ -27,10 +29,7 @@
         "foregroundImage": "./assets/friends-life-logo.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE"
-      ]
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"]
     },
     "web": {
       "favicon": "./assets/friends-life-logo.png"
