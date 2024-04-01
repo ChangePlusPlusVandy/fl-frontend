@@ -11,23 +11,34 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera to take photos.",
         "NSPhotoLibraryUsageDescription": "This app accesses the photo library to select photos."
-      }
+      },
+      "bundleIdentifier": "com.friendslifedev.friendslifeapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/friends-life-logo.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"]
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/friends-life-logo.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "80b9a03c-5ace-4045-b737-e0218d8c740c"
+      }
     }
   }
 }
