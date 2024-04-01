@@ -8,7 +8,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  RefreshControl
+  RefreshControl,
 } from "react-native";
 
 import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome icons
@@ -260,28 +260,28 @@ const Messages = ({ navigation }: RouterProps) => {
         <Text style={styles.headerTitle}>{reciever}</Text>
       </View>
       <View style={styles.divider} />
-  <FlatList
-    data={messages}
-    keyExtractor={(item) => item.id}
-    renderItem={({ item }) => (
-      <View
-        style={
-          item.sender === 'user' ? styles.userMessage : styles.otherMessage
-        }>
-        <Text style={styles.messageText}>{item.text}</Text>
-      </View>
-    )}
-    inverted={true}
-    showsVerticalScrollIndicator={false}
-    refreshControl={
-      <RefreshControl
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-        colors={["#f89b40"]} // Set the colors of the refresh indicator
-        tintColor="#f89b40" // Set the color of the refresh indicator
+      <FlatList
+        data={messages}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View
+            style={
+              item.sender === "user" ? styles.userMessage : styles.otherMessage
+            }>
+            <Text style={styles.messageText}>{item.text}</Text>
+          </View>
+        )}
+        inverted={true}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#f89b40"]} // Set the colors of the refresh indicator
+            tintColor="#f89b40" // Set the color of the refresh indicator
+          />
+        }
       />
-    }
-  />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}>
