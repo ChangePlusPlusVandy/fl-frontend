@@ -132,23 +132,23 @@ const UserHome = ({ navigation }: RouterProps) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
-        <View style={styles.headerContainer}>
-          <View style={styles.nameWrapper}>
-            <Text style={styles.headerText}>Welcome </Text>
-            <Text style={styles.nameText}>{userDetails.name}!</Text>
-          </View>
-
-          <View style={styles.profilePic}>
-            <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-              <Image
-                source={{ uri: userDetails.profilePicture }}
-                style={styles.profileImage}
-              />
-            </TouchableOpacity>
-          </View>
+      <View style={styles.headerContainer}>
+        <View style={styles.nameWrapper}>
+          <Text style={styles.headerText}>Welcome </Text>
+          <Text style={styles.nameText}>{userDetails.name}!</Text>
         </View>
 
+        <View style={styles.profilePic}>
+          <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+            <Image
+              source={{ uri: userDetails.profilePicture }}
+              style={styles.profileImage}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView>
         {posts.map((post) => (
           <Post
             key={post.id}
