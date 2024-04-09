@@ -41,18 +41,15 @@ const Messages = ({ navigation }: RouterProps) => {
     try {
       setMessages([]);
       if (chatId) {
-        const chatResponse = await fetch(
-          `https://fl-backend.vercel.app/chat/${chatId}`,
-          {
-            method: "GET",
-            headers: {
-              "Friends-Life-Signature": generateHmacSignature(
-                JSON.stringify({ chatId: chatId }),
-                API_SECRET
-              ),
-            },
-          }
-        );
+        const chatResponse = await fetch(`${API_URL}chat/${chatId}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature(
+              JSON.stringify({ chatId: chatId }),
+              API_SECRET
+            ),
+          },
+        });
         const chatJSON = await chatResponse.json();
 
         setRecieverId(
@@ -63,7 +60,7 @@ const Messages = ({ navigation }: RouterProps) => {
           const messageStr = String(message);
 
           const messageResponse = await fetch(
-            `https://fl-backend.vercel.app/message/${messageStr}`,
+            `${API_URL}message/${messageStr}`,
             {
               method: "GET",
               headers: {
@@ -101,18 +98,15 @@ const Messages = ({ navigation }: RouterProps) => {
   const updateMessages = async () => {
     if (chatId) {
       try {
-        const chatResponse = await fetch(
-          `https://fl-backend.vercel.app/chat/${chatId}`,
-          {
-            method: "GET",
-            headers: {
-              "Friends-Life-Signature": generateHmacSignature(
-                JSON.stringify({ chatId: chatId }),
-                API_SECRET
-              ),
-            },
-          }
-        );
+        const chatResponse = await fetch(`${API_URL}chat/${chatId}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature(
+              JSON.stringify({ chatId: chatId }),
+              API_SECRET
+            ),
+          },
+        });
         const chatJSON = await chatResponse.json();
 
         const existingMessageIds = new Set(messages.map((msg) => msg.id)); // Assuming `id` is a unique identifier for each message
@@ -123,7 +117,7 @@ const Messages = ({ navigation }: RouterProps) => {
             if (existingMessageIds.has(messageId)) return;
             console.log("Fetching message", messageId);
             const messageResponse = await fetch(
-              `https://fl-backend.vercel.app/message/${messageId}`,
+              `${API_URL}message/${messageId}`,
               {
                 method: "GET",
                 headers: {

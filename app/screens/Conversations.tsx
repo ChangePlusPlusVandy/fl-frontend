@@ -7,12 +7,12 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
-  RefreshControl
+  RefreshControl,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons"; // Import the FontAwesome icons
 import { NavigationProp, useFocusEffect } from "@react-navigation/native";
 import moment from "moment";
-import { API_SECRET } from "@env";
+import { API_URL, API_SECRET } from "@env";
 import useAuthStore from "../stores/auth";
 import { generateHmacSignature } from "../utils/signature";
 import NewMessagePopup from "../components/NewMessagePopup"; // Assuming the file is in the same directory
@@ -41,7 +41,6 @@ const Conversations = ({ navigation }: RouterProps) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
-
   const filteredChats = chats?.filter((chat) =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -49,40 +48,32 @@ const Conversations = ({ navigation }: RouterProps) => {
     try {
       setChats([]); // Clear chats before fetching new ones
       const tempChats = [];
-      const userResponse = await fetch(
-        `https://fl-backend.vercel.app/user/${userId}`,
-        {
-          method: "GET",
-          headers: {
-            "Friends-Life-Signature": generateHmacSignature(
-              JSON.stringify({ userId: userId }),
-              API_SECRET
-            ),
-          },
-        }
-      );
+      const userResponse = await fetch(`${API_URL}user/${userId}`, {
+        method: "GET",
+        headers: {
+          "Friends-Life-Signature": generateHmacSignature(
+            JSON.stringify({ userId: userId }),
+            API_SECRET
+          ),
+        },
+      });
       const userJSON = await userResponse.json();
 
       for (const chatID of userJSON.chats) {
-        const chatResponse = await fetch(
-          `https://fl-backend.vercel.app/chat/${chatID}`,
-          {
-            method: "GET",
-            headers: {
-              "Friends-Life-Signature": generateHmacSignature(
-                JSON.stringify({ chatId: chatID }),
-                API_SECRET
-              ),
-            },
-          }
-        );
+        const chatResponse = await fetch(`${API_URL}chat/${chatID}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature(
+              JSON.stringify({ chatId: chatID }),
+              API_SECRET
+            ),
+          },
+        });
         const chat = await chatResponse.json();
 
         if (chat.messages?.length > 0) {
           const messagesResponse = await fetch(
-            `https://fl-backend.vercel.app/message/${
-              chat.messages[chat.messages.length - 1]
-            }`,
+            `${API_URL}message/${chat.messages[chat.messages.length - 1]}`,
             {
               method: "GET",
               headers: {
@@ -98,18 +89,15 @@ const Conversations = ({ navigation }: RouterProps) => {
           const messageJSON = await messagesResponse.json();
 
           const otherUser = chat.user1 == userId ? chat.user2 : chat.user1;
-          const userResponse = await fetch(
-            `https://fl-backend.vercel.app/user/${otherUser}`,
-            {
-              method: "GET",
-              headers: {
-                "Friends-Life-Signature": generateHmacSignature(
-                  JSON.stringify({ userId: otherUser }),
-                  API_SECRET
-                ),
-              },
-            }
-          );
+          const userResponse = await fetch(`${API_URL}user/${otherUser}`, {
+            method: "GET",
+            headers: {
+              "Friends-Life-Signature": generateHmacSignature(
+                JSON.stringify({ userId: otherUser }),
+                API_SECRET
+              ),
+            },
+          });
           const userJSON = await userResponse.json();
 
           const newChatObj: Chat = {
@@ -123,18 +111,15 @@ const Conversations = ({ navigation }: RouterProps) => {
           tempChats.push(newChatObj);
         } else {
           const otherUser = chat.user1 == userId ? chat.user2 : chat.user1;
-          const userResponse = await fetch(
-            `https://fl-backend.vercel.app/user/${otherUser}`,
-            {
-              method: "GET",
-              headers: {
-                "Friends-Life-Signature": generateHmacSignature(
-                  JSON.stringify({ userId: otherUser }),
-                  API_SECRET
-                ),
-              },
-            }
-          );
+          const userResponse = await fetch(`${API_URL}user/${otherUser}`, {
+            method: "GET",
+            headers: {
+              "Friends-Life-Signature": generateHmacSignature(
+                JSON.stringify({ userId: otherUser }),
+                API_SECRET
+              ),
+            },
+          });
           const userJSON = await userResponse.json();
 
           const newChatObj: Chat = {

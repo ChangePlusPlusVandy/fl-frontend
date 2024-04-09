@@ -13,7 +13,6 @@ import NewFriendReport from "./app/screens/NewFriendReport";
 import ForgotPassword from "./app/screens/ForgotPassword";
 import DayAttendanceUser from "./app/screens/DayAttendanceUser";
 
-
 import { NavigationContainer } from "@react-navigation/native";
 import NavBarFamily from "./app/components/NavBarFamily";
 import NavBarStaff from "./app/components/NavBarStaff";
@@ -35,8 +34,7 @@ export default function App() {
             headerShown: false,
             gestureEnabled: false,
             gestureDirection: "horizontal",
-          }}
-        >
+          }}>
           {userId === null ? (
             <>
               <Stack.Screen name="SignIn" component={SignIn} />
