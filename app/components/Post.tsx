@@ -10,10 +10,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from "react-native";
 import useAuthStore from "../stores/auth";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
+import ReportIcon from "../../assets/reporticon.png";
 
 interface PostProps {
   key: string;
@@ -53,6 +55,23 @@ const Post: React.FC<PostProps> = ({
     setProfilePic(user.profilePicture);
   };
 
+  const report = () => {
+    Alert.alert(
+      "Report Post?",
+      "Please confirm if this post violates guidelines.",
+      [
+        {
+          text: "Confirm",
+          onPress: () => console.log("Confirmed"),
+        },
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancelled"),
+        },
+      ]
+    );
+  };
+
   useEffect(() => {
     getUser(user);
   }, [user]);
@@ -62,10 +81,24 @@ const Post: React.FC<PostProps> = ({
       <View style={styles.postHeader}>
         <Image source={{ uri: profilePic }} style={styles.postProfilePic} />
         <View>
-          <Text style={styles.profileName}>{profileName}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              width: "auto",
+            }}
+          >
+            <View style={styles.nameHeader}>
+              <Text style={styles.profileName}>{profileName}</Text>
+              <Text>.</Text>
+              <Text style={styles.profileTimePosted}>{profileTimePosted}</Text>
+            </View>
+          </View>
+
           <Text style={styles.profileLocation}>Friends Life</Text>
         </View>
-        <Text style={styles.profileTimePosted}>{profileTimePosted}</Text>
+        <TouchableOpacity style={styles.reportIconButton} onPress={report}>
+          <Image source={ReportIcon} style={styles.reportIcon} />
+        </TouchableOpacity>
       </View>
       <View style={styles.postBody}>
         {bodyPic && bodyPic !== "test" && (
@@ -109,8 +142,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#888",
     marginLeft: "auto",
-    marginTop: 5,
     alignSelf: "flex-start",
+    marginTop: 4,
   },
   postBody: {
     marginTop: 20,
@@ -125,6 +158,17 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: 8,
     marginBottom: 10,
+  },
+  nameHeader: {
+    flexDirection: "row",
+    gap: 5,
+  },
+  reportIcon: {
+    width: 30,
+    height: 30,
+  },
+  reportIconButton: {
+    marginLeft: "auto",
   },
 });
 
