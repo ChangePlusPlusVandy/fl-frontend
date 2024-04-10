@@ -19,6 +19,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import useAuthStore from "../stores/auth";
 import { generateHmacSignature } from "../utils/signature";
 import NewMessagePopup from "../components/NewMessagePopup"; // Assuming the file is in the same directory
+import { UserCredential } from "firebase/auth";
 
 interface RouterProps {
   navigation: NavigationProp<any, any>;
@@ -165,6 +166,35 @@ const Conversations = ({ navigation }: RouterProps) => {
     setRefreshing(false);
   }, []);
 
+  const handleBlock = async (chatId: String) => {
+    const recieverId = await getRecieverId(chatId);
+    console.log(userId);
+    console.log(recieverId);
+    const body = JSON.stringify({ userId: userId, blockId: recieverId });
+    await fetch(`${API_URL}user/blockUser`, {
+      method: "POST",
+      headers: {
+        "Friends-Life-Signature": generateHmacSignature(body, API_SECRET),
+        "Content-Type": "application/json",
+      },
+      body: body,
+    });
+  };
+
+  const getRecieverId = async (chatId: String) => {
+    const chatResponse = await fetch(`${API_URL}chat/${chatId}`, {
+      method: "GET",
+      headers: {
+        "Friends-Life-Signature": generateHmacSignature(
+          JSON.stringify({ chatId: chatId }),
+          API_SECRET
+        ),
+      },
+    });
+    const chatJSON = await chatResponse.json();
+    return chatJSON.user1 === userId ? chatJSON.user2 : chatJSON.user1;
+  };
+
   return (
     <View style={styles.root}>
       <View style={styles.header}>
@@ -173,7 +203,8 @@ const Conversations = ({ navigation }: RouterProps) => {
         </View>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => setPopupVisible(true)}>
+          onPress={() => setPopupVisible(true)}
+        >
           <View style={styles.plusButton}>
             <FontAwesome name="plus" size={20} color="#fff" />
           </View>
@@ -197,13 +228,14 @@ const Conversations = ({ navigation }: RouterProps) => {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.chatItem}
-            onPress={() =>
+            onPress={async () =>
               navigation.navigate("Messages", {
                 reciever: item.name,
                 chatID: item.id,
-                recieverID: undefined,
+                recieverID: await getRecieverId(item.id),
               })
-            }>
+            }
+          >
             <Image
               source={{ uri: item.profileImage }}
               style={styles.profileImage}
@@ -228,7 +260,7 @@ const Conversations = ({ navigation }: RouterProps) => {
                       onPress: () => console.log("Cancel Pressed"),
                       style: "cancel",
                     },
-                    { text: "Yes", onPress: () => console.log("OK Pressed") }, //block logic here
+                    { text: "Yes", onPress: () => handleBlock(item.id) }, //block logic here
                   ]
                 );
               }}
