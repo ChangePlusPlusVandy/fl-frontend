@@ -63,18 +63,16 @@ const SignUp = ({ navigation }: RouterProps) => {
   };
 
   const handleEULAPress = () => {
-    Linking.openURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+    Linking.openURL("https://friends-life-admin.vercel.app/eula");
   };
 
   return (
     <TouchableWithoutFeedback
       onPress={() => {
         Keyboard.dismiss();
-      }}
-    >
+      }}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
+        behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <ScrollView>
           <View style={styles.root}>
             <View style={styles.wrapper}>
@@ -87,8 +85,7 @@ const SignUp = ({ navigation }: RouterProps) => {
                     styles.accountTypeButton,
                     form.type === "Staff" && styles.selectedAccountType,
                   ]}
-                  onPress={() => updateForm({ type: "Staff" })}
-                >
+                  onPress={() => updateForm({ type: "Staff" })}>
                   <Text>Staff</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -96,8 +93,7 @@ const SignUp = ({ navigation }: RouterProps) => {
                     styles.accountTypeButton,
                     form.type === "Family" && styles.selectedAccountType,
                   ]}
-                  onPress={() => updateForm({ type: "Family" })}
-                >
+                  onPress={() => updateForm({ type: "Family" })}>
                   <Text>Family</Text>
                 </TouchableOpacity>
               </View>
@@ -134,8 +130,7 @@ const SignUp = ({ navigation }: RouterProps) => {
 
               <View style={styles.checkboxContainer}>
                 <TouchableOpacity
-                  onPress={() => setAgreedToEULA(!agreedToEULA)}
-                >
+                  onPress={() => setAgreedToEULA(!agreedToEULA)}>
                   <View style={styles.checkbox}>
                     {agreedToEULA && (
                       <Text style={styles.checkmark}>&#10003;</Text>
@@ -151,8 +146,7 @@ const SignUp = ({ navigation }: RouterProps) => {
               </View>
               <TouchableOpacity
                 style={styles.signUpButton}
-                onPress={handleAccountCreation}
-              >
+                onPress={handleAccountCreation}>
                 <Text style={styles.createAccount}>Create Account</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.signInLink}>
@@ -160,8 +154,7 @@ const SignUp = ({ navigation }: RouterProps) => {
                   Already have an account?{" "}
                   <Text
                     style={styles.signIn}
-                    onPress={() => navigation.navigate("SignIn")}
-                  >
+                    onPress={() => navigation.navigate("SignIn")}>
                     Sign In
                   </Text>
                 </Text>

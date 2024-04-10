@@ -9,7 +9,7 @@ import {
   FlatList,
   RefreshControl,
   Modal,
-  Alert
+  Alert,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons"; // Import the FontAwesome icons
 import { NavigationProp, useFocusEffect } from "@react-navigation/native";
@@ -42,7 +42,7 @@ const Conversations = ({ navigation }: RouterProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [chats, setChats] = useState<Chat[]>([]);
-  const [refreshing, setRefreshing] = useState(false);  
+  const [refreshing, setRefreshing] = useState(false);
   const filteredChats = chats?.filter((chat) =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -73,7 +73,7 @@ const Conversations = ({ navigation }: RouterProps) => {
         });
         const chat = await chatResponse.json();
 
-        if (chat.messages?.length > 0) {
+        if (chat?.messages?.length > 0) {
           const messagesResponse = await fetch(
             `${API_URL}message/${chat.messages[chat.messages.length - 1]}`,
             {
@@ -90,7 +90,7 @@ const Conversations = ({ navigation }: RouterProps) => {
           );
           const messageJSON = await messagesResponse.json();
 
-          const otherUser = chat.user1 == userId ? chat.user2 : chat.user1;
+          const otherUser = chat?.user1 == userId ? chat?.user2 : chat?.user1;
           const userResponse = await fetch(`${API_URL}user/${otherUser}`, {
             method: "GET",
             headers: {
@@ -215,23 +215,28 @@ const Conversations = ({ navigation }: RouterProps) => {
               </Text>
             </View>
             <Dropdown
-              data={[{ label: 'Block Sender', value: 'block' }]}
-              isVisible={true}
-              onChange={()=> {Alert.alert('Block sender', 'Are you sure you want to block ' + item.name + "?", [
-                {
-                  text: 'No',
-                  onPress: () => console.log('Cancel Pressed'),
-                  style: 'cancel',
-                },
-                {text: 'Yes', onPress: () => console.log('OK Pressed')},//block logic here
-              ])
+              data={[{ label: "Block Sender", value: "block" }]}
+              // Remove the 'isVisible' prop
+              // isVisible={true}
+              onChange={() => {
+                Alert.alert(
+                  "Block sender",
+                  "Are you sure you want to block " + item.name + "?",
+                  [
+                    {
+                      text: "No",
+                      onPress: () => console.log("Cancel Pressed"),
+                      style: "cancel",
+                    },
+                    { text: "Yes", onPress: () => console.log("OK Pressed") }, //block logic here
+                  ]
+                );
               }}
               placeholder=""
               labelField="label"
               valueField="value"
-              style = {styles.ellipsisButton}
-              dropdownStyle = {{width: 150}}
-              
+              style={styles.ellipsisButton}
+              // dropdownStyle={{ width: 150 }}
             />
           </TouchableOpacity>
         )}
@@ -250,7 +255,6 @@ const Conversations = ({ navigation }: RouterProps) => {
           navigation={navigation}
         />
       )}
-      
     </View>
   );
 };
@@ -318,11 +322,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
-    position: 'relative', // Add this line
-
+    position: "relative", // Add this line
   },
   ellipsisButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 0, // Adjust this as needed
     right: 0, // Adjust if you need some margin
     width: 150,

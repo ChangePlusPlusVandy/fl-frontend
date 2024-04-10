@@ -124,9 +124,6 @@ const useAuthStore = create<AuthStore>((set) => ({
   },
   initializeAuthState: async () => {
     auth.onAuthStateChanged(async (user) => {
-      if (user == null) {
-        console.log("user is null");
-      }
       if (user !== null) {
         // User is logged in
         try {
