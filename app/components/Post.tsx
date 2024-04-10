@@ -15,7 +15,7 @@ import {
 import useAuthStore from "../stores/auth";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
-import ReportIcon from "../../assets/reporticon.png";
+import ReportIcon from "../../assets/threedots.png";
 
 interface PostProps {
   key: string;
@@ -85,8 +85,7 @@ const Post: React.FC<PostProps> = ({
             style={{
               flexDirection: "row",
               width: "auto",
-            }}
-          >
+            }}>
             <View style={styles.nameHeader}>
               <Text style={styles.profileName}>{profileName}</Text>
               <Text>.</Text>

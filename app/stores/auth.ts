@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import { create } from "zustand";
 import { useFirebase } from "../firebase";
+import { auth } from "../firebase";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
 import { Alert } from "react-native";
@@ -40,7 +41,6 @@ interface AuthStore {
 }
 
 const firebase = useFirebase();
-const auth = getAuth(firebase);
 
 const useAuthStore = create<AuthStore>((set) => ({
   user: null,
