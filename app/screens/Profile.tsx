@@ -16,6 +16,7 @@ import ChangePasswordIcon from "../../assets/passwordicon.png";
 import AboutIcon from "../../assets/infoicon.png";
 import LogoutIcon from "../../assets/logouticon.png";
 import Arrow from "../../assets/arrow.png";
+import DeleteIcon from "../../assets/deleteicon.png";
 import DefaultProfilePicture from "../../assets/DefaultProfilePicture.png";
 import { sendPasswordResetEmail, getAuth } from "firebase/auth";
 import { useFirebase } from "../firebase";
@@ -32,7 +33,7 @@ const firebase = useFirebase();
 const auth = getAuth(firebase);
 
 const Profile = ({ navigation }: RouterProps) => {
-  const { user, logout, checkApproved } = useAuthStore();
+  const { user, logout, checkApproved, deleteAccount } = useAuthStore();
   const [userDetails, setUserDetails] = useState({
     name: "",
     emailAddress: "",
@@ -126,6 +127,27 @@ const Profile = ({ navigation }: RouterProps) => {
     );
   };
 
+  const onDeleteAccount = async () => {
+    Alert.alert(
+      "Account Deletion",
+      "Are you sure you want to delete your account? (This is a permanent action)",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: async () => {
+            await deleteAccount();
+            navigation.navigate("SignIn");
+          },
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
   const fetchUserData = async () => {
     try {
       if (user) {
@@ -188,6 +210,11 @@ const Profile = ({ navigation }: RouterProps) => {
         <TouchableOpacity style={styles.option} onPress={onAboutUs}>
           <Image source={AboutIcon} style={styles.icon}></Image>
           <Text style={styles.optionText}>About Us</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.option} onPress={onDeleteAccount}>
+          <Image source={DeleteIcon} style={styles.icon}></Image>
+          <Text style={styles.optionText}>Delete account</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.stupidOption} onPress={onLogout}>
           <Image source={LogoutIcon} style={styles.stupidIcon}></Image>

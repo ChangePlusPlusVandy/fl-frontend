@@ -15,8 +15,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "This app uses the camera to take photos.",
-        "NSPhotoLibraryUsageDescription": "This app accesses the photo library to select photos.",
+        "NSCameraUsageDescription": "Your privacy is important to us. This app requests access to your camera to allow you to take photos for your profile picture or to create posts.",
+        "NSPhotoLibraryUsageDescription": "Your privacy is important to us. This app requests access to your photo library to allow you to select photos for your profile picture or to create posts. For example, you can upload a new profile picture from your saved photos.",
         "UIBackgroundModes": ["remote-notification"],
         "entitlements": {
           "aps-environment": "production"

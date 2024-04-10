@@ -37,6 +37,7 @@ interface AuthStore {
   logout: () => Promise<void>;
   initializeAuthState: () => Promise<void>;
   checkApproved: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const firebase = useFirebase();
@@ -71,8 +72,11 @@ const useAuthStore = create<AuthStore>((set) => ({
         },
         body: body,
       });
+      setTimeout(() => {
+        console.log("timer");
+      }, 3000);
     } catch (e) {
-      Alert.alert("Invalid sign up. Please try again.");
+      Alert.alert(`Invalid sign up: ${(e as any).message}`);
       console.log(e);
     }
   },
@@ -120,10 +124,13 @@ const useAuthStore = create<AuthStore>((set) => ({
   },
   initializeAuthState: async () => {
     auth.onAuthStateChanged(async (user) => {
-      if (user) {
+      if (user == null) {
+        console.log("user is null");
+      }
+      if (user !== null) {
         // User is logged in
         try {
-          const userData = await fetch(`${API_URL}user/firebase/${user.uid}`, {
+          const userData = await fetch(`${API_URL}user/firebase/${user?.uid}`, {
             method: "GET",
             headers: {
               "Friends-Life-Signature": generateHmacSignature(
@@ -132,7 +139,9 @@ const useAuthStore = create<AuthStore>((set) => ({
               ),
             },
           });
-          const userId = (await userData.json())._id;
+
+          const res = await userData.json();
+          const userId = res?._id;
 
           set({ user, userId });
         } catch (error) {
@@ -168,6 +177,30 @@ const useAuthStore = create<AuthStore>((set) => ({
       }
     } catch (error) {
       console.error("Error checking if user is approved:", error);
+    }
+  },
+  deleteAccount: async () => {
+    try {
+      // First, delete the user data from your server
+      await fetch(`${API_URL}user/${useAuthStore.getState().userId}`, {
+        method: "DELETE",
+        headers: {
+          "Friends-Life-Signature": generateHmacSignature(
+            JSON.stringify({ userId: useAuthStore.getState().userId }),
+            API_SECRET
+          ),
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (auth.currentUser) {
+        await auth.currentUser.delete();
+        set({ user: null, userId: null });
+        console.log("Firebase user account deleted successfully.");
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      Alert.alert("Error", "Failed to delete account. Please try again.");
     }
   },
 }));
