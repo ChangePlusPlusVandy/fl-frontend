@@ -8,11 +8,14 @@ import {
   Image,
   FlatList,
   RefreshControl,
+  Modal,
+  Alert
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons"; // Import the FontAwesome icons
 import { NavigationProp, useFocusEffect } from "@react-navigation/native";
 import moment from "moment";
 import { API_URL, API_SECRET } from "@env";
+import { Dropdown } from "react-native-element-dropdown";
 import useAuthStore from "../stores/auth";
 import { generateHmacSignature } from "../utils/signature";
 import NewMessagePopup from "../components/NewMessagePopup"; // Assuming the file is in the same directory
@@ -39,8 +42,7 @@ const Conversations = ({ navigation }: RouterProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [chats, setChats] = useState<Chat[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
-
+  const [refreshing, setRefreshing] = useState(false);  
   const filteredChats = chats?.filter((chat) =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -212,6 +214,25 @@ const Conversations = ({ navigation }: RouterProps) => {
                 {item.lastMessage} · {item.lastMessageTime}
               </Text>
             </View>
+            <Dropdown
+              data={[{ label: 'Block Sender', value: 'block' }]}
+              isVisible={true}
+              onChange={()=> {Alert.alert('Block sender', 'Are you sure you want to block ' + item.name + "?", [
+                {
+                  text: 'No',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel',
+                },
+                {text: 'Yes', onPress: () => console.log('OK Pressed')},//block logic here
+              ])
+              }}
+              placeholder=""
+              labelField="label"
+              valueField="value"
+              style = {styles.ellipsisButton}
+              dropdownStyle = {{width: 150}}
+              
+            />
           </TouchableOpacity>
         )}
         refreshControl={
@@ -229,6 +250,7 @@ const Conversations = ({ navigation }: RouterProps) => {
           navigation={navigation}
         />
       )}
+      
     </View>
   );
 };
@@ -296,6 +318,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
+    position: 'relative', // Add this line
+
+  },
+  ellipsisButton: {
+    position: 'absolute',
+    top: 0, // Adjust this as needed
+    right: 0, // Adjust if you need some margin
+    width: 150,
+    padding: 20, // Add padding to increase the touchable area
   },
   profileImage: {
     width: 50,
