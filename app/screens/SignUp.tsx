@@ -11,6 +11,7 @@ import {
   Platform,
   Dimensions,
   ScrollView,
+  Linking,
 } from "react-native";
 import { NavigationProp } from "@react-navigation/native";
 import useAuthStore, { CreateUserProps } from "../stores/auth";
@@ -31,6 +32,7 @@ const SignUp = ({ navigation }: RouterProps) => {
   });
   const { user, createAccount } = useAuthStore();
   const [secure, setSecure] = useState(true);
+  const [agreedToEULA, setAgreedToEULA] = useState(false);
   const firebase = useFirebase();
   const auth = getAuth(firebase);
 
@@ -42,6 +44,10 @@ const SignUp = ({ navigation }: RouterProps) => {
     try {
       if (form.password !== form.confirmPassword) {
         throw new Error("Passwords do not match");
+      }
+
+      if (!agreedToEULA) {
+        throw new Error("Please agree to the End User License Agreement");
       }
 
       await createAccount(form);
@@ -56,13 +62,19 @@ const SignUp = ({ navigation }: RouterProps) => {
     setForm({ ...form, ...updates });
   };
 
+  const handleEULAPress = () => {
+    Linking.openURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  };
+
   return (
     <TouchableWithoutFeedback
       onPress={() => {
         Keyboard.dismiss();
-      }}>
+      }}
+    >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <ScrollView>
           <View style={styles.root}>
             <View style={styles.wrapper}>
@@ -75,7 +87,8 @@ const SignUp = ({ navigation }: RouterProps) => {
                     styles.accountTypeButton,
                     form.type === "Staff" && styles.selectedAccountType,
                   ]}
-                  onPress={() => updateForm({ type: "Staff" })}>
+                  onPress={() => updateForm({ type: "Staff" })}
+                >
                   <Text>Staff</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -83,7 +96,8 @@ const SignUp = ({ navigation }: RouterProps) => {
                     styles.accountTypeButton,
                     form.type === "Family" && styles.selectedAccountType,
                   ]}
-                  onPress={() => updateForm({ type: "Family" })}>
+                  onPress={() => updateForm({ type: "Family" })}
+                >
                   <Text>Family</Text>
                 </TouchableOpacity>
               </View>
@@ -117,9 +131,28 @@ const SignUp = ({ navigation }: RouterProps) => {
                 value={form.confirmPassword}
                 onChangeText={(text) => updateForm({ confirmPassword: text })}
               />
+
+              <View style={styles.checkboxContainer}>
+                <TouchableOpacity
+                  onPress={() => setAgreedToEULA(!agreedToEULA)}
+                >
+                  <View style={styles.checkbox}>
+                    {agreedToEULA && (
+                      <Text style={styles.checkmark}>&#10003;</Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+                <Text style={styles.eulaText}>
+                  I agree to the{" "}
+                  <Text style={styles.linkText} onPress={handleEULAPress}>
+                    End User License Agreement
+                  </Text>
+                </Text>
+              </View>
               <TouchableOpacity
                 style={styles.signUpButton}
-                onPress={handleAccountCreation}>
+                onPress={handleAccountCreation}
+              >
                 <Text style={styles.createAccount}>Create Account</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.signInLink}>
@@ -127,7 +160,8 @@ const SignUp = ({ navigation }: RouterProps) => {
                   Already have an account?{" "}
                   <Text
                     style={styles.signIn}
-                    onPress={() => navigation.navigate("SignIn")}>
+                    onPress={() => navigation.navigate("SignIn")}
+                  >
                     Sign In
                   </Text>
                 </Text>
@@ -216,6 +250,33 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   signIn: {
+    color: "#f89b40",
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#818181",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  checkmark: {
+    fontSize: 18,
+    color: "#818181",
+  },
+  eulaText: {
+    fontSize: 16,
+    color: "#818181",
+  },
+  linkText: {
+    fontSize: 16,
     color: "#f89b40",
   },
 });
