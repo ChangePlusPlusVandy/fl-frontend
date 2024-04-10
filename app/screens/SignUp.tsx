@@ -36,9 +36,9 @@ const SignUp = ({ navigation }: RouterProps) => {
   const firebase = useFirebase();
   const auth = getAuth(firebase);
 
-  if (user !== null) {
-    navigation.navigate("UserTabs");
-  }
+  // if (user !== null) {
+  //   navigation.navigate("UserTabs");
+  // }
 
   const handleAccountCreation = async () => {
     try {
