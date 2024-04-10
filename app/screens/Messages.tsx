@@ -36,6 +36,8 @@ const Messages = ({ navigation }: RouterProps) => {
   const [recieverId, setRecieverId] = useState(recieverID);
   const [chatId, setChatId] = useState(chatID);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [blockedByReciever, setBlockedByReciever] = useState(false);
+  const [blockedReciever, setBlockedReciever] = useState(false);
 
   const getChats = async () => {
     try {
@@ -154,6 +156,40 @@ const Messages = ({ navigation }: RouterProps) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      async function updateBlocked() {
+        const userResponse = await fetch(`${API_URL}user/${userId}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature(
+              JSON.stringify({ userId: userId }),
+              API_SECRET
+            ),
+          },
+        });
+        const userData = await userResponse.json();
+        console.log(recieverId);
+        console.log(userData.blockedUsers);
+        setBlockedReciever(userData.blockedUsers.includes(recieverId));
+
+        const recieverResponse = await fetch(`${API_URL}user/${recieverId}`, {
+          method: "GET",
+          headers: {
+            "Friends-Life-Signature": generateHmacSignature(
+              JSON.stringify({ userId: recieverId }),
+              API_SECRET
+            ),
+          },
+        });
+        const recieverData = await recieverResponse.json();
+        setBlockedByReciever(recieverData.blockedUsers.includes(userId));
+      }
+
+      updateBlocked();
+    }, [userId, recieverId])
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
       checkApproved();
     }, [])
   );
@@ -261,7 +297,8 @@ const Messages = ({ navigation }: RouterProps) => {
           <View
             style={
               item.sender === "user" ? styles.userMessage : styles.otherMessage
-            }>
+            }
+          >
             <Text style={styles.messageText}>{item.text}</Text>
           </View>
         )}
@@ -277,20 +314,35 @@ const Messages = ({ navigation }: RouterProps) => {
         }
       />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}>
-        <View style={styles.messageInputContainer}>
-          <TextInput
-            style={styles.messageInput}
-            placeholder="Type a message..."
-            value={newMessage}
-            onChangeText={(text) => setNewMessage(text)}
-          />
-          <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-            <FontAwesome name="send" size={20} color="#fff" />
-          </TouchableOpacity>
+      {!blockedByReciever && !blockedReciever ? (
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <View style={styles.messageInputContainer}>
+            <TextInput
+              style={styles.messageInput}
+              placeholder="Type a message..."
+              value={newMessage}
+              onChangeText={setNewMessage}
+            />
+            <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+              <FontAwesome name="send" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      ) : blockedByReciever ? (
+        <View style={styles.blockedMessageContainer}>
+          <Text style={styles.blockedMessageText}>
+            You are blocked by this user.
+          </Text>
         </View>
-      </KeyboardAvoidingView>
+      ) : (
+        <View style={styles.blockedMessageContainer}>
+          <Text style={styles.blockedMessageText}>
+            You have blocked this user.
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -369,6 +421,17 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: "center",
     justifyContent: "center",
+  },
+  blockedMessageContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  blockedMessageText: {
+    fontSize: 16,
+    color: "red",
   },
 });
 
