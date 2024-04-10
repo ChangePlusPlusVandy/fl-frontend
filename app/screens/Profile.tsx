@@ -15,6 +15,7 @@ import HelpIcon from "../../assets/helpicon.png";
 import ChangePasswordIcon from "../../assets/passwordicon.png";
 import AboutIcon from "../../assets/infoicon.png";
 import LogoutIcon from "../../assets/logouticon.png";
+import blockedUser from "../../assets/blockeduser.png";
 import Arrow from "../../assets/arrow.png";
 import DeleteIcon from "../../assets/deleteicon.png";
 import DefaultProfilePicture from "../../assets/DefaultProfilePicture.png";
@@ -173,6 +174,10 @@ const Profile = ({ navigation }: RouterProps) => {
     }
   };
 
+  const onBlocked = () => {
+    navigation.navigate("BlockedUsers");
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -212,10 +217,16 @@ const Profile = ({ navigation }: RouterProps) => {
           <Text style={styles.optionText}>About Us</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.stupidOption} onPress={onBlocked}>
+          <Image source={blockedUser} style={styles.stupidIcon}></Image>
+          <Text style={styles.optionText}>Unblock Users</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.option} onPress={onDeleteAccount}>
           <Image source={DeleteIcon} style={styles.icon}></Image>
           <Text style={styles.optionText}>Delete account</Text>
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.stupidOption} onPress={onLogout}>
           <Image source={LogoutIcon} style={styles.stupidIcon}></Image>
           <Text style={styles.optionText}>Logout</Text>

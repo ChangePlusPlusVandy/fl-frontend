@@ -42,8 +42,22 @@ const UserHome = ({ navigation }: RouterProps) => {
     React.useCallback(() => {
       checkApproved();
       setPosts([]);
+
       const fetchPosts = async () => {
         try {
+          const user = await fetch(`${API_URL}user/${userId}`, {
+            method: "GET",
+            headers: {
+              "Friends-Life-Signature": generateHmacSignature(
+                JSON.stringify({ userId }),
+                API_SECRET
+              ),
+            },
+          });
+
+          const userData = await user.json();
+          const blockedUsers = userData.blockedUsers;
+
           const response = await fetch(`${API_URL}post`, {
             method: "GET",
             headers: {
@@ -54,6 +68,8 @@ const UserHome = ({ navigation }: RouterProps) => {
               ),
             },
           });
+
+          console.log(userData);
 
           if (response.ok) {
             const data = await response.json();
@@ -66,7 +82,11 @@ const UserHome = ({ navigation }: RouterProps) => {
               bodyText: post.postBody,
             }));
 
-            setPosts(formattedPosts.reverse());
+            setPosts(
+              formattedPosts
+                .filter((post: any) => !blockedUsers.includes(post.user))
+                .reverse()
+            );
           } else {
             console.error("Failed to fetch posts");
           }
@@ -149,15 +169,8 @@ const UserHome = ({ navigation }: RouterProps) => {
       </View>
 
       <ScrollView>
-        {posts.map((post) => (
-          <Post
-            key={post.id}
-            user={post.user}
-            profileLocation={"Filler Location"}
-            profileTimePosted={post.profileTimePosted}
-            bodyPic={post.bodyPic}
-            bodyText={post.bodyText}
-          />
+        {posts.map((post: any) => (
+          <Post post={post} navigation={navigation} />
         ))}
       </ScrollView>
     </SafeAreaView>

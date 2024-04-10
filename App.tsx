@@ -19,6 +19,7 @@ import NavBarStaff from "./app/components/NavBarStaff";
 import AttendanceHistory from "./app/screens/AttendanceHistory";
 import { StatusBar } from "react-native";
 import useAuthStore from "./app/stores/auth";
+import BlockedUsers from "./app/screens/BlockedUser";
 
 const Stack = createNativeStackNavigator();
 export default function App() {
@@ -70,6 +71,7 @@ export default function App() {
               />
               <Stack.Screen name="UserTabs" component={NavBarFamily} />
               <Stack.Screen name="StaffTabs" component={NavBarStaff} />
+              <Stack.Screen name="BlockedUsers" component={BlockedUsers} />
               <Stack.Screen
                 name="Report"
                 component={Report}

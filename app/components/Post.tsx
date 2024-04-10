@@ -16,26 +16,28 @@ import useAuthStore from "../stores/auth";
 import { generateHmacSignature } from "../utils/signature";
 import { API_SECRET, API_URL } from "@env";
 import ReportIcon from "../../assets/threedots.png";
+import { Dropdown } from "react-native-element-dropdown";
+import { NavigationProp } from "@react-navigation/native";
 
 interface PostProps {
-  key: string;
-  user: string;
-  profileLocation: string;
-  profileTimePosted: string;
-  bodyPic?: any;
-  bodyText: string;
+  post: {
+    key: string;
+    user: string;
+    profileLocation: string;
+    profileTimePosted: string;
+    bodyPic?: any;
+    bodyText: string;
+  };
+  navigation: NavigationProp<any>;
 }
 
-const Post: React.FC<PostProps> = ({
-  key,
-  user,
-  profileLocation,
-  profileTimePosted,
-  bodyPic,
-  bodyText,
-}) => {
+const Post: React.FC<PostProps> = ({ post, navigation }) => {
   const [profileName, setProfileName] = useState("");
   const [profilePic, setProfilePic] = useState();
+  const [userType, setUserType] = useState("");
+  const { key, user, profileLocation, profileTimePosted, bodyPic, bodyText } =
+    post;
+  const { userId } = useAuthStore();
 
   const getUser = async (userId: string) => {
     const userData = await fetch(`${API_URL}user/${userId}`, {
@@ -51,25 +53,90 @@ const Post: React.FC<PostProps> = ({
 
     const user = await userData.json();
 
+    setUserType(user.type);
+
     setProfileName(user.name);
     setProfilePic(user.profilePicture);
   };
 
-  const report = () => {
-    Alert.alert(
-      "Report Post?",
-      "Please confirm if this post violates guidelines.",
-      [
-        {
-          text: "Confirm",
-          onPress: () => console.log("Confirmed"),
-        },
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancelled"),
-        },
-      ]
-    );
+  const handleDropdownChange = async (option: any) => {
+    const userData = await fetch(`${API_URL}user/${user}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Friends-Life-Signature": generateHmacSignature(
+          JSON.stringify({ userId: user }),
+          API_SECRET
+        ),
+      },
+    });
+
+    const postUser = await userData.json();
+
+    switch (option.value) {
+      case "block":
+        Alert.alert(
+          "Block user",
+          `Are you sure you want to block ${postUser.name}?`,
+          [
+            {
+              text: "No",
+              onPress: () => console.log("Cancel Pressed"),
+              style: "cancel",
+            },
+            {
+              text: "Yes",
+              onPress: async () => {
+                await fetch(`${API_URL}user/blockUser`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Friends-Life-Signature": generateHmacSignature(
+                      JSON.stringify({ userId: userId, blockId: user }),
+                      API_SECRET
+                    ),
+                  },
+                  body: JSON.stringify({ userId: userId, blockId: user }),
+                });
+                if (userType === "Family") {
+                  navigation.navigate("Profile");
+                } else {
+                  navigation.navigate("Profile");
+                }
+              },
+            }, // Implement block logic here
+          ]
+        );
+        break;
+      case "report":
+        Alert.alert("Report", `Are you sure you want to report this post?`, [
+          {
+            text: "No",
+            onPress: () => console.log("Cancel Pressed"),
+            style: "cancel",
+          },
+          {
+            text: "Yes",
+            onPress: async () => {
+              await fetch(`${API_URL}user/reportPost`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Friends-Life-Signature": generateHmacSignature(
+                    JSON.stringify({ userId: userId, postId: key }),
+                    API_SECRET
+                  ),
+                },
+                body: JSON.stringify({ userId: userId, postId: key }),
+              });
+              navigation.navigate("Profile");
+            },
+          }, // Implement report logic here
+        ]);
+        break;
+      default:
+        console.log("No action selected");
+    }
   };
 
   useEffect(() => {
@@ -95,9 +162,17 @@ const Post: React.FC<PostProps> = ({
 
           <Text style={styles.profileLocation}>Friends Life</Text>
         </View>
-        <TouchableOpacity style={styles.reportIconButton} onPress={report}>
-          <Image source={ReportIcon} style={styles.reportIcon} />
-        </TouchableOpacity>
+        <Dropdown
+          data={[
+            { label: "Block User", value: "block" },
+            { label: "Report Post", value: "report" },
+          ]}
+          onChange={handleDropdownChange} // Updated to use the new handler
+          placeholder=""
+          labelField="label"
+          valueField="value"
+          style={styles.ellipsisButton}
+        />
       </View>
       <View style={styles.postBody}>
         {bodyPic && bodyPic !== "test" && (
@@ -168,6 +243,13 @@ const styles = StyleSheet.create({
   },
   reportIconButton: {
     marginLeft: "auto",
+  },
+  ellipsisButton: {
+    position: "absolute",
+    top: 0, // Adjust this as needed
+    right: 0, // Adjust if you need some margin
+    width: 150,
+    padding: 20, // Add padding to increase the touchable area
   },
 });
 
