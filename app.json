@@ -2,7 +2,7 @@
   "expo": {
     "name": "Friends++",
     "slug": "friends-life-app",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/friends-life-logo.png",
     "userInterfaceStyle": "light",
@@ -23,7 +23,7 @@
         }
       },
       "bundleIdentifier": "com.friendslifedev.friendslifeapp",
-      "buildNumber": "4"
+      "buildNumber": "7"
     },
     "android": {
       "adaptiveIcon": {

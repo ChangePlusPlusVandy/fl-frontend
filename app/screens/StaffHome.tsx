@@ -235,6 +235,7 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     width: width * 0.15,
     height: width * 0.15,
+    borderWidth: 2,
   },
 });
 
